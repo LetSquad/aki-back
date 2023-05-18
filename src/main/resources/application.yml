@@ -8,3 +8,8 @@ spring:
 springdoc:
   swagger-ui:
     path: '/swagger-ui'
+aki:
+  security:
+    key-secret: 'akicreatedinmoscowlctleaders2023akicreatedinmoscowlctleaders2023'
+    auth-token-validity: 1h
+    refresh-token-validity: 7d

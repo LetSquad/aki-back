@@ -1,0 +1,53 @@
+package moscow.createdin.backend.controller
+
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import moscow.createdin.backend.getLogger
+import moscow.createdin.backend.model.dto.SignInRequestDTO
+import moscow.createdin.backend.model.dto.UserRoleDTO
+import moscow.createdin.backend.service.auth.AuthenticationService
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import javax.servlet.http.HttpServletResponse
+
+@Tag(name = "Методы аутентификации")
+@RestController
+@RequestMapping("/auth")
+class AuthenticationController(private val authenticationService: AuthenticationService) {
+
+    @Operation(
+        summary = "Аутентификация пользователя",
+        description = "auth и refresh токены для пользователя проставляются в куки"
+    )
+    @PostMapping
+    fun postAuth(
+        @RequestBody signIn: SignInRequestDTO,
+        response: HttpServletResponse
+    ): ResponseEntity<UserRoleDTO> = try {
+        val (userRole, jwtCookies) = authenticationService.authUser(signIn)
+        response.addCookie(jwtCookies.retrieveAuthCookie())
+        response.addCookie(jwtCookies.retrieveRefreshCookie())
+
+        ResponseEntity.ok(userRole)
+    } catch (e: Exception) {
+        log.warn("Unauthorized auth request", e)
+
+        ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+            .build()
+    }
+
+    @Operation(
+        summary = "Обновление токенов пользователя",
+        description = "Возвращаются новые auth и refresh токены для пользователя"
+    )
+    @PostMapping("/refresh")
+    fun postAuthRefresh() { } //TODO: refresh tokens
+
+    companion object {
+        private val log = getLogger<AuthenticationController>()
+    }
+}
