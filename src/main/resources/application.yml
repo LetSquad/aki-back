@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: 'jdbc:postgresql://localhost:5432/aki_back'
+    username: 'postgres'
+    password: 'postgres'
+  liquibase:
+    enabled: false
+springdoc:
+  swagger-ui:
+    path: '/swagger-ui'
