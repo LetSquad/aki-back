@@ -2,9 +2,9 @@ spring:
   datasource:
     url: 'jdbc:postgresql://localhost:5432/aki_back'
     username: 'postgres'
-    password: 'postgres'
+    password: 'Orion123'
   liquibase:
-    enabled: false
+    enabled: true
 springdoc:
   swagger-ui:
     path: '/swagger-ui'
