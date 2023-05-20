@@ -35,6 +35,16 @@ class JwtTokenService(
         withClaims = false
     )
 
+    fun checkTokenValidOrExpired(jwtToken: String): Boolean = try {
+        jwtParser.parse(jwtToken)
+        true
+    } catch (e: ExpiredJwtException) {
+        true
+    } catch (e: Exception) {
+        log.error("Invalid jwt token", e)
+        false
+    }
+
     fun retrieveUserContext(jwtToken: String?): UserContext? {
         if (jwtToken == null) return null
 
@@ -48,6 +58,11 @@ class JwtTokenService(
             log.warn("Received expired jwt", e)
             null
         }
+    }
+
+    fun retrieveSubject(jwtToken: String): String {
+        val parsedToken: Jws<Claims> = jwtParser.parseClaimsJws(jwtToken)
+        return parsedToken.body.subject
     }
 
     private fun generateToken(userDetails: UserDetails, tokenValidity: Duration, withClaims: Boolean): String {

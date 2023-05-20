@@ -2,6 +2,6 @@ package moscow.createdin.backend.model.cookie
 
 object CookieName {
 
-    const val AUTH = "aki-back-token"
-    const val REFRESH = "aki-back-refresh-token"
+    const val AUTH_TOKEN = "aki-back-token"
+    const val REFRESH_TOKEN = "aki-back-refresh-token"
 }

@@ -1,5 +1,6 @@
 package moscow.createdin.backend.context
 
+import moscow.createdin.backend.exception.EmptyContextException
 import moscow.createdin.backend.model.cookie.CookieName
 import moscow.createdin.backend.service.auth.JwtTokenService
 import org.springframework.context.annotation.Scope
@@ -16,12 +17,14 @@ class UserContextRequestProxy(
 ) : UserContext {
 
     private val contextDelegate: UserContext? = jwtTokenService.retrieveUserContext(
-        jwtToken = WebUtils.getCookie(request, CookieName.AUTH)?.value
+        jwtToken = WebUtils.getCookie(request, CookieName.AUTH_TOKEN)?.value
     )
 
-    override val userEmail: String?
+    override val userEmail: String
         get() = contextDelegate?.userEmail
+            ?: throw EmptyContextException("There is no user email in current request context")
 
-    override val userRole: String?
+    override val userRole: String
         get() = contextDelegate?.userRole
+            ?: throw EmptyContextException("There is no user role in current request context")
 }

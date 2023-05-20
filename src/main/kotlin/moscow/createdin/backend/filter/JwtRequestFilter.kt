@@ -1,6 +1,7 @@
 package moscow.createdin.backend.filter
 
 import moscow.createdin.backend.context.UserContext
+import moscow.createdin.backend.exception.EmptyContextException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -13,7 +14,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Component
-class JwtRequestFilter(private val userContext: UserContext, ) : OncePerRequestFilter() {
+class JwtRequestFilter(private val userContext: UserContext) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -28,15 +29,18 @@ class JwtRequestFilter(private val userContext: UserContext, ) : OncePerRequestF
         chain.doFilter(request, response)
     }
 
-    private fun createAuthentication(userContext: UserContext, request: HttpServletRequest): Authentication? {
-        if (userContext.userEmail == null || userContext.userRole == null) return null
-
-        return UsernamePasswordAuthenticationToken(
+    private fun createAuthentication(
+        userContext: UserContext,
+        request: HttpServletRequest
+    ): Authentication? = try {
+        UsernamePasswordAuthenticationToken(
             userContext.userEmail,
             null,
             listOf(SimpleGrantedAuthority(userContext.userRole))
         ).apply {
             details = WebAuthenticationDetailsSource().buildDetails(request)
         }
+    } catch (e: EmptyContextException) {
+        null
     }
 }

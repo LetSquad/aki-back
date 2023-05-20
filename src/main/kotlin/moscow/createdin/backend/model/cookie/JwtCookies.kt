@@ -11,7 +11,7 @@ data class JwtCookies(
 ) {
 
     fun retrieveAuthCookie(): Cookie {
-        return Cookie(CookieName.AUTH, authToken).apply {
+        return Cookie(CookieName.AUTH_TOKEN, authToken).apply {
             maxAge = Math.toIntExact(cookiesValidity.seconds)
             secure = isSecure
             isHttpOnly = true
@@ -20,7 +20,7 @@ data class JwtCookies(
     }
 
     fun retrieveRefreshCookie(): Cookie {
-        return Cookie(CookieName.REFRESH, refreshToken).apply {
+        return Cookie(CookieName.REFRESH_TOKEN, refreshToken).apply {
             maxAge = Math.toIntExact(cookiesValidity.seconds)
             secure = isSecure
             isHttpOnly = true

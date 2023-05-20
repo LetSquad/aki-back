@@ -1,13 +1,12 @@
-package moscow.createdin.backend.model.domain
+package moscow.createdin.backend.model.dto
 
 import moscow.createdin.backend.model.enums.UserRole
 
-data class AkiUser(
+data class AkiUserDTO(
     val id: Long,
 
     val email: String,
-    val password: String,
-    val role: UserRole,
+    val userRole: UserRole,
 
     val firstName: String,
     val lastName: String,
@@ -17,8 +16,5 @@ data class AkiUser(
     val userImage: String?,
     val inn: String?,
     val entityName: String?,
-    val jobTitle: String?,
-
-    val isActive: Boolean,
-    val isBanned: Boolean
+    val jobTitle: String?
 )
