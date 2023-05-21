@@ -15,6 +15,10 @@ class UserService(
     private val userMapper: UserMapper
 ) {
 
+    fun isEmailExists(email: String): Boolean = false
+
+    fun isPhoneExists(phone: String): Boolean = false
+
     fun getCurrentUser(): AkiUserDTO {
         return getUserByEmail(userContext.userEmail)
             .let { userMapper.domainToDto(it) }
@@ -22,7 +26,7 @@ class UserService(
 
     fun getUserByEmail(email: String): AkiUser {
         return AkiUser(
-            id = 123L,
+            id = 123,
             email = email,
             password = passwordEncoder.encode("qwerty"),
             role = UserRole.ADMIN,
@@ -37,5 +41,9 @@ class UserService(
             isActive = true,
             isBanned = false
         )
+    }
+
+    fun registerUser(user: AkiUser): AkiUser {
+        return user.copy(id = 123)
     }
 }

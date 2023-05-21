@@ -3,7 +3,7 @@ package moscow.createdin.backend.model.domain
 import moscow.createdin.backend.model.enums.UserRole
 
 data class AkiUser(
-    val id: Long,
+    val id: Long?,
 
     val email: String,
     val password: String,

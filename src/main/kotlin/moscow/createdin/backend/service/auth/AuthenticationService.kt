@@ -23,7 +23,7 @@ class AuthenticationService(
 ) {
 
     fun authUser(signIn: SignInRequestDTO): Pair<UserRoleDTO, JwtCookies> {
-        val userDetails: UserDetails = doAuth(signIn.email, signIn.password)
+        val userDetails: UserDetails = doAuth(signIn.email.lowercase(), signIn.password)
         return userMapper.detailsDomainToRoleDto(userDetails) to createAuthenticationTokens(userDetails)
     }
 

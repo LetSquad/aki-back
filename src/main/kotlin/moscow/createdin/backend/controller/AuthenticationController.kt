@@ -19,12 +19,12 @@ import javax.servlet.http.HttpServletResponse
 
 @Tag(name = "Методы аутентификации")
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 class AuthenticationController(private val authenticationService: AuthenticationService) {
 
     @Operation(
         summary = "Аутентификация пользователя",
-        description = "auth и refresh токены для пользователя проставляются в куки"
+        description = "В куки проставляются auth и refresh токены для пользователя"
     )
     @PostMapping
     fun postAuth(
@@ -45,7 +45,7 @@ class AuthenticationController(private val authenticationService: Authentication
 
     @Operation(
         summary = "Обновление токенов пользователя",
-        description = "Возвращаются новые auth и refresh токены для пользователя"
+        description = "В куки проставляются новые auth и refresh токены для пользователя"
     )
     @PostMapping("/refresh")
     fun postAuthRefresh(

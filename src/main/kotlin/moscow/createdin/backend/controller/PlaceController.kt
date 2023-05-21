@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/place")
+@RequestMapping("/api/place")
 class PlaceController(private val placeService: PlaceService) {
 
     @GetMapping
