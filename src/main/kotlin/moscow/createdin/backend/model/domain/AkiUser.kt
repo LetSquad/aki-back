@@ -11,12 +11,12 @@ data class AkiUser(
 
     val firstName: String,
     val lastName: String,
-    val surname: String?,
+    val middleName: String?,
     val phone: String,
 
     val userImage: String?,
     val inn: String?,
-    val entityName: String?,
+    val organization: String?,
     val jobTitle: String?,
 
     val isActive: Boolean,

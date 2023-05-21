@@ -32,11 +32,11 @@ class UserService(
             role = UserRole.ADMIN,
             firstName = "Иван",
             lastName = "Иванов",
-            surname = "Иванович",
+            middleName = "Иванович",
             phone = "+71234567890",
             userImage = null,
             inn = "123456789",
-            entityName = null,
+            organization = null,
             jobTitle = null,
             isActive = true,
             isBanned = false

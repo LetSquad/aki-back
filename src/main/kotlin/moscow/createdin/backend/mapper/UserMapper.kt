@@ -20,11 +20,11 @@ class UserMapper {
         role = UserRole.RENTER,
         firstName = registrationRequest.firstName,
         lastName = registrationRequest.lastName,
-        surname = registrationRequest.surname,
+        middleName = registrationRequest.middleName,
         phone = registrationRequest.phone,
         userImage = null,
         inn = null,
-        entityName = null,
+        organization = null,
         jobTitle = null,
         isActive = true,
         isBanned = false
@@ -36,11 +36,11 @@ class UserMapper {
         userRole = user.role,
         firstName = user.firstName,
         lastName = user.lastName,
-        surname = user.surname,
+        middleName = user.middleName,
         phone = user.phone,
         userImage = user.userImage,
         inn = user.inn,
-        entityName = user.entityName,
+        organization = user.organization,
         jobTitle = user.jobTitle
     )
 
