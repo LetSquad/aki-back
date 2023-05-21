@@ -1,16 +1,25 @@
-CREATE TABLE "user"
+CREATE TABLE aki_user
 (
-    id          BIGINT PRIMARY KEY,
-    first_name  TEXT NOT NULL,
-    last_name   TEXT NOT NULL,
-    middle_name TEXT,
-    email       TEXT NOT NULL,
-    password    TEXT NOT NULL,
-    phone       JSONB,
-    inn         TEXT,
-    job_title   TEXT,
-    image       TEXT,
-    role        TEXT
+    id           BIGINT PRIMARY KEY,
+    email        TEXT NOT NULL UNIQUE,
+    password     TEXT NOT NULL,
+    role         TEXT NOT NULL,
+    first_name   TEXT NOT NULL,
+    last_name    TEXT NOT NULL,
+    middle_name  TEXT,
+    user_image   TEXT,
+    phone        TEXT NOT NULL UNIQUE,
+    inn          TEXT,
+    organization TEXT,
+    job_title    TEXT,
+    is_active    BOOLEAN NOT NULL,
+    is_banned    BOOLEAN NOT NULL
+);
+
+CREATE TABLE user_refresh_token
+(
+    user_id BIGINT PRIMARY KEY REFERENCES aki_user(id),
+    refresh_token TEXT
 );
 
 CREATE TABLE place

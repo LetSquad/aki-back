@@ -2,7 +2,7 @@ spring:
   datasource:
     url: 'jdbc:postgresql://localhost:5432/aki_back'
     username: 'postgres'
-    password: 'Orion123'
+    password: 'postgres'
   liquibase:
     enabled: true
 springdoc:
