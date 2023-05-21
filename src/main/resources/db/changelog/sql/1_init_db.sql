@@ -1,14 +1,14 @@
 CREATE TABLE aki_user
 (
-    id           BIGINT PRIMARY KEY,
+    id           BIGSERIAL PRIMARY KEY,
     email        TEXT NOT NULL UNIQUE,
     password     TEXT NOT NULL,
     role         TEXT NOT NULL,
     first_name   TEXT NOT NULL,
     last_name    TEXT NOT NULL,
     middle_name  TEXT,
-    user_image   TEXT,
     phone        TEXT NOT NULL UNIQUE,
+    user_image   TEXT,
     inn          TEXT,
     organization TEXT,
     job_title    TEXT,
