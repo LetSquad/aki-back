@@ -1,13 +1,11 @@
-package moscow.createdin.backend.model.domain
+package moscow.createdin.backend.model.entity
 
-import moscow.createdin.backend.model.enums.UserRole
-
-data class AkiUser(
+data class AkiUserEntity(
     val id: Long?,
 
     val email: String,
     val password: String,
-    val role: UserRole,
+    val role: String,
 
     val firstName: String,
     val lastName: String,

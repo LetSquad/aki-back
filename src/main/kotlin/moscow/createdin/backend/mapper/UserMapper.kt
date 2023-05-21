@@ -4,19 +4,21 @@ import moscow.createdin.backend.model.domain.AkiUser
 import moscow.createdin.backend.model.dto.AkiUserDTO
 import moscow.createdin.backend.model.dto.RegistrationRequestDTO
 import moscow.createdin.backend.model.dto.UserRoleDTO
+import moscow.createdin.backend.model.entity.AkiUserEntity
 import moscow.createdin.backend.model.enums.UserRole
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 
 @Component
-class UserMapper {
+class UserMapper(private val passwordEncoder: PasswordEncoder) {
 
     fun registrationDtoToDomain(registrationRequest: RegistrationRequestDTO) = AkiUser(
         id = null,
         email = registrationRequest.email.lowercase(),
-        password = registrationRequest.password,
+        password = passwordEncoder.encode(registrationRequest.password),
         role = UserRole.RENTER,
         firstName = registrationRequest.firstName,
         lastName = registrationRequest.lastName,
@@ -26,7 +28,7 @@ class UserMapper {
         inn = null,
         organization = null,
         jobTitle = null,
-        isActive = true,
+        isActivated = true,
         isBanned = false
     )
 
@@ -51,10 +53,44 @@ class UserMapper {
     fun domainToDetailsDomain(user: AkiUser): UserDetails = User(
         user.email,
         user.password,
-        user.isActive,
+        user.isActivated,
         true,
         true,
         !user.isBanned,
         setOf(SimpleGrantedAuthority(user.role.name))
+    )
+
+    fun domainToEntity(user: AkiUser) = AkiUserEntity(
+        id = user.id,
+        email = user.email,
+        password = user.password,
+        role = user.role.name,
+        firstName = user.firstName,
+        lastName = user.lastName,
+        middleName = user.middleName,
+        phone = user.phone,
+        userImage = user.userImage,
+        inn = user.inn,
+        organization = user.organization,
+        jobTitle = user.jobTitle,
+        isActivated = user.isActivated,
+        isBanned = user.isBanned
+    )
+
+    fun entityToDomain(user: AkiUserEntity) = AkiUser(
+        id = user.id,
+        email = user.email,
+        password = user.password,
+        role = UserRole.valueOf(user.role),
+        firstName = user.firstName,
+        lastName = user.lastName,
+        middleName = user.middleName,
+        phone = user.phone,
+        userImage = user.userImage,
+        inn = user.inn,
+        organization = user.organization,
+        jobTitle = user.jobTitle,
+        isActivated = user.isActivated,
+        isBanned = user.isBanned
     )
 }

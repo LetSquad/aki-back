@@ -14,9 +14,4 @@ class AkiUserDetailsService(
 
     override fun loadUserByUsername(username: String): UserDetails = userService.getUserByEmail(username)
         .let { userMapper.domainToDetailsDomain(it) }
-
-    fun validateRefreshTokenAndLoadUser(username: String, refreshToken: String): UserDetails {
-        //TODO: validate refresh token
-        return loadUserByUsername(username)
-    }
 }

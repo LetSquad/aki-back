@@ -1,6 +1,7 @@
 package moscow.createdin.backend.controller
 
 import moscow.createdin.backend.getLogger
+import moscow.createdin.backend.model.ErrorCode
 import moscow.createdin.backend.model.dto.ErrorDTO
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -13,8 +14,8 @@ class ErrorHandlingControllerAdvise {
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleException(e: Exception): ErrorDTO {
-        log.error("", e)
-        return ErrorDTO("error", e.message)
+        log.error("Caught unhandled error", e)
+        return ErrorDTO(ErrorCode.UNKNOWN_ERROR, e.message)
     }
 
     companion object {
