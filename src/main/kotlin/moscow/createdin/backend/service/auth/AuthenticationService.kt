@@ -6,6 +6,7 @@ import moscow.createdin.backend.mapper.UserMapper
 import moscow.createdin.backend.model.cookie.JwtCookies
 import moscow.createdin.backend.model.dto.SignInRequestDTO
 import moscow.createdin.backend.model.dto.UserRoleDTO
+import moscow.createdin.backend.service.RefreshTokenService
 import org.springframework.boot.autoconfigure.web.ServerProperties
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -19,7 +20,8 @@ class AuthenticationService(
     private val userMapper: UserMapper,
     private val authenticationManager: AuthenticationManager,
     private val jwtTokenService: JwtTokenService,
-    private val userDetailsService: AkiUserDetailsService
+    private val userDetailsService: AkiUserDetailsService,
+    private val refreshTokenService: RefreshTokenService
 ) {
 
     fun authUser(signIn: SignInRequestDTO): Pair<UserRoleDTO, JwtCookies> {
@@ -33,7 +35,11 @@ class AuthenticationService(
         }
 
         val username: String = jwtTokenService.retrieveSubject(refreshToken)
-        val userDetails: UserDetails = userDetailsService.validateRefreshTokenAndLoadUser(username, refreshToken)
+        if (!refreshTokenService.isRefreshTokenValid(username, refreshToken)) {
+            throw JwtValidationException("Invalid refresh token for user with username = $username")
+        }
+
+        val userDetails: UserDetails = userDetailsService.loadUserByUsername(username)
         return userMapper.detailsDomainToRoleDto(userDetails) to createAuthenticationTokens(userDetails)
     }
 
@@ -44,9 +50,12 @@ class AuthenticationService(
     }
 
     private fun createAuthenticationTokens(userDetails: UserDetails): JwtCookies {
+        val refreshToken: String = jwtTokenService.generateRefreshToken(userDetails)
+        refreshTokenService.updateRefreshToken(userDetails.username, refreshToken)
+
         return JwtCookies(
             authToken = jwtTokenService.generateAuthToken(userDetails),
-            refreshToken = jwtTokenService.generateRefreshToken(userDetails),
+            refreshToken = refreshToken,
             cookiesValidity = securityProperties.refreshTokenValidity,
             isSecure = serverProperties.ssl?.isEnabled ?: false
         )

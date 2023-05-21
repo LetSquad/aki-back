@@ -18,7 +18,7 @@ CREATE TABLE aki_user
 
 CREATE TABLE user_refresh_token
 (
-    user_id BIGINT PRIMARY KEY REFERENCES aki_user(id),
+    user_email    TEXT PRIMARY KEY REFERENCES aki_user(email),
     refresh_token TEXT
 );
 
@@ -46,7 +46,7 @@ CREATE TABLE place_review
 (
     id          BIGINT PRIMARY KEY,
     place_id    BIGINT REFERENCES place (id),
-    rating      decimal(2, 1)
+    rating      DECIMAL(2, 1)
         CONSTRAINT chk_Ratings CHECK (rating >= 0 AND rating <= 5),
     review_text TEXT
 );

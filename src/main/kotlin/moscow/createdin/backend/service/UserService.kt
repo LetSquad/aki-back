@@ -26,7 +26,7 @@ class UserService(
     fun getUserByEmail(email: String): AkiUser = userRepository.findByEmail(email)
         .let { userMapper.entityToDomain(it) }
 
-    fun registerUser(user: AkiUser) {
+    fun createUser(user: AkiUser) {
         userMapper.domainToEntity(user)
             .also { userRepository.save(it) }
     }
