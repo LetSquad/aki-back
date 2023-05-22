@@ -13,4 +13,14 @@ interface AkiUserRepository {
     fun findByEmail(email: String): AkiUserEntity
 
     fun save(user: AkiUserEntity)
+
+    fun findAll(
+        email: String?, role: String?, firstName: String?, lastName: String?, middleName: String?,
+        phone: String?, inn: String?, organization: String?, jobTitle: String?, offset: Long, limit: Int
+    ): List<AkiUserEntity>
+
+    fun countByFilter(
+        email: String?, role: String?, firstName: String?, lastName: String?, middleName: String?,
+        phone: String?, inn: String?, organization: String?, jobTitle: String?
+    ): Int
 }
