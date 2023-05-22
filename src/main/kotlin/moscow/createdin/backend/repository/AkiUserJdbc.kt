@@ -93,7 +93,7 @@ class AkiUserJdbc(
         email: String?, role: String?, firstName: String?, lastName: String?, middleName: String?,
         phone: String?, inn: String?, organization: String?, jobTitle: String?, offset: Long, limit: Int
     ): List<AkiUserEntity> {
-        var query = """
+        val query = """
             $SQL_SELECT_ENTITY
                 WHERE (:email = '' OR email like :email)
                 AND (:role = '' OR role like :role)
@@ -163,7 +163,7 @@ class AkiUserJdbc(
     }
 
     companion object {
-        const val SQL_SELECT_ENTITY = "SELECT id, email, password, role, first_name, last_name, middle_name, " +
+        private const val SQL_SELECT_ENTITY = "SELECT id, email, password, role, first_name, last_name, middle_name, " +
                 "phone, user_image, inn, organization, job_title, is_activated, is_banned " +
                 "FROM aki_user"
     }
