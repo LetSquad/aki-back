@@ -12,7 +12,7 @@ CREATE TABLE aki_user
     inn          TEXT,
     organization TEXT,
     job_title    TEXT,
-    is_active    BOOLEAN NOT NULL,
+    is_activated BOOLEAN NOT NULL,
     is_banned    BOOLEAN NOT NULL
 );
 

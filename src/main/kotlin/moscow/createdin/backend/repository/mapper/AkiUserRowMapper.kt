@@ -21,7 +21,7 @@ class AkiUserRowMapper : RowMapper<AkiUserEntity> {
         inn = rs.getString("inn"),
         organization = rs.getString("organization"),
         jobTitle = rs.getString("job_title"),
-        isActive = rs.getBoolean("is_active"),
+        isActivated = rs.getBoolean("is_activated"),
         isBanned = rs.getBoolean("is_banned")
     )
 }

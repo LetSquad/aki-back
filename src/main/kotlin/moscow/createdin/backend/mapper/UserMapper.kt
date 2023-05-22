@@ -28,7 +28,7 @@ class UserMapper(private val passwordEncoder: PasswordEncoder) {
         inn = null,
         organization = null,
         jobTitle = null,
-        isActive = true,
+        isActivated = true,
         isBanned = false
     )
 
@@ -53,7 +53,7 @@ class UserMapper(private val passwordEncoder: PasswordEncoder) {
     fun domainToDetailsDomain(user: AkiUser): UserDetails = User(
         user.email,
         user.password,
-        user.isActive,
+        user.isActivated,
         true,
         true,
         !user.isBanned,
@@ -73,7 +73,7 @@ class UserMapper(private val passwordEncoder: PasswordEncoder) {
         inn = user.inn,
         organization = user.organization,
         jobTitle = user.jobTitle,
-        isActive = user.isActive,
+        isActivated = user.isActivated,
         isBanned = user.isBanned
     )
 
@@ -90,7 +90,7 @@ class UserMapper(private val passwordEncoder: PasswordEncoder) {
         inn = user.inn,
         organization = user.organization,
         jobTitle = user.jobTitle,
-        isActive = user.isActive,
+        isActivated = user.isActivated,
         isBanned = user.isBanned
     )
 }

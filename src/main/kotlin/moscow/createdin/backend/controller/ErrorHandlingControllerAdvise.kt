@@ -13,7 +13,7 @@ class ErrorHandlingControllerAdvise {
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleException(e: Exception): ErrorDTO {
-        log.error("", e)
+        log.error("Caught unhandled error", e)
         return ErrorDTO("error", e.message)
     }
 

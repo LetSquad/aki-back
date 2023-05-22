@@ -17,6 +17,6 @@ data class AkiUserEntity(
     val organization: String?,
     val jobTitle: String?,
 
-    val isActive: Boolean,
+    val isActivated: Boolean,
     val isBanned: Boolean
 )

@@ -35,7 +35,7 @@ class AkiUserJdbc(
         return jdbcTemplate.queryForObject(
             """
                 SELECT id, email, id, email, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, inn, organization, job_title, is_active, is_banned 
+                    phone, user_image, inn, organization, job_title, is_activated, is_banned 
                 FROM aki_user 
                 WHERE id = ?
             """, rowMapper, id
@@ -46,7 +46,7 @@ class AkiUserJdbc(
         return jdbcTemplate.queryForObject(
             """
                 SELECT id, email, id, email, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, inn, organization, job_title, is_active, is_banned 
+                    phone, user_image, inn, organization, job_title, is_activated, is_banned 
                 FROM aki_user 
                 WHERE email = ?
             """, rowMapper, email
@@ -57,11 +57,11 @@ class AkiUserJdbc(
         jdbcTemplate.update(
             """
                 INSERT INTO aki_user (email, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, inn, organization, job_title, is_active, is_banned) 
+                    phone, user_image, inn, organization, job_title, is_activated, is_banned) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             user.email, user.password, user.role, user.firstName, user.lastName, user.middleName,
-            user.phone, user.userImage, user.inn, user.organization, user.jobTitle, user.isActive, user.isBanned
+            user.phone, user.userImage, user.inn, user.organization, user.jobTitle, user.isActivated, user.isBanned
         )
     }
 }
