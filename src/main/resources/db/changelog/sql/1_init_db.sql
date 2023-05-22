@@ -1,24 +1,24 @@
 CREATE TABLE aki_user
 (
-    id           BIGINT PRIMARY KEY,
+    id           BIGSERIAL PRIMARY KEY,
     email        TEXT NOT NULL UNIQUE,
     password     TEXT NOT NULL,
     role         TEXT NOT NULL,
     first_name   TEXT NOT NULL,
     last_name    TEXT NOT NULL,
     middle_name  TEXT,
-    user_image   TEXT,
     phone        TEXT NOT NULL UNIQUE,
+    user_image   TEXT,
     inn          TEXT,
     organization TEXT,
     job_title    TEXT,
-    is_active    BOOLEAN NOT NULL,
+    is_activated BOOLEAN NOT NULL,
     is_banned    BOOLEAN NOT NULL
 );
 
 CREATE TABLE user_refresh_token
 (
-    user_id BIGINT PRIMARY KEY REFERENCES aki_user(id),
+    user_email    TEXT PRIMARY KEY REFERENCES aki_user(email),
     refresh_token TEXT
 );
 
@@ -46,7 +46,7 @@ CREATE TABLE place_review
 (
     id          BIGINT PRIMARY KEY,
     place_id    BIGINT REFERENCES place (id),
-    rating      decimal(2, 1)
+    rating      DECIMAL(2, 1)
         CONSTRAINT chk_Ratings CHECK (rating >= 0 AND rating <= 5),
     review_text TEXT
 );

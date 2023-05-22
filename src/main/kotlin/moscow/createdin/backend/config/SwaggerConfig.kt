@@ -17,7 +17,7 @@ class SwaggerConfig {
     }
 
     private fun apiInfo(): Info = Info().title("AKI Backend")
-        .description("Агрегатор площадок и услуг креативных индрустрий Москвы")
+        .description("Агрегатор площадок и услуг креативных индустрий Москвы")
         .version("1.0")
         .contact(
             Contact().name("LetSquad")
