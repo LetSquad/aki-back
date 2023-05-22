@@ -12,6 +12,10 @@ springdoc:
   swagger-ui:
     path: '/swagger-ui'
 aki:
+  none-same-site-cookies: false
+  data-path: 'data'
+  max-file-size-mb: 10
+  image-url-prefix: 'data'
   security:
     key-secret: 'akicreatedinmoscowlctleaders2023akicreatedinmoscowlctleaders2023'
     auth-token-validity: 1h
