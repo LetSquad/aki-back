@@ -5,3 +5,5 @@ target
 .flattened-pom.xml
 
 public/
+
+*.ttf

@@ -8,6 +8,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.thymeleaf.ITemplateEngine
+import org.thymeleaf.TemplateEngine
+import org.thymeleaf.templatemode.TemplateMode
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
+import org.thymeleaf.templateresolver.ITemplateResolver
 import java.security.Key
 import javax.crypto.spec.SecretKeySpec
 
@@ -26,4 +31,19 @@ class AppConfig(private val securityProperties: AkiSecurityProperties) {
 
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+
+    @Bean
+    fun templateResolver(): ITemplateResolver {
+        return ClassLoaderTemplateResolver().apply {
+            suffix = ".html"
+            templateMode = TemplateMode.HTML
+        }
+    }
+
+    @Bean
+    fun templateEngine(templateResolver: ITemplateResolver): ITemplateEngine {
+        val templateEngine = TemplateEngine()
+        templateEngine.setTemplateResolver(templateResolver)
+        return templateEngine
+    }
 }

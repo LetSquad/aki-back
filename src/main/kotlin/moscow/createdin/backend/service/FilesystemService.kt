@@ -1,5 +1,6 @@
 package moscow.createdin.backend.service
 
+import com.lowagie.text.pdf.BaseFont
 import moscow.createdin.backend.config.properties.AkiProperties
 import moscow.createdin.backend.getLogger
 import org.apache.tomcat.util.http.fileupload.FileUploadException
@@ -9,6 +10,8 @@ import org.springframework.boot.system.ApplicationHome
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import org.xhtmlrenderer.pdf.ITextRenderer
+import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -52,6 +55,19 @@ class FilesystemService(properties: AkiProperties) {
         return imageName
     }
 
+    fun saveHtmlContentAsPdf(htmlContent: String): String {
+        val filename = "${UUID.randomUUID()}.pdf"
+        FileOutputStream(dataPath.resolve(filename).toFile()).use { outputStream ->
+            val renderer = ITextRenderer()
+            renderer.fontResolver.addFont(FONT_CALIBRI, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+            renderer.fontResolver.addFont(FONT_CALIBRI_BOLD, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+            renderer.setDocumentFromString(htmlContent)
+            renderer.layout()
+            renderer.createPDF(outputStream)
+        }
+        return filename
+    }
+
     fun deleteFile(filename: String) {
         try {
             Files.delete(dataPath.resolve(filename))
@@ -67,5 +83,8 @@ class FilesystemService(properties: AkiProperties) {
 
     companion object {
         private val log = getLogger<FilesystemService>()
+
+        private const val FONT_CALIBRI = "template/font/calibri.ttf"
+        private const val FONT_CALIBRI_BOLD = "template/font/calibri_bold.ttf"
     }
 }
