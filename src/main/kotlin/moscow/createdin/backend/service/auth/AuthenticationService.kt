@@ -2,7 +2,7 @@ package moscow.createdin.backend.service.auth
 
 import moscow.createdin.backend.config.properties.AkiSecurityProperties
 import moscow.createdin.backend.exception.JwtValidationException
-import moscow.createdin.backend.mapper.UserMapper
+import moscow.createdin.backend.mapper.AkiUserMapper
 import moscow.createdin.backend.model.cookie.JwtCookies
 import moscow.createdin.backend.model.dto.SignInRequestDTO
 import moscow.createdin.backend.model.dto.UserRoleDTO
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service
 class AuthenticationService(
     private val serverProperties: ServerProperties,
     private val securityProperties: AkiSecurityProperties,
-    private val userMapper: UserMapper,
+    private val akiUserMapper: AkiUserMapper,
     private val authenticationManager: AuthenticationManager,
     private val jwtTokenService: JwtTokenService,
     private val userDetailsService: AkiUserDetailsService,
@@ -26,7 +26,7 @@ class AuthenticationService(
 
     fun authUser(signIn: SignInRequestDTO): Pair<UserRoleDTO, JwtCookies> {
         val userDetails: UserDetails = doAuth(signIn.email.lowercase(), signIn.password)
-        return userMapper.detailsDomainToRoleDto(userDetails) to createAuthenticationTokens(userDetails)
+        return akiUserMapper.detailsDomainToRoleDto(userDetails) to createAuthenticationTokens(userDetails)
     }
 
     fun updateTokens(authToken: String, refreshToken: String): Pair<UserRoleDTO, JwtCookies> {
@@ -40,7 +40,7 @@ class AuthenticationService(
         }
 
         val userDetails: UserDetails = userDetailsService.loadUserByUsername(username)
-        return userMapper.detailsDomainToRoleDto(userDetails) to createAuthenticationTokens(userDetails)
+        return akiUserMapper.detailsDomainToRoleDto(userDetails) to createAuthenticationTokens(userDetails)
     }
 
     private fun doAuth(email: String, password: String): UserDetails {
