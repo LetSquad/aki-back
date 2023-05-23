@@ -4,7 +4,7 @@ import moscow.createdin.backend.model.domain.Rent
 import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.dto.RentDTO
 import moscow.createdin.backend.model.entity.RentEntity
-import moscow.createdin.backend.model.enums.AdminStatusType
+import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import org.springframework.stereotype.Component
 
 @Component
@@ -27,7 +27,7 @@ class RentMapper(
 
     fun domainToDto(rent: Rent) = RentDTO(
         id = rent.id!!,
-        place = placeMapper.domainToDto(rent.place),
+        place = placeMapper.domainToDto(rent.place, listOf()),
         renter = userMapper.domainToDto(rent.renter),
 
         rentSlots = rent.rentSlots.map { rentSlotMapper.domainToDto(it) },
@@ -42,7 +42,7 @@ class RentMapper(
         renter = userMapper.entityToDomain(rent.user),
         rentSlots = rentSlots,
 
-        status = AdminStatusType.valueOf(rent.status),
+        status = PlaceConfirmationStatus.valueOf(rent.status),
         banReason = rent.banReason,
         admin = rent.admin,
     )

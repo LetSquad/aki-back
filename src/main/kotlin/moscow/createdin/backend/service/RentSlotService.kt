@@ -1,10 +1,11 @@
 package moscow.createdin.backend.service
 
 import moscow.createdin.backend.getLogger
+import moscow.createdin.backend.mapper.PlaceMapper
 import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.dto.CreateRentSlotRequestDTO
-import moscow.createdin.backend.model.dto.PlaceDTO
+import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.RentSlotDTO
 import moscow.createdin.backend.model.enums.RentSlotStatusType
 import moscow.createdin.backend.repository.RentSlotRepository
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class RentSlotService(
+    private val placeService: PlaceService,
+    private val placeMapper: PlaceMapper,
     private val rentSlotMapper: RentSlotMapper,
     private val rentSlotRepository: RentSlotRepository
 ) {
@@ -21,8 +24,9 @@ class RentSlotService(
             .map { rentSlotMapper.domainToEntity(it) }
             .also { rentSlotRepository.save(it) }
 
-        // TODO добавить нормальное создание модели площадки
-        return PlaceDTO(id = 0)
+        return placeService.findById(list[0].placeId)
+            .let { placeMapper.entityToDomain(it) }
+            .let { placeMapper.domainToDto(it, listOf()) }
     }
 
     fun getById(id: Long): RentSlot {
@@ -39,8 +43,10 @@ class RentSlotService(
     fun delete(ids: List<Long>): PlaceDTO {
         updateStatus(ids, RentSlotStatusType.DELETED)
 
-        // TODO добавить нормальное создание модели площадки
-        return PlaceDTO(id = 0)
+        val placeId = getById(ids[0]).placeId!!
+        return placeService.findById(placeId)
+            .let { placeMapper.entityToDomain(it) }
+            .let { placeMapper.domainToDto(it, listOf()) }
     }
 
     fun updateStatus(

@@ -1,6 +1,7 @@
 package moscow.createdin.backend.model.domain
 
-import moscow.createdin.backend.model.enums.AdminStatusType
+import moscow.createdin.backend.model.domain.place.Place
+import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 
 data class Rent(
     val id: Long?,
@@ -9,7 +10,7 @@ data class Rent(
     val renter: AkiUser,
     val rentSlots: List<RentSlot>,
 
-    val status: AdminStatusType,
+    val status: PlaceConfirmationStatus,
     val banReason: String?,
     val admin: Long?,
 )

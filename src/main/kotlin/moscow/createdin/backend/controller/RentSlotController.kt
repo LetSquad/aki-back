@@ -2,7 +2,7 @@ package moscow.createdin.backend.controller
 
 import moscow.createdin.backend.model.dto.CreateRentSlotRequestDTOList
 import moscow.createdin.backend.model.dto.DeleteRentSlotRequestDTOList
-import moscow.createdin.backend.model.dto.PlaceDTO
+import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.service.RentSlotService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping

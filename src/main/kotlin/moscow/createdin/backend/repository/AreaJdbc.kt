@@ -113,7 +113,7 @@ class AreaJdbc(
                        area.area_admin_id,
                        area.area_coordinates_id,
                 
-                       aki_user.id,
+                       aki_user.id as user_id,,
                        aki_user.user_email,
                        aki_user.password,
                        aki_user.role,
