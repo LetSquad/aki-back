@@ -7,6 +7,8 @@ data class AkiUserEntity(
     val password: String,
     val role: String,
 
+    val type: String?,
+
     val firstName: String,
     val lastName: String,
     val middleName: String?,
@@ -15,8 +17,14 @@ data class AkiUserEntity(
     val userImage: String?,
     val inn: String?,
     val organization: String?,
+    val logoImage: String?,
     val jobTitle: String?,
 
+    val area: AreaEntity?,
+
     val isActivated: Boolean,
-    val isBanned: Boolean
+
+    val isBanned: Boolean,
+    val banReason: String?,
+    val admin: AkiUserEntity?,
 )

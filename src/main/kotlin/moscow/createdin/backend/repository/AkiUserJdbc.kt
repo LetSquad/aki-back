@@ -159,7 +159,7 @@ class AkiUserJdbc(
         if (parameter.isNullOrEmpty()) {
             return parameter
         }
-        return "%$parameter%"
+        return "$parameter"
     }
 
     companion object {
