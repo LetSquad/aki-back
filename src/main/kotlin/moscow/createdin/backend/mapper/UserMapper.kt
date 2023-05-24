@@ -6,6 +6,7 @@ import moscow.createdin.backend.model.dto.RegistrationRequestDTO
 import moscow.createdin.backend.model.dto.UserRoleDTO
 import moscow.createdin.backend.model.entity.AkiUserEntity
 import moscow.createdin.backend.model.enums.UserRole
+import moscow.createdin.backend.model.enums.UserType
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
@@ -13,7 +14,11 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 
 @Component
-class UserMapper(private val passwordEncoder: PasswordEncoder) {
+class UserMapper(
+    private val passwordEncoder: PasswordEncoder,
+    private val areaMapper: AreaMapper,
+    private val akiUserAdminMapper: AkiUserAdminMapper
+) {
 
     fun registrationDtoToDomain(registrationRequest: RegistrationRequestDTO) = AkiUser(
         id = null,
@@ -27,9 +32,14 @@ class UserMapper(private val passwordEncoder: PasswordEncoder) {
         userImage = null,
         inn = null,
         organization = null,
+        logoImage = null,
         jobTitle = null,
         isActivated = true,
-        isBanned = false
+        isBanned = false,
+        admin = null,
+        area = null,
+        banReason = null,
+        type = null // TODO добавить на фронте выбор типа юзера для системы рекомендаций
     )
 
     fun domainToDto(user: AkiUser) = AkiUserDTO(
@@ -72,9 +82,14 @@ class UserMapper(private val passwordEncoder: PasswordEncoder) {
         userImage = user.userImage,
         inn = user.inn,
         organization = user.organization,
+        logoImage = user.logoImage,
         jobTitle = user.jobTitle,
         isActivated = user.isActivated,
-        isBanned = user.isBanned
+        isBanned = user.isBanned,
+        type = user.type?.name,
+        banReason = user.banReason,
+        admin = user.admin?.let { akiUserAdminMapper.domainToEntity(user.admin) },
+        area = user.area?.let { areaMapper.domainToEntity(user.area) },
     )
 
     fun entityToDomain(user: AkiUserEntity) = AkiUser(
@@ -89,8 +104,13 @@ class UserMapper(private val passwordEncoder: PasswordEncoder) {
         userImage = user.userImage,
         inn = user.inn,
         organization = user.organization,
+        logoImage = user.logoImage,
         jobTitle = user.jobTitle,
         isActivated = user.isActivated,
-        isBanned = user.isBanned
+        isBanned = user.isBanned,
+        type = user.type?.let { UserType.valueOf(user.type) },
+        admin = user.admin?.let { akiUserAdminMapper.entityToDomain(user.admin) },
+        area = user.area?.let { areaMapper.entityToDomain(user.area) },
+        banReason = user.banReason,
     )
 }
