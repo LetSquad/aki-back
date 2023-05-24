@@ -1,7 +1,7 @@
 package moscow.createdin.backend.service
 
 import moscow.createdin.backend.exception.UserAlreadyExistsException
-import moscow.createdin.backend.mapper.AkiUserMapper
+import moscow.createdin.backend.mapper.UserMapper
 import moscow.createdin.backend.model.domain.AkiUser
 import moscow.createdin.backend.model.dto.RegistrationRequestDTO
 import org.springframework.stereotype.Service
@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class RegistrationService(
-    private val akiUserMapper: AkiUserMapper,
+    private val userMapper: UserMapper,
     private val userService: UserService,
     private val refreshTokenService: RefreshTokenService,
     private val mailService: MailService
@@ -24,7 +24,7 @@ class RegistrationService(
             throw UserAlreadyExistsException("phone", registrationRequest.phone)
         }
 
-        val user: AkiUser = akiUserMapper.registrationDtoToDomain(registrationRequest)
+        val user: AkiUser = userMapper.registrationDtoToDomain(registrationRequest)
         userService.createUser(user)
         refreshTokenService.initUser(user.email)
 
