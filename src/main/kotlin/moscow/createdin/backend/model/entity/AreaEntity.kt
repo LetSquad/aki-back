@@ -7,7 +7,6 @@ data class AreaEntity(
     val name: String,
     val description: String,
     val areaImage: String?,
-    val logoImage: String?,
     val address: String,
     val website: String?,
     val email: String?,
