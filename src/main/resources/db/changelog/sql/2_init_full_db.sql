@@ -47,10 +47,12 @@ CREATE TABLE area
     name           TEXT NOT NULL,
     description    TEXT NOT NULL,
     area_image     TEXT,
+    logo_image     TEXT,
     status         TEXT NOT NULL,
     address        TEXT NOT NULL,
     website        TEXT,
     email          TEXT NOT NULL,
+    phone          TEXT NOT NULL,
     coordinates_id BIGINT UNIQUE,
     ban_reason     TEXT,
     admin_id       BIGINT UNIQUE

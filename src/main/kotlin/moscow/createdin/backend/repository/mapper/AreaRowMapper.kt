@@ -17,6 +17,7 @@ class AreaRowMapper(
         name = rs.getString("area_name"),
         description = rs.getString("area_description"),
         areaImage = rs.getString("area_image"),
+        logoImage = rs.getString("logo_image"),
         address = rs.getString("area_address"),
         website = rs.getString("area_website"),
         email = rs.getString("area_email"),
