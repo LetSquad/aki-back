@@ -8,11 +8,13 @@ import java.sql.ResultSet
 @Component
 class AreaRowMapper(
     private val coordinatesRowMapper: CoordinatesRowMapper,
-    private val akiUserAdminRowMapper: AkiUserAdminRowMapper
+    private val akiUserAdminRowMapper: AkiUserAdminRowMapper,
+    private val userRowMapper: AkiUserRowMapper
 ) : RowMapper<AreaEntity> {
 
     override fun mapRow(rs: ResultSet, rowNum: Int): AreaEntity = AreaEntity(
         id = rs.getLong("id"),
+        user = userRowMapper.mapRow(rs, rowNum),
         name = rs.getString("name"),
         description = rs.getString("description"),
         areaImage = rs.getString("area_image"),
@@ -26,11 +28,11 @@ class AreaRowMapper(
             coordinatesRowMapper.mapRow(rs, rowNum)
         },
         status = rs.getString("status"),
-        banReason = rs.getString("banReason"),
+        banReason = rs.getString("ban_reason"),
         admin = if (rs.getLongOrNull("admin_id") == null) {
             null
         } else {
             akiUserAdminRowMapper.mapRow(rs, rowNum)
-        },
+        }
     )
 }

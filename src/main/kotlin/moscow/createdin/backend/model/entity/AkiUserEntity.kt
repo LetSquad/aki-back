@@ -20,11 +20,8 @@ data class AkiUserEntity(
     val logoImage: String?,
     val jobTitle: String?,
 
-    val area: AreaEntity?,
-
     val isActivated: Boolean,
-
     val isBanned: Boolean,
     val banReason: String?,
-    val admin: AkiUserEntity?,
+    val admin: AkiUserEntity?
 )

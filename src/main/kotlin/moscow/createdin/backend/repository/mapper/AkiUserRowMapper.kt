@@ -7,7 +7,6 @@ import java.sql.ResultSet
 
 @Component
 class AkiUserRowMapper(
-    private val areaRowMapper: AreaRowMapper,
     private val akiUserAdminRowMapper: AkiUserAdminRowMapper
 ) : RowMapper<AkiUserEntity> {
 
@@ -31,11 +30,6 @@ class AkiUserRowMapper(
             null
         } else {
             akiUserAdminRowMapper.mapRow(rs, rowNum)
-        },
-        area = if (rs.getLongOrNull("area_id") == null) {
-            null
-        } else {
-            areaRowMapper.mapRow(rs, rowNum)
         },
         banReason = rs.getString("ban_reason"),
         type = rs.getString("type"),

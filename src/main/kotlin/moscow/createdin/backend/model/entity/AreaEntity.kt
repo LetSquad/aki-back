@@ -2,6 +2,7 @@ package moscow.createdin.backend.model.entity
 
 data class AreaEntity(
     val id: Long?,
+    val user: AkiUserEntity,
 
     val name: String,
     val description: String,
@@ -16,5 +17,5 @@ data class AreaEntity(
     val status: String,
 
     val banReason: String?,
-    val admin: AkiUserEntity?,
+    val admin: AkiUserEntity?
 )

@@ -28,7 +28,6 @@ class AkiUserAdminMapper {
         type = UserRole.ADMIN.name,
         banReason = user.banReason,
         admin = null,
-        area = null,
     )
 
     fun entityToDomain(user: AkiUserEntity) = AkiUser(
@@ -49,7 +48,6 @@ class AkiUserAdminMapper {
         isBanned = user.isBanned,
         type = user.type?.let { UserType.valueOf(user.type) },
         admin = null,
-        area = null,
         banReason = user.banReason,
     )
 }

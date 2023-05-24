@@ -26,7 +26,6 @@ class AkiUserAdminRowMapper : RowMapper<AkiUserEntity> {
         isActivated = rs.getBoolean("is_activated"),
         isBanned = rs.getBoolean("is_banned"),
         admin = null,
-        area = null,
         banReason = rs.getString("ban_reason"),
         type = rs.getString("type"),
     )

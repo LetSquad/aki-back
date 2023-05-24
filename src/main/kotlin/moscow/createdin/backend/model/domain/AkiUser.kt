@@ -17,8 +17,6 @@ data class AkiUser(
     val middleName: String?,
     val phone: String,
 
-    val area: Area?,
-
     val userImage: String?,
     val inn: String?,
     val organization: String?,
@@ -28,5 +26,5 @@ data class AkiUser(
     val isActivated: Boolean,
     val isBanned: Boolean,
     val banReason: String?,
-    val admin: AkiUser?,
+    val admin: AkiUser?
 )

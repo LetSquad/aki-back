@@ -42,8 +42,8 @@ class AkiUserJdbc(
             .addValue("id", id)
         return jdbcTemplate.queryForObject(
             """
-                SELECT id, email, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, inn, organization, job_title, is_activated, is_banned 
+                SELECT id, type, email, password, role, first_name, last_name, middle_name, 
+                    phone, user_image, logo_image, inn, organization, job_title, is_activated, is_banned, admin_id, ban_reason
                 FROM aki_user 
                 WHERE id = :id
             """, parameters, rowMapper
@@ -55,8 +55,8 @@ class AkiUserJdbc(
             .addValue("email", email)
         return jdbcTemplate.queryForObject(
             """
-                SELECT id, email, id, email, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, inn, organization, job_title, is_activated, is_banned 
+                SELECT id, type, email, id, email, password, role, first_name, last_name, middle_name, 
+                    phone, user_image, logo_image, inn, organization, job_title, is_activated, is_banned, admin_id, ban_reason
                 FROM aki_user 
                 WHERE email = :email
             """, parameters, rowMapper
@@ -77,13 +77,17 @@ class AkiUserJdbc(
         )
         parameters.addValue("password", user.password)
         parameters.addValue("userImage", user.userImage)
+        parameters.addValue("logoImage", user.logoImage)
         parameters.addValue("isActivated", user.isActivated)
         parameters.addValue("isBanned", user.isBanned)
+        parameters.addValue("banReason", user.banReason)
+        parameters.addValue("type", user.type)
+        parameters.addValue("adminId", user.admin?.id)
         jdbcTemplate.update(
             """
-                INSERT INTO aki_user (email, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, inn, organization, job_title, is_activated, is_banned) 
-                VALUES (:email, :password, :role, :firstName, :lastName, :middleName, :phone, :userImage, :inn, :organization, :jobTitle, :isActivated, :isBanned)
+                INSERT INTO aki_user (email, type, password, role, first_name, last_name, middle_name, 
+                    phone, user_image, logo_image, inn, organization, job_title, is_activated, is_banned, admin_id, ban_reason) 
+                VALUES (:email, :type, :password, :role, :firstName, :lastName, :middleName, :phone, :userImage,  :logoImage, :inn, :organization, :jobTitle, :isActivated, :isBanned, :adminId, :banReason)
             """,
             parameters
         )
@@ -163,8 +167,8 @@ class AkiUserJdbc(
     }
 
     companion object {
-        private const val SQL_SELECT_ENTITY = "SELECT id, email, password, role, first_name, last_name, middle_name, " +
-                "phone, user_image, inn, organization, job_title, is_activated, is_banned " +
+        private const val SQL_SELECT_ENTITY = "SELECT id, type, email, password, role, first_name, last_name, middle_name, " +
+                "phone, user_image, logo_image, inn, organization, job_title, is_activated, is_banned, admin_id, ban_reason " +
                 "FROM aki_user"
     }
 }
