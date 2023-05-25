@@ -9,5 +9,6 @@ data class AkiProperties(
     val noneSameSiteCookies: Boolean,
     val dataPath: String,
     val maxFileSizeMb: Double,
-    val imageUrlPrefix: String
+    val imageUrlPrefix: String,
+    val agreementDefaultWebsite: String
 )
