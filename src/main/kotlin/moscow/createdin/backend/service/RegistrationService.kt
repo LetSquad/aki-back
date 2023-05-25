@@ -11,7 +11,8 @@ import org.springframework.transaction.annotation.Transactional
 class RegistrationService(
     private val userMapper: UserMapper,
     private val userService: UserService,
-    private val refreshTokenService: RefreshTokenService
+    private val refreshTokenService: RefreshTokenService,
+    private val mailService: MailService
 ) {
 
     @Transactional
@@ -26,5 +27,7 @@ class RegistrationService(
         val user: AkiUser = userMapper.registrationDtoToDomain(registrationRequest)
         userService.createUser(user)
         refreshTokenService.initUser(user.email)
+
+        mailService.sendWelcomeEmail(user.email, user.activationCode)
     }
 }

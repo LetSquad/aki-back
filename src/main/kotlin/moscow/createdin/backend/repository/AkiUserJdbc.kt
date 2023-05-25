@@ -4,6 +4,8 @@ import moscow.createdin.backend.model.entity.AkiUserEntity
 import moscow.createdin.backend.repository.mapper.AkiUserRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.support.GeneratedKeyHolder
+import org.springframework.jdbc.support.KeyHolder
 import org.springframework.stereotype.Repository
 
 
@@ -43,7 +45,8 @@ class AkiUserJdbc(
         return jdbcTemplate.queryForObject(
             """
                 SELECT id, type, email, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, logo_image, inn, organization, job_title, is_activated, is_banned, admin_id, ban_reason
+                    phone, user_image, logo_image, inn, organization, job_title, is_activated, 
+                    activation_code, is_banned, admin_id, ban_reason
                 FROM aki_user 
                 WHERE id = :id
             """, parameters, rowMapper
@@ -56,7 +59,8 @@ class AkiUserJdbc(
         return jdbcTemplate.queryForObject(
             """
                 SELECT id, type, email, id, email, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, logo_image, inn, organization, job_title, is_activated, is_banned, admin_id, ban_reason
+                    phone, user_image, logo_image, inn, organization, job_title, is_activated, 
+                    activation_code, is_banned, admin_id, ban_reason
                 FROM aki_user 
                 WHERE email = :email
             """, parameters, rowMapper
@@ -64,6 +68,7 @@ class AkiUserJdbc(
     }
 
     override fun save(user: AkiUserEntity) {
+        val keyHolder: KeyHolder = GeneratedKeyHolder()
         val parameters = getNamedParameters(
             user.email,
             user.role,
@@ -79,6 +84,7 @@ class AkiUserJdbc(
         parameters.addValue("userImage", user.userImage)
         parameters.addValue("logoImage", user.logoImage)
         parameters.addValue("isActivated", user.isActivated)
+        parameters.addValue("activationCode", user.activationCode)
         parameters.addValue("isBanned", user.isBanned)
         parameters.addValue("banReason", user.banReason)
         parameters.addValue("type", user.type)
@@ -86,8 +92,34 @@ class AkiUserJdbc(
         jdbcTemplate.update(
             """
                 INSERT INTO aki_user (email, type, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, logo_image, inn, organization, job_title, is_activated, is_banned, admin_id, ban_reason) 
-                VALUES (:email, :type, :password, :role, :firstName, :lastName, :middleName, :phone, :userImage,  :logoImage, :inn, :organization, :jobTitle, :isActivated, :isBanned, :adminId, :banReason)
+                    phone, user_image, logo_image, inn, organization, job_title, is_activated, activation_code, is_banned, admin_id, ban_reason) 
+                VALUES (:email, :type, :password, :role, :firstName, :lastName, :middleName, :phone, :userImage,  :logoImage, :inn, :organization, :jobTitle, :isActivated, :activationCode, :isBanned, :adminId, :banReason)
+            """,
+            parameters, keyHolder
+        )
+
+
+    }
+
+    override fun update(user: AkiUserEntity) {
+        val parameters = MapSqlParameterSource()
+            .addValue("id", user.id)
+            .addValue("email", user.email)
+            .addValue("firstName", user.firstName)
+            .addValue("lastName", user.lastName)
+            .addValue("middleName", user.middleName)
+            .addValue("phone", user.phone)
+            .addValue("userImage", user.userImage)
+            .addValue("inn", user.inn)
+            .addValue("organization", user.organization)
+            .addValue("jobTitle", user.jobTitle)
+        jdbcTemplate.update(
+            """
+                UPDATE aki_user 
+                SET email = :email, first_name = :firstName, last_name = :lastName, middle_name = :middleName, 
+                    phone = :phone, user_image = :userImage, inn = :inn, organization = :organization,
+                    job_title = :jobTitle
+                WHERE id = :id
             """,
             parameters
         )
@@ -168,7 +200,7 @@ class AkiUserJdbc(
 
     companion object {
         private const val SQL_SELECT_ENTITY = "SELECT id, type, email, password, role, first_name, last_name, middle_name, " +
-                "phone, user_image, logo_image, inn, organization, job_title, is_activated, is_banned, admin_id, ban_reason " +
+                "phone, user_image, logo_image, inn, organization, job_title, is_activated, activation_code, is_banned, admin_id, ban_reason " +
                 "FROM aki_user"
     }
 }

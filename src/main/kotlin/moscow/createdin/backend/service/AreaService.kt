@@ -40,7 +40,7 @@ class AreaService(
         return getByUser(currentUser.id)
     }
 
-    fun edit(req: EditAreaRequestDTO) {
+    fun update(req: EditAreaRequestDTO) {
         val currentUser = userService.getCurrentUserDomain()
         val editableArea = areaRepository.findById(req.id)
             .let { areaMapper.entityToDomain(it) }

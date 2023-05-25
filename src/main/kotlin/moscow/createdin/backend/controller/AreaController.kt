@@ -30,7 +30,7 @@ class AreaController(private val areaService: AreaService) {
     @PreAuthorize("hasRole('LANDLORD')")
     @PutMapping("edit")
     fun edit(@RequestBody editAreaReq: EditAreaRequestDTO) {
-        return areaService.edit(editAreaReq)
+        return areaService.update(editAreaReq)
     }
 
     @GetMapping("id")

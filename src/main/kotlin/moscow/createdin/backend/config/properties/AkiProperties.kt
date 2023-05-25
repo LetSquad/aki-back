@@ -6,6 +6,8 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties(prefix = "aki")
 @ConstructorBinding
 data class AkiProperties(
+    val url: String,
+    val resetPasswordExpirationMin: Int,
     val noneSameSiteCookies: Boolean,
     val dataPath: String,
     val maxFileSizeMb: Double,
