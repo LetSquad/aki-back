@@ -1,10 +1,10 @@
-package moscow.createdin.backend.model.domain
+package moscow.createdin.backend.model.dto
 
 import moscow.createdin.backend.model.enums.AdminStatusType
 
-data class Area(
+data class AreaDTO(
     val id: Long?,
-    val user: AkiUser,
+    val user: AkiUserDTO,
 
     val name: String,
     val description: String,
@@ -14,9 +14,9 @@ data class Area(
     val email: String?,
     val phone: String?,
 
-    val coordinates: Coordinates?,
+    val coordinates: CoordinatesDTO?,
 
     val status: AdminStatusType,
     val banReason: String?,
-    val admin: AkiUser?
+    val admin: AkiUserDTO?
 )

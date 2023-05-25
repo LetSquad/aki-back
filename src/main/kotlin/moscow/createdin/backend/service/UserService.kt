@@ -24,6 +24,10 @@ class UserService(
             .let { userMapper.domainToDto(it) }
     }
 
+    fun getCurrentUserDomain(): AkiUser {
+        return getUserByEmail(userContext.userEmail)
+    }
+
     fun getUserByEmail(email: String): AkiUser = userRepository.findByEmail(email)
         .let { userMapper.entityToDomain(it) }
 

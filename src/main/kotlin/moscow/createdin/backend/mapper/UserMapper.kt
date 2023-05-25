@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component
 @Component
 class UserMapper(
     private val passwordEncoder: PasswordEncoder,
-    private val areaMapper: AreaMapper,
     private val akiUserAdminMapper: AkiUserAdminMapper
 ) {
 
@@ -37,7 +36,6 @@ class UserMapper(
         isActivated = true,
         isBanned = false,
         admin = null,
-        area = null,
         banReason = null,
         type = null // TODO добавить на фронте выбор типа юзера для системы рекомендаций
     )
@@ -88,8 +86,7 @@ class UserMapper(
         isBanned = user.isBanned,
         type = user.type?.name,
         banReason = user.banReason,
-        admin = user.admin?.let { akiUserAdminMapper.domainToEntity(user.admin) },
-        area = user.area?.let { areaMapper.domainToEntity(user.area) },
+        admin = user.admin?.let { akiUserAdminMapper.domainToEntity(user.admin) }
     )
 
     fun entityToDomain(user: AkiUserEntity) = AkiUser(
@@ -110,7 +107,6 @@ class UserMapper(
         isBanned = user.isBanned,
         type = user.type?.let { UserType.valueOf(user.type) },
         admin = user.admin?.let { akiUserAdminMapper.entityToDomain(user.admin) },
-        area = user.area?.let { areaMapper.entityToDomain(user.area) },
-        banReason = user.banReason,
+        banReason = user.banReason
     )
 }
