@@ -43,7 +43,7 @@ class SecurityConfig(
             .formLogin().disable()
             .httpBasic().disable()
             .authorizeRequests()
-            .antMatchers(HttpMethod.POST, "/api/register").permitAll()
+            .antMatchers(HttpMethod.POST, "/api/user/register").permitAll()
             .antMatchers(HttpMethod.POST, "/api/auth", "/api/auth/refresh").permitAll()
             .antMatchers("/api/**").authenticated()
             .anyRequest().permitAll()

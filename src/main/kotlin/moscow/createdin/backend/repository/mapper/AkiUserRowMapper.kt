@@ -25,8 +25,9 @@ class AkiUserRowMapper(
         logoImage = rs.getString("logo_image"),
         jobTitle = rs.getString("job_title"),
         isActivated = rs.getBoolean("is_activated"),
+        activationCode = rs.getString("activation_code"),
         isBanned = rs.getBoolean("is_banned"),
-        admin = if (rs.getLongOrNull("admin_id") == null) {
+        admin = if (rs.getLongOrNull("admin_id") == null) { // TODO здесь будет возникать ошибка при попытке смаппить админа
             null
         } else {
             akiUserAdminRowMapper.mapRow(rs, rowNum)

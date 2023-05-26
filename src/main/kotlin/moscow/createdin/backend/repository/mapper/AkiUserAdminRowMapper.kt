@@ -24,6 +24,7 @@ class AkiUserAdminRowMapper : RowMapper<AkiUserEntity> {
         logoImage = null,
         jobTitle = rs.getString("job_title"),
         isActivated = rs.getBoolean("is_activated"),
+        activationCode = rs.getString("activation_code"),
         isBanned = rs.getBoolean("is_banned"),
         admin = null,
         banReason = rs.getString("ban_reason"),

@@ -5,6 +5,21 @@ spring:
     password: 'postgres'
   liquibase:
     enabled: true
+  mail:
+    host: 'smtp.yandex.ru'
+    port: 465
+    protocol: 'smtps'
+    username: 'example@example.com'
+    password: 'password'
+    properties:
+      mail:
+        debug: false
+        smtp:
+          auth: true
+        starttls:
+          enable: true
+        ssl:
+          enable: true
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -12,6 +27,8 @@ springdoc:
   swagger-ui:
     path: '/swagger-ui'
 aki:
+  url: 'http://localhost:8080'
+  reset-password-expiration-min: 180
   none-same-site-cookies: false
   data-path: 'data'
   max-file-size-mb: 10

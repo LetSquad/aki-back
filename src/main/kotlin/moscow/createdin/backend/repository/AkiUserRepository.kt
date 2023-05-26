@@ -14,6 +14,8 @@ interface AkiUserRepository {
 
     fun save(user: AkiUserEntity)
 
+    fun update(user: AkiUserEntity)
+
     fun findAll(
         email: String?, role: String?, firstName: String?, lastName: String?, middleName: String?,
         phone: String?, inn: String?, organization: String?, jobTitle: String?, offset: Long, limit: Int

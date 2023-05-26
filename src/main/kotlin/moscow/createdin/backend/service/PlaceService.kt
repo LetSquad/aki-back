@@ -9,5 +9,5 @@ class PlaceService {
         return listOf("Винзавод")
     }
 
-    fun addPlace(place: String) = Unit
+    fun create(place: String) = Unit
 }

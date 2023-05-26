@@ -9,17 +9,18 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/place")
+@RequestMapping("/api/places")
 class PlaceController(private val placeService: PlaceService) {
 
-    @GetMapping
-    fun getPlaces(): List<String> {
+    @PreAuthorize("hasRole('LANDLORD')")
+    @GetMapping("my")
+    fun getCurrentLandlordPlaces(): List<String> {
         return placeService.getPlaces()
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping
-    fun postPlace(@RequestBody place: String) {
-        placeService.addPlace(place)
+    fun create(@RequestBody place: String) {
+        placeService.create(place)
     }
 }
