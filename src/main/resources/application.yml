@@ -16,6 +16,7 @@ aki:
   data-path: 'data'
   max-file-size-mb: 10
   image-url-prefix: 'data'
+  agreement-default-website: 'https://createdin.moscow/'
   security:
     key-secret: 'akicreatedinmoscowlctleaders2023akicreatedinmoscowlctleaders2023'
     auth-token-validity: 1h
