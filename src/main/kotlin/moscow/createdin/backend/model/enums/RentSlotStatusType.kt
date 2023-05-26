@@ -4,5 +4,6 @@ enum class RentSlotStatusType {
     OPEN,
     BOOKED,
     CLOSED,
-    CANCELLED
+    CANCELLED,
+    DELETED
 }

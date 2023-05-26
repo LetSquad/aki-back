@@ -3,3 +3,5 @@ databaseChangeLog:
       file: db/changelog/sql/1_init_db.sql
   - include:
       file: db/changelog/sql/2_add_user_password_reset.sql
+  - include:
+      file: db/changelog/sql/3_fix_place_field_area_id_null.sql

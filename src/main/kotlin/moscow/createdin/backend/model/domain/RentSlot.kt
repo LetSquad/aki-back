@@ -2,16 +2,15 @@ package moscow.createdin.backend.model.domain
 
 import moscow.createdin.backend.model.enums.RentSlotStatusType
 import java.math.BigDecimal
-import java.sql.Date
+import java.time.Instant
 
 data class RentSlot(
     val id: Long?,
+    val placeId: Long?,
 
-    val place: Place?,
-
-    val timeStart: Date,
-    val timeEnd: Date,
+    val timeStart: Instant,
+    val timeEnd: Instant,
 
     val status: RentSlotStatusType,
-    val price: BigDecimal,
+    val price: BigDecimal
 )
