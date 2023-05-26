@@ -17,5 +17,5 @@ data class AreaEntity(
     val status: String,
 
     val banReason: String?,
-    val admin: AkiUserEntity?
+    val admin: Long?
 )

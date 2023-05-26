@@ -13,7 +13,7 @@ class RentSlotRowMapper : RowMapper<RentSlotEntity> {
         placeId = rs.getLong("place_id"),
         timeStart = rs.getTimestamp("time_start"),
         timeEnd = rs.getTimestamp("time_end"),
-        status = rs.getString("status"),
+        status = rs.getString("rent_slot_status"),
         price = rs.getBigDecimal("price"),
     )
 }

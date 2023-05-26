@@ -81,7 +81,7 @@ class AreaService(
 
         val result = editable.copy(
             status = AdminStatusType.VERIFIED,
-            admin = adminUser
+            admin = adminUser.id
         )
 
         areaMapper.domainToEntity(result)
@@ -96,7 +96,7 @@ class AreaService(
         val result = editable.copy(
             status = AdminStatusType.BANNED,
             banReason = banRequestDTO.reason,
-            admin = adminUser
+            admin = adminUser.id
         )
 
         areaMapper.domainToEntity(result)

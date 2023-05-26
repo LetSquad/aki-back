@@ -9,27 +9,19 @@ import java.sql.ResultSet
 class RentRowMapper(
     private val placeRowMapper: PlaceRowMapper,
     private val akiUserRowMapper: AkiUserRowMapper,
-    private val akiUserAdminRowMapper: AkiUserAdminRowMapper
 ) : RowMapper<RentEntity> {
 
-    override fun mapRow(rs: ResultSet, rowNum: Int): RentEntity = RentEntity(
-        id = rs.getLong("id"),
-        place = if (rs.getLongOrNull("place_id") == null) {
-            null
-        } else {
-            placeRowMapper.mapRow(rs, rowNum)
-        },
-        user = if (rs.getLongOrNull("user_id") == null) {
-            null
-        } else {
-            akiUserRowMapper.mapRow(rs, rowNum)
-        },
-        status = rs.getString("status"),
-        banReason = rs.getString("ban_reason"),
-        admin = if (rs.getLongOrNull("admin_id") == null) {
-            null
-        } else {
-            akiUserAdminRowMapper.mapRow(rs, rowNum)
-        },
-    )
+    override fun mapRow(rs: ResultSet, rowNum: Int): RentEntity {
+        val arrayIds = rs.getString("array_agg")
+
+        return RentEntity(
+            id = rs.getLong("id"),
+            place = placeRowMapper.mapRow(rs, rowNum),
+            user = akiUserRowMapper.mapRow(rs, rowNum),
+            rentSlotIds = arrayIds.substring(1, arrayIds.length-1).split(',').map { it.toLong() },
+            status = rs.getString("rent_status"),
+            banReason = rs.getString("rent_ban_reason"),
+            admin = rs.getLong("rent_admin_id")
+        )
+    }
 }

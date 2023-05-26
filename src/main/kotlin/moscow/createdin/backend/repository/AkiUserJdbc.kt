@@ -22,7 +22,7 @@ class AkiUserJdbc(
             """
                 SELECT COUNT(*) count
                 FROM aki_user 
-                WHERE email = :email
+                WHERE user_email = :email
             """, parameters
         ) { rs, _ -> rs.getInt("count") }!! == 1
     }
@@ -34,7 +34,7 @@ class AkiUserJdbc(
             """
                 SELECT COUNT(*) count
                 FROM aki_user 
-                WHERE phone = :phone
+                WHERE user_phone = :phone
             """, parameters
         ) { rs, _ -> rs.getInt("count") }!! == 1
     }
@@ -44,9 +44,9 @@ class AkiUserJdbc(
             .addValue("id", id)
         return jdbcTemplate.queryForObject(
             """
-                SELECT id, type, email, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, logo_image, inn, organization, job_title, is_activated, 
-                    activation_code, is_banned, admin_id, ban_reason
+                SELECT id, user_type, user_email, password, role, first_name, last_name, middle_name, 
+                    user_phone, user_image, logo_image, inn, organization, job_title, is_activated, 
+                    activation_code, is_banned, user_admin_id, user_ban_reason
                 FROM aki_user 
                 WHERE id = :id
             """, parameters, rowMapper
@@ -58,11 +58,11 @@ class AkiUserJdbc(
             .addValue("email", email)
         return jdbcTemplate.queryForObject(
             """
-                SELECT id, type, email, id, email, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, logo_image, inn, organization, job_title, is_activated, 
-                    activation_code, is_banned, admin_id, ban_reason
+                SELECT id, user_type, user_email, password, role, first_name, last_name, middle_name, 
+                    user_phone, user_image, logo_image, inn, organization, job_title, is_activated, 
+                    activation_code, is_banned, user_admin_id, user_ban_reason
                 FROM aki_user 
-                WHERE email = :email
+                WHERE user_email = :email
             """, parameters, rowMapper
         )!!
     }
@@ -88,11 +88,11 @@ class AkiUserJdbc(
         parameters.addValue("isBanned", user.isBanned)
         parameters.addValue("banReason", user.banReason)
         parameters.addValue("type", user.type)
-        parameters.addValue("adminId", user.admin?.id)
+        parameters.addValue("adminId", user.admin)
         jdbcTemplate.update(
             """
-                INSERT INTO aki_user (email, type, password, role, first_name, last_name, middle_name, 
-                    phone, user_image, logo_image, inn, organization, job_title, is_activated, activation_code, is_banned, admin_id, ban_reason) 
+                INSERT INTO aki_user (user_email, user_type, password, role, first_name, last_name, middle_name, 
+                    user_phone, user_image, logo_image, inn, organization, job_title, is_activated, activation_code, is_banned, user_admin_id, user_ban_reason) 
                 VALUES (:email, :type, :password, :role, :firstName, :lastName, :middleName, :phone, :userImage,  :logoImage, :inn, :organization, :jobTitle, :isActivated, :activationCode, :isBanned, :adminId, :banReason)
             """,
             parameters, keyHolder
@@ -116,8 +116,8 @@ class AkiUserJdbc(
         jdbcTemplate.update(
             """
                 UPDATE aki_user 
-                SET email = :email, first_name = :firstName, last_name = :lastName, middle_name = :middleName, 
-                    phone = :phone, user_image = :userImage, inn = :inn, organization = :organization,
+                SET user_email = :email, first_name = :firstName, last_name = :lastName, middle_name = :middleName, 
+                    user_phone = :phone, user_image = :userImage, inn = :inn, organization = :organization,
                     job_title = :jobTitle
                 WHERE id = :id
             """,
@@ -131,12 +131,12 @@ class AkiUserJdbc(
     ): List<AkiUserEntity> {
         val query = """
             $SQL_SELECT_ENTITY
-                WHERE (:email = '' OR email like :email)
+                WHERE (:email = '' OR user_email like :email)
                 AND (:role = '' OR role like :role)
                 AND (:firstName = '' OR first_name like :firstName)
                 AND (:lastName = '' OR last_name like :lastName)
                 AND (:middleName = '' OR middle_name like :middleName)
-                AND (:phone = '' OR phone like :phone)
+                AND (:phone = '' OR user_phone like :phone)
                 AND (:inn = '' OR inn like :inn)
                 AND (:organization = '' OR organization like :organization)
                 AND (:jobTitle = '' OR job_title like :jobTitle)
@@ -161,12 +161,12 @@ class AkiUserJdbc(
             """
                 SELECT COUNT(*) as count
                 FROM aki_user 
-                WHERE (:email = '' OR email like :email)
+                WHERE (:email = '' OR user_email like :email)
                 AND (:role = '' OR role = :role)
                 AND (:firstName = '' OR first_name like :firstName)
                 AND (:lastName = '' OR last_name like :lastName)
                 AND (:middleName = '' OR middle_name like :middleName)
-                AND (:phone = '' OR phone like :phone)
+                AND (:phone = '' OR user_phone like :phone)
                 AND (:inn = '' OR inn like :inn)
                 AND (:organization = '' OR organization like :organization)
                 AND (:jobTitle = '' OR job_title like :jobTitle)
@@ -199,8 +199,8 @@ class AkiUserJdbc(
     }
 
     companion object {
-        private const val SQL_SELECT_ENTITY = "SELECT id, type, email, password, role, first_name, last_name, middle_name, " +
-                "phone, user_image, logo_image, inn, organization, job_title, is_activated, activation_code, is_banned, admin_id, ban_reason " +
+        private const val SQL_SELECT_ENTITY = "SELECT id, user_type, user_email, password, role, first_name, last_name, middle_name, " +
+                "user_phone, user_image, logo_image, inn, organization, job_title, is_activated, activation_code, is_banned, user_admin_id, user_ban_reason " +
                 "FROM aki_user"
     }
 }

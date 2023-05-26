@@ -10,28 +10,31 @@ class PlaceRowMapper(
     private val coordinatesRowMapper: CoordinatesRowMapper,
     private val areaRowMapper: AreaRowMapper,
     private val akiUserRowMapper: AkiUserRowMapper,
-    private val akiUserAdminRowMapper: AkiUserAdminRowMapper
 ) : RowMapper<PlaceEntity> {
 
     override fun mapRow(rs: ResultSet, rowNum: Int): PlaceEntity = PlaceEntity(
         id = rs.getLong("id"),
         user = akiUserRowMapper.mapRow(rs, rowNum),
-        area = areaRowMapper.mapRow(rs, rowNum),
-        coordinates = if (rs.getLongOrNull("coordinates_id") == null) {
+        area = if (rs.getLongOrNull("area_id") == null) {
+            null
+        } else {
+            areaRowMapper.mapRow(rs, rowNum)
+        },
+        coordinates = if (rs.getLongOrNull("place_coordinates_id") == null) {
             null
         } else {
             coordinatesRowMapper.mapRow(rs, rowNum)
         },
-        type = rs.getString("type"),
-        name = rs.getString("name"),
+        type = rs.getString("place_type"),
+        name = rs.getString("place_name"),
         specialization = rs.getString("specialization"),
-        description = rs.getString("description"),
-        address = rs.getString("address"),
-        phone = rs.getString("phone"),
-        email = rs.getString("email"),
-        website = rs.getString("website"),
+        description = rs.getString("place_description"),
+        address = rs.getString("place_address"),
+        phone = rs.getString("place_phone"),
+        email = rs.getString("place_email"),
+        website = rs.getString("place_website"),
         levelNumber = rs.getInt("level_number"),
-        fullArea = rs.getInt("fullArea"),
+        fullArea = rs.getInt("full_area"),
         rentableArea = rs.getInt("rentable_area"),
         capacityMin = rs.getInt("capacity_min"),
         capacityMax = rs.getInt("capacity_max"),
@@ -40,12 +43,8 @@ class PlaceRowMapper(
         accessibility = rs.getString("accessibility"),
         facilities = rs.getString("facilities"),
         equipments = rs.getString("equipments"),
-        status = rs.getString("status"),
-        banReason = rs.getString("ban_reason"),
-        admin = if (rs.getLongOrNull("admin_id") == null) {
-            null
-        } else {
-            akiUserAdminRowMapper.mapRow(rs, rowNum)
-        },
+        status = rs.getString("place_status"),
+        banReason = rs.getString("place_ban_reason"),
+        admin = rs.getLong("place_admin_id")
     )
 }

@@ -6,19 +6,17 @@ import org.springframework.stereotype.Component
 import java.sql.ResultSet
 
 @Component
-class AkiUserRowMapper(
-    private val akiUserAdminRowMapper: AkiUserAdminRowMapper
-) : RowMapper<AkiUserEntity> {
+class AkiUserRowMapper : RowMapper<AkiUserEntity> {
 
     override fun mapRow(rs: ResultSet, rowNum: Int): AkiUserEntity = AkiUserEntity(
         id = rs.getLong("id"),
-        email = rs.getString("email"),
+        email = rs.getString("user_email"),
         password = rs.getString("password"),
         role = rs.getString("role"),
         firstName = rs.getString("first_name"),
         lastName = rs.getString("last_name"),
         middleName = rs.getString("middle_name"),
-        phone = rs.getString("phone"),
+        phone = rs.getString("user_phone"),
         userImage = rs.getString("user_image"),
         inn = rs.getString("inn"),
         organization = rs.getString("organization"),
@@ -27,12 +25,8 @@ class AkiUserRowMapper(
         isActivated = rs.getBoolean("is_activated"),
         activationCode = rs.getString("activation_code"),
         isBanned = rs.getBoolean("is_banned"),
-        admin = if (rs.getLongOrNull("admin_id") == null) { // TODO здесь будет возникать ошибка при попытке смаппить админа
-            null
-        } else {
-            akiUserAdminRowMapper.mapRow(rs, rowNum)
-        },
-        banReason = rs.getString("ban_reason"),
-        type = rs.getString("type"),
+        admin = rs.getLong("user_admin_id"),
+        banReason = rs.getString("user_ban_reason"),
+        type = rs.getString("user_type"),
     )
 }

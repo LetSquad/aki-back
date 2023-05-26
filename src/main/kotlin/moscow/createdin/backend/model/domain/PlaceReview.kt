@@ -11,5 +11,5 @@ data class PlaceReview(
 
     val status: AdminStatusType,
     val banReason: String?,
-    val admin: AkiUser?,
+    val admin: Long?,
 )

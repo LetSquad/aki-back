@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class AreaMapper(
-    private val akiUserAdminMapper: AkiUserAdminMapper,
     private val userMapper: UserMapper,
     private val coordinatesMapper: CoordinatesMapper
 ) {
@@ -27,7 +26,7 @@ class AreaMapper(
         coordinates = area.coordinates?.let { coordinatesMapper.domainToEntity(area.coordinates) },
         status = area.status.name,
         banReason = area.banReason,
-        admin = area.admin?.let { akiUserAdminMapper.domainToEntity(area.admin) }
+        admin = area.admin
     )
 
     fun entityToDomain(area: AreaEntity) = Area(
@@ -43,7 +42,7 @@ class AreaMapper(
         coordinates = area.coordinates?.let { coordinatesMapper.entityToDomain(area.coordinates) },
         status = AdminStatusType.valueOf(area.status),
         banReason = area.banReason,
-        admin = area.admin?.let { akiUserAdminMapper.entityToDomain(area.admin) }
+        admin = area.admin
     )
 
     fun createDtoToDomain(createAreaRequestDTO: CreateAreaRequestDTO, akiUser: AkiUser) = Area(
@@ -75,7 +74,7 @@ class AreaMapper(
         coordinates = area.coordinates?.let { coordinatesMapper.domainToDto(area.coordinates) },
         status = area.status,
         banReason = area.banReason,
-        admin = area.admin?.let { userMapper.domainToDto(area.admin) }
+        admin = area.admin
     )
 
 }

@@ -1,33 +1,49 @@
 package moscow.createdin.backend.mapper
 
 import moscow.createdin.backend.model.domain.Rent
+import moscow.createdin.backend.model.domain.RentSlot
+import moscow.createdin.backend.model.dto.RentDTO
 import moscow.createdin.backend.model.entity.RentEntity
 import moscow.createdin.backend.model.enums.AdminStatusType
 import org.springframework.stereotype.Component
 
 @Component
 class RentMapper(
-    private val akiUserAdminMapper: AkiUserAdminMapper,
+    private val rentSlotMapper: RentSlotMapper,
     private val userMapper: UserMapper,
     private val placeMapper: PlaceMapper
 ) {
     fun domainToEntity(rent: Rent) = RentEntity(
         id = rent.id,
-        place = rent.place?.let { placeMapper.domainToEntity(rent.place) },
-        user = rent.user?.let { userMapper.domainToEntity(rent.user) },
 
+        place = placeMapper.domainToEntity(rent.place),
+        user = userMapper.domainToEntity(rent.renter),
+
+        rentSlotIds = rent.rentSlots.map { it.id!! },
         status = rent.status.name,
         banReason = rent.banReason,
-        admin = rent.admin?.let { akiUserAdminMapper.domainToEntity(rent.admin) },
+        admin = rent.admin
     )
 
-    fun entityToDomain(rent: RentEntity) = Rent(
+    fun domainToDto(rent: Rent) = RentDTO(
+        id = rent.id!!,
+        place = placeMapper.domainToDto(rent.place),
+        renter = userMapper.domainToDto(rent.renter),
+
+        rentSlots = rent.rentSlots.map { rentSlotMapper.domainToDto(it) },
+        status = rent.status.name,
+        banReason = rent.banReason,
+        adminId = rent.admin
+    )
+
+    fun entityToDomain(rent: RentEntity, rentSlots: List<RentSlot>) = Rent(
         id = rent.id,
-        place = rent.place?.let { placeMapper.entityToDomain(rent.place) },
-        user = rent.user?.let { userMapper.entityToDomain(rent.user) },
+        place = placeMapper.entityToDomain(rent.place),
+        renter = userMapper.entityToDomain(rent.user),
+        rentSlots = rentSlots,
 
         status = AdminStatusType.valueOf(rent.status),
         banReason = rent.banReason,
-        admin = rent.admin?.let { akiUserAdminMapper.entityToDomain(rent.admin) },
+        admin = rent.admin,
     )
 }

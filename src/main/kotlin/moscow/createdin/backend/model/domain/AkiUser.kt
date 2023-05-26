@@ -28,5 +28,5 @@ data class AkiUser(
 
     val isBanned: Boolean,
     val banReason: String?,
-    val admin: AkiUser?
+    val admin: Long?
 )
