@@ -22,7 +22,6 @@ import moscow.createdin.backend.model.entity.AreaEntity
 import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.PriceType
-import moscow.createdin.backend.model.enums.SpecializationType
 import org.postgresql.util.PGobject
 import org.springframework.stereotype.Component
 

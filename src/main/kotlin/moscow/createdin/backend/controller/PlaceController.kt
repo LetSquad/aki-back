@@ -2,7 +2,6 @@ package moscow.createdin.backend.controller
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
-import moscow.createdin.backend.model.dto.AreaDTO
 import moscow.createdin.backend.model.dto.place.NewPlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
