@@ -111,7 +111,7 @@ class PlaceMapper(
 
         type = place.type,
         name = place.name,
-        specialization = stringToPGObject(gson.toJson(place.specialization)),
+        specialization = place.specialization,
         description = place.description,
         address = place.address,
         phone = place.phone,
@@ -144,7 +144,7 @@ class PlaceMapper(
 
         type = place.type,
         name = place.name,
-        specialization = stringToPGObject(gson.toJson(place.specialization)),
+        specialization = place.specialization,
         description = place.description,
         address = place.address,
         phone = place.phone,
@@ -177,10 +177,7 @@ class PlaceMapper(
 
         type = place.type,
         name = place.name,
-        specialization = gson.fromJson(
-            place.specialization.value ?: "[]",
-            object : TypeToken<Collection<SpecializationType?>?>() {}.type
-        ),
+        specialization = place.specialization,
         description = place.description,
         address = place.address,
         phone = place.phone,

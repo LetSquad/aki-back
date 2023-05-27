@@ -125,9 +125,13 @@ class PlaceService(
             .let { placeMapper.domainToDto(it, placeImages) }
     }
 
-    fun getCurrentUserPlaces(): PlaceListDTO {
+    fun getCurrentUserPlaces(
+        pageNumber: Long,
+        limit: Int
+    ): PlaceListDTO {
         val user = userService.getCurrentUserDomain()
-        val places = placeRepository.findByUserId(user.id!!)
+        val total = placeRepository.countByUserId(user.id!!)
+        val places = placeRepository.findByUserId(pageNumber, limit, user.id)
             .map {
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
@@ -137,7 +141,7 @@ class PlaceService(
                 placeMapper.domainToDto(it, placeImages)
             }
 
-        return PlaceListDTO(places, places.size)
+        return PlaceListDTO(places, total)
     }
 
     private fun getByPlaceId(placeId: Long): List<RentSlot> {
@@ -152,10 +156,10 @@ class PlaceService(
 
     private fun getSortType(sortType: PlaceSortType): String {
         return when (sortType) {
-            PlaceSortType.PERSONAL -> "personal"
-            PlaceSortType.POPULAR -> "popular_count"
-            PlaceSortType.RATING -> "avg_rating"
-            PlaceSortType.PRICE -> "min_price"
+            PlaceSortType.personal -> "popular_count"   // TODO придумать как запросить по персональным рекомендациям
+            PlaceSortType.popular -> "popular_count"
+            PlaceSortType.rating -> "avg_rating"
+            PlaceSortType.price -> "min_price"
         }
     }
 }

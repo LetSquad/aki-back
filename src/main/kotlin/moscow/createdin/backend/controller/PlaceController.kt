@@ -72,13 +72,12 @@ class PlaceController(private val placeService: PlaceService) {
         return placeService.get(id)
     }
 
-    // todo переделать на пагинацию
     @PreAuthorize("hasRole('LANDLORD')")
     @GetMapping("my")
     fun getCurrentUserPlaces(
-        @RequestParam pageNumber: Long,
-        @RequestParam limit: Long
+        @Parameter(description = "Страница на фронте") @RequestParam pageNumber: Long,
+        @Parameter(description = "Количество площадок на страницу") @RequestParam limit: Int
     ): PlaceListDTO {
-        return placeService.getCurrentUserPlaces()
+        return placeService.getCurrentUserPlaces(pageNumber, limit)
     }
 }

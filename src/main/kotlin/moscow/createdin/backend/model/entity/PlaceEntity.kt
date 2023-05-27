@@ -1,5 +1,6 @@
 package moscow.createdin.backend.model.entity
 
+import moscow.createdin.backend.model.enums.SpecializationType
 import org.postgresql.util.PGobject
 
 data class PlaceEntity(
@@ -11,7 +12,7 @@ data class PlaceEntity(
 
     val type: String?,
     val name: String,
-    val specialization: PGobject,
+    val specialization: List<SpecializationType>,
     val description: String,
     val address: String,
     val phone: String,

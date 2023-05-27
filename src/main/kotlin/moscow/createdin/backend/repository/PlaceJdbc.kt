@@ -2,12 +2,15 @@ package moscow.createdin.backend.repository
 
 import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PlaceSortDirection
+import moscow.createdin.backend.model.enums.SpecializationType
 import moscow.createdin.backend.repository.mapper.PlaceRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.jdbc.support.KeyHolder
 import org.springframework.stereotype.Repository
+import java.sql.Array
+import java.sql.SQLException
 
 
 @Repository
@@ -29,11 +32,11 @@ class PlaceJdbc(
                 SELECT COUNT(distinct p.id) as count
                 FROM place p
                 INNER JOIN rent_slot rs on p.id = rs.place_id
-                WHERE (:specialization = '' OR specialization like :specialization)
+                WHERE (:withSpecializationFilter = false OR :specialization::SPECIALIZATION_ENUM = ANY (specialization))
                 AND (:withCapacityFilter = false OR :capacity >= capacity_min AND :capacity <= capacity_max)
                 AND (:withAreaFilter = false OR :fullAreaMin <= full_area AND :fullAreaMax >= full_area)
                 AND (:withLevelFilter = false OR :levelNumberMin <= level_number AND :levelNumberMax >= level_number)
-                AND p.status = 'CONFIRMED' AND rs.status = 'OPEN' 
+                AND p.place_status = 'CONFIRMED' AND rs.rent_slot_status = 'OPEN' 
             """, namedParameters
         ) { rs, _ -> rs.getInt("count") }!!
     }
@@ -45,11 +48,11 @@ class PlaceJdbc(
     ): List<PlaceEntity> {
         val query = """
             $SQL_SELECT_FILTER_ENTITY
-                WHERE (:specialization = '' OR specialization like :specialization)
+                WHERE (:withSpecializationFilter = false OR :specialization::SPECIALIZATION_ENUM = ANY (specialization))
                 AND (:withCapacityFilter = false OR :capacity >= capacity_min AND :capacity <= capacity_max)
                 AND (:withAreaFilter = false OR :fullAreaMin <= full_area AND :fullAreaMax >= full_area)
                 AND (:withLevelFilter = false OR :levelNumberMin <= level_number AND :levelNumberMax >= level_number)
-                AND p.status = 'CONFIRMED'
+                AND p.place_status = 'CONFIRMED'
                 ORDER BY $sortType $sortDirection
                 LIMIT :limit OFFSET :offset
         """
@@ -74,7 +77,7 @@ class PlaceJdbc(
         parameters.addValue("area_id", place.area?.id)
         parameters.addValue("type", place.type)
         parameters.addValue("name", place.name)
-        parameters.addValue("specialization", place.specialization)
+        parameters.addValue("specialization", createSqlArray(place.specialization))
         parameters.addValue("description", place.description)
         parameters.addValue("address", place.address)
         parameters.addValue("coordinates_id", place.coordinates?.id)
@@ -108,6 +111,15 @@ class PlaceJdbc(
         )
 
         return keyHolder.key?.toLong() ?: -1
+    }
+
+    private fun createSqlArray(list: List<SpecializationType>): Array? {
+        var intArray: Array? = null
+        try {
+            intArray = jdbcTemplate.jdbcTemplate.dataSource.connection.createArrayOf("SPECIALIZATION_ENUM", list.toTypedArray())
+        } catch (ignore: SQLException) {
+        }
+        return intArray
     }
 
     override fun update(place: PlaceEntity) {
@@ -149,13 +161,34 @@ class PlaceJdbc(
         )!!
     }
 
-    override fun findByUserId(userId: Long): List<PlaceEntity> {
+    override fun countByUserId(userId: Long): Int {
         val parameters = MapSqlParameterSource()
             .addValue("userId", userId)
+
+        return jdbcTemplate.queryForObject(
+            """
+                SELECT COUNT(distinct p.id) as count
+                FROM place p
+                WHERE p.user_id = :userId
+            """, parameters
+        ) { rs, _ -> rs.getInt("count") }!!
+    }
+
+    override fun findByUserId(
+        pageNumber: Long,
+        limit: Int,
+        userId: Long
+    ): List<PlaceEntity> {
+        val parameters = MapSqlParameterSource()
+            .addValue("userId", userId)
+            .addValue("limit", limit)
+            .addValue("offset", (pageNumber - 1) * limit)
+
         return jdbcTemplate.query(
             """
                 $SQL_SELECT_ENTITY
                 WHERE p.user_id = :userId
+                LIMIT :limit OFFSET :offset
             """, parameters, rowMapper
         )
     }
@@ -166,7 +199,8 @@ class PlaceJdbc(
     ): MapSqlParameterSource {
         val mapSqlParameterSource = MapSqlParameterSource()
         return mapSqlParameterSource
-            .addValue("specialization", specialization.orEmpty())
+            .addValue("withSpecializationFilter", !specialization.isNullOrBlank())
+            .addValue("specialization", specialization)
             .addValue("withCapacityFilter", capacity != null)
             .addValue("capacity", capacity)
             .addValue("withAreaFilter", fullAreaMin != null && fullAreaMax != null)
@@ -180,32 +214,92 @@ class PlaceJdbc(
 
     companion object {
         private const val SQL_SELECT_FILTER_ENTITY =
-            "SELECT distinct p.id, p.user_id as user_id, p.area_id, p.place_type, p.place_coordinates_id, p.place_description, p.place_name, p.specialization, p.place_address, p.place_phone, p.place_email, " +
-                    "p.place_website, p.level_number, p.services, p.rules, p.accessibility, p.full_area, p.rentable_area, p.facilities, " +
-                    "p.equipments, p.capacity_min, p.capacity_max, p.place_status, p.place_admin_id, p.place_ban_reason, " +
+            """
+                SELECT distinct 
+                    p.id, 
+                    p.user_id, 
+                    p.area_id, 
+                    p.place_type, 
+                    p.place_coordinates_id, 
+                    p.place_description, 
+                    p.place_name, 
+                    p.specialization, 
+                    p.place_address, 
+                    p.place_phone, 
+                    p.place_email,
+                    p.place_website, 
+                    p.level_number, 
+                    p.services, 
+                    p.rules, 
+                    p.accessibility, 
+                    p.full_area, 
+                    p.rentable_area, 
+                    p.facilities,
+                    p.equipments, 
+                    p.capacity_min, 
+                    p.capacity_max, 
+                    p.place_status, 
+                    p.place_admin_id, 
+                    p.place_ban_reason,
 
-                    "u.id, u.user_email, u.password, u.role, u.user_type, " +
-                    "u.first_name, u.last_name, u.middle_name, " +
-                    "u.user_phone, u.user_image, u.inn, u.organization, u.logo_image, u.job_title, u.is_activated, u.is_banned, u.user_ban_reason, u.user_admin_id, " +
+                    u.id, 
+                    u.user_email, 
+                    u.password, 
+                    u.role, 
+                    u.user_type,
+                    u.first_name, 
+                    u.last_name, 
+                    u.middle_name,
+                    u.user_phone, 
+                    u.user_image, 
+                    u.inn, 
+                    u.organization, 
+                    u.logo_image, 
+                    u.job_title, 
+                    u.is_activated, 
+                    u.is_banned, 
+                    u.user_ban_reason, 
+                    u.user_admin_id,
 
-                    "a.id, a.user_id, a.area_name, a.area_description, a.area_image, a.area_status, a.area_address, a.area_website, a.area_email, a.area_phone, a.area_coordinates_id, " +
-                    "a.area_ban_reason, a.area_admin_id, u.activation_code," +
+                    a.id, 
+                    a.user_id, 
+                    a.area_name, 
+                    a.area_description, 
+                    a.area_image, 
+                    a.area_status, 
+                    a.area_address, 
+                    a.area_website, 
+                    a.area_email, 
+                    a.area_phone, 
+                    a.area_coordinates_id,
+                    a.area_ban_reason, 
+                    a.area_admin_id, 
+                    u.activation_code,
 
-                    "st.popular_count, " +
-                    "st.avg_rating, " +
-                    "st.min_price," +
-                    "st.time_start ," +
-                    "st.time_end  " +
-                    "FROM place p " +
-                    "INNER JOIN aki_user u on p.user_id = u.id " +
-                    "LEFT JOIN area a on p.area_id = a.id " +
-                    "INNER JOIN (SELECT count(distinct r.id) as popular_count, avg(rating) as avg_rating, min(price) as min_price, " +
-                    "min(time_start) as time_start, min(time_end) as time_end, r.place_id " +
-                    "                     from rent r " +
-                    "                              INNER JOIN rent_slot rs on rs.place_id = r.place_id " +
-                    "                              INNER JOIN place_review pr on r.id = pr.rent_id " +
-                    "                     where rs.status = 'OPEN'" +
-                    "                     group by r.place_id) as st on p.id = st.place_id "
+                    st.popular_count,
+                    st.avg_rating,
+                    st.min_price,
+                    st.time_start,
+                    st.time_end
+                    
+                    FROM place p
+                    INNER JOIN aki_user u on p.user_id = u.id
+                    LEFT JOIN area a on p.area_id = a.id
+                    INNER JOIN (
+                        SELECT 
+                            count(distinct r.id) as popular_count, 
+                            avg(rating) as avg_rating, 
+                            min(price) as min_price,
+                            min(time_start) as time_start, 
+                            min(time_end) as time_end, 
+                            r.place_id
+                        FROM rent r
+                        INNER JOIN rent_slot rs on rs.place_id = r.place_id
+                        INNER JOIN place_review pr on r.id = pr.rent_id
+                                         WHERE rs.rent_slot_status = 'OPEN'
+                                         GROUP BY r.place_id
+                              ) as st on p.id = st.place_id
+                    """
 
         private const val SQL_SELECT_ENTITY =
             """
