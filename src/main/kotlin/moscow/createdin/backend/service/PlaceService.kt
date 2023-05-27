@@ -54,9 +54,11 @@ class PlaceService(
 
     fun create(newPlaceDTO: NewPlaceDTO): PlaceDTO {
         val user = userService.getCurrentUserDomain()
-        val area = areaService.get(newPlaceDTO.area)
-            .let { areaMapper.dtoToDomain(it, user) }
-            .let { areaMapper.domainToEntity(it) }
+        val area = newPlaceDTO.area?.let {
+            areaService.get(newPlaceDTO.area)
+                .let { areaMapper.dtoToDomain(it, user) }
+                .let { areaMapper.domainToEntity(it) }
+        }
 
 
 //        if (images.isNotEmpty()) {
@@ -70,8 +72,10 @@ class PlaceService(
 //            }
 //        }
 //        val placeImages = placeImageService.getPlaceImages(place.id)
+
         //TODO add placeImages...
         val placeImages = emptyList<String>()
+
         return placeMapper.dtoToDomain(newPlaceDTO, user)
             .let { placeMapper.simpleDomainToEntity(it, user, area) }
             .let { placeRepository.save(it) }
@@ -95,6 +99,29 @@ class PlaceService(
 
     fun findById(id: Long): PlaceEntity {
         return placeRepository.findById(id)
+    }
+
+    fun get(id: Long): PlaceDTO {
+        val placeImages = getImages(id)
+        return placeRepository.findById(id)
+            .let { placeMapper.entityToDomain(it) }
+            .let { placeMapper.domainToDto(it, placeImages) }
+    }
+
+    fun getCurrentUserPlaces(): PlaceListDTO {
+        val user = userService.getCurrentUserDomain()
+        val places = placeRepository.findByUserId(user.id!!)
+            .map { placeMapper.entityToDomain(it) }
+            .map {
+                val placeImages = getImages(it.id!!)
+                placeMapper.domainToDto(it, placeImages) }
+
+        return PlaceListDTO(places, places.size)
+    }
+
+    // todo добавить получение картинок
+    fun getImages(placeId: Long): List<String>? {
+        return null
     }
 
     private fun getSortType(sortType: PlaceSortType): String {

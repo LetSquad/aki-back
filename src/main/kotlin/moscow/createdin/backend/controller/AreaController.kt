@@ -10,6 +10,7 @@ import moscow.createdin.backend.service.AreaService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -33,8 +34,8 @@ class AreaController(private val areaService: AreaService) {
         return areaService.update(editAreaReq)
     }
 
-    @GetMapping("id")
-    fun get(@Parameter(description = "ID кластера") @RequestParam id: Long): AreaDTO {
+    @GetMapping("{id}")
+    fun get(@Parameter(description = "ID кластера") @PathVariable id: Long): AreaDTO {
         return areaService.get(id)
     }
 

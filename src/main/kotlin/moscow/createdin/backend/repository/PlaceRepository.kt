@@ -19,5 +19,8 @@ interface PlaceRepository {
     fun save(place: PlaceEntity): Long
 
     fun findById(id: Long): PlaceEntity
+
+    fun findByUserId(userId: Long): List<PlaceEntity>
+
     fun update(place: PlaceEntity)
 }

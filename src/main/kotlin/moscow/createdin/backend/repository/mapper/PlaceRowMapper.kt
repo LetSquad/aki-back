@@ -33,7 +33,7 @@ class PlaceRowMapper(
         },
         type = rs.getString("place_type"),
         name = rs.getString("place_name"),
-        specialization = rs.getString("specialization"),
+        specialization = stringToPGObject(rs.getString("specialization")),
         description = rs.getString("place_description"),
         address = rs.getString("place_address"),
         phone = rs.getString("place_phone"),

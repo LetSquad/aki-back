@@ -51,8 +51,8 @@ class PlaceMapper(
         levelNumber = place.levelNumber,
         fullArea = place.fullSquare,
         rentableArea = place.freeSquare,
-        capacityMin = place.capacityMin,
-        capacityMax = place.capacityMax,
+        capacityMin = place.minCapacity,
+        capacityMax = place.maxCapacity,
 
         services = place.services?.map { dtoToPlaceService(it) },
         rules = place.rules,
@@ -109,7 +109,7 @@ class PlaceMapper(
 
         type = place.type,
         name = place.name,
-        specialization = place.specialization.name,
+        specialization = stringToPGObject(gson.toJson(place.specialization)),
         description = place.description,
         address = place.address,
         phone = place.phone,
@@ -142,7 +142,7 @@ class PlaceMapper(
 
         type = place.type,
         name = place.name,
-        specialization = place.specialization.name,
+        specialization = stringToPGObject(gson.toJson(place.specialization)),
         description = place.description,
         address = place.address,
         phone = place.phone,
@@ -175,7 +175,10 @@ class PlaceMapper(
 
         type = place.type,
         name = place.name,
-        specialization = SpecializationType.valueOf(place.specialization),
+        specialization = gson.fromJson(
+            place.specialization.value ?: "[]",
+            object : TypeToken<Collection<SpecializationType?>?>() {}.type
+        ),
         description = place.description,
         address = place.address,
         phone = place.phone,

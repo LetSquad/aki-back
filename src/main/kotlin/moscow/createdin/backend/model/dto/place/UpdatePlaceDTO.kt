@@ -7,7 +7,7 @@ data class UpdatePlaceDTO(
     val name: String,
     val email: String,
     val site: String?,
-    val specialization: SpecializationType,
+    val specialization: List<SpecializationType>,
     val phone: String,
     val description: String,
     val freeSquare: Int,

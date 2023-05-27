@@ -9,9 +9,9 @@ data class PlaceEntity(
     val area: AreaEntity?,
     val coordinates: CoordinatesEntity?,
 
-    val type: String,
+    val type: String?,
     val name: String,
-    val specialization: String,
+    val specialization: PGobject,
     val description: String,
     val address: String,
     val phone: String,

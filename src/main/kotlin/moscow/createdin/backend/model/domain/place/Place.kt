@@ -14,9 +14,9 @@ data class Place(
     val area: Area?,
     val coordinates: Coordinates?,
 
-    val type: String,
+    val type: String?,
     val name: String,
-    val specialization: SpecializationType,
+    val specialization: List<SpecializationType>,
     val description: String,
     val address: String,
     val phone: String,

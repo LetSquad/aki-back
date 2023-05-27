@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/rent-slot")
+@RequestMapping("/api/rentSlots")
 class RentSlotController(
     private val rentSlotService: RentSlotService
 ) {

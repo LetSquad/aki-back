@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/sql/3_fix_place_field_area_id_null.sql
   - include:
       file: db/changelog/sql/4_uniq_field_name.sql
+  - include:
+      file: db/changelog/sql/5_fix_place_table.sql

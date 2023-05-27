@@ -1,6 +1,8 @@
 package moscow.createdin.backend.controller
 
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Schema
+import moscow.createdin.backend.model.dto.AreaDTO
 import moscow.createdin.backend.model.dto.place.NewPlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
@@ -10,12 +12,15 @@ import moscow.createdin.backend.model.enums.PlaceSortType
 import moscow.createdin.backend.service.PlaceService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/places")
@@ -44,18 +49,36 @@ class PlaceController(private val placeService: PlaceService) {
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping
     fun create(
-        @RequestBody newPlaceDTO: NewPlaceDTO,
-//        @Parameter(ref = "Фотографии площадки") image: List<MultipartFile>
+        @Parameter(
+            ref = "Модель данных площадки",
+            schema = Schema(type = "string", format = "binary")
+        ) @RequestPart place: NewPlaceDTO,
+        @Parameter(ref = "Фотографии площадки") image: List<MultipartFile>?
     ): PlaceDTO {
-        return placeService.create(newPlaceDTO)
+        return placeService.create(place)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
     @PutMapping("edit")
     fun edit(
         @RequestBody updatePlaceDTO: UpdatePlaceDTO,
-//        @Parameter(ref = "Фотографии площадки") image: List<MultipartFile>
+        @Parameter(ref = "Фотографии площадки") image: List<MultipartFile>?
     ): PlaceDTO {
         return placeService.edit(updatePlaceDTO)
+    }
+
+    @GetMapping("{id}")
+    fun get(@Parameter(description = "ID площадки") @PathVariable id: Long): PlaceDTO {
+        return placeService.get(id)
+    }
+
+    // todo переделать на пагинацию
+    @PreAuthorize("hasRole('LANDLORD')")
+    @GetMapping("my")
+    fun getCurrentUserPlaces(
+        @RequestParam pageNumber: Long,
+        @RequestParam limit: Long
+    ): PlaceListDTO {
+        return placeService.getCurrentUserPlaces()
     }
 }

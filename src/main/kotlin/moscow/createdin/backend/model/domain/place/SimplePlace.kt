@@ -12,9 +12,9 @@ data class SimplePlace(
     val area: Long?,
     val coordinates: Long?,
 
-    val type: String,
+    val type: String?,
     val name: String,
-    val specialization: SpecializationType,
+    val specialization: List<SpecializationType>,
     val description: String,
     val address: String,
     val phone: String,

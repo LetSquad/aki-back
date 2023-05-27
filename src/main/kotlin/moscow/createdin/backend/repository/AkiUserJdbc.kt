@@ -44,7 +44,7 @@ class AkiUserJdbc(
             .addValue("id", id)
         return jdbcTemplate.queryForObject(
             """
-                SELECT id, user_type, user_email, password, role, first_name, last_name, middle_name, 
+sm                SELECT id as user_id, user_type, user_email, password, role, first_name, last_name, middle_name, 
                     user_phone, user_image, logo_image, inn, organization, job_title, is_activated, 
                     activation_code, is_banned, user_admin_id, user_ban_reason
                 FROM aki_user 
@@ -199,7 +199,7 @@ class AkiUserJdbc(
     }
 
     companion object {
-        private const val SQL_SELECT_ENTITY = "SELECT id, user_type, user_email, password, role, first_name, last_name, middle_name, " +
+        private const val SQL_SELECT_ENTITY = "SELECT id as user_id, user_type, user_email, password, role, first_name, last_name, middle_name, " +
                 "user_phone, user_image, logo_image, inn, organization, job_title, is_activated, activation_code, is_banned, user_admin_id, user_ban_reason " +
                 "FROM aki_user"
     }
