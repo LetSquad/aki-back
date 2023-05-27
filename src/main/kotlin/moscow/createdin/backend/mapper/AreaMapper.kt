@@ -61,6 +61,22 @@ class AreaMapper(
         admin = null
     )
 
+    fun dtoToDomain(area: AreaDTO, akiUser: AkiUser) = Area(
+        id = area.id,
+        user = akiUser,
+        name = area.name,
+        description = area.description,
+        areaImage = area.areaImage,
+        address = area.address,
+        website = area.website,
+        email = area.email,
+        phone = area.phone,
+        coordinates = area.coordinates?.let { coordinatesMapper.dtoToDomain(area.coordinates) },
+        status = AdminStatusType.UNVERIFIED,
+        banReason = null,
+        admin = null
+    )
+
     fun domainToDto(area: Area) = AreaDTO(
         id = area.id,
         user = userMapper.domainToDto(area.user),

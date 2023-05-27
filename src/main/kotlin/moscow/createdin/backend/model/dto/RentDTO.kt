@@ -1,5 +1,7 @@
 package moscow.createdin.backend.model.dto
 
+import moscow.createdin.backend.model.dto.place.PlaceDTO
+
 data class RentDTO(
     val id: Long,
 

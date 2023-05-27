@@ -1,5 +1,6 @@
 package moscow.createdin.backend.config
 
+import com.google.gson.Gson
 import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -15,6 +16,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import org.thymeleaf.templateresolver.ITemplateResolver
 import java.security.Key
 import javax.crypto.spec.SecretKeySpec
+
 
 @Configuration
 class AppConfig(private val securityProperties: AkiSecurityProperties) {
@@ -45,5 +47,10 @@ class AppConfig(private val securityProperties: AkiSecurityProperties) {
         val templateEngine = TemplateEngine()
         templateEngine.setTemplateResolver(templateResolver)
         return templateEngine
+    }
+
+    @Bean
+    fun gson(): Gson {
+        return Gson()
     }
 }

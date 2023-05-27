@@ -2,9 +2,11 @@ package moscow.createdin.backend.mapper
 
 import moscow.createdin.backend.config.properties.AkiProperties
 import moscow.createdin.backend.model.domain.AkiUser
+import moscow.createdin.backend.model.domain.SimpleUser
 import moscow.createdin.backend.model.dto.AkiUserDTO
 import moscow.createdin.backend.model.dto.RegistrationRequestDTO
 import moscow.createdin.backend.model.dto.UserRoleDTO
+import moscow.createdin.backend.model.dto.place.PlaceUserDTO
 import moscow.createdin.backend.model.entity.AkiUserEntity
 import moscow.createdin.backend.model.enums.UserRole
 import moscow.createdin.backend.model.enums.UserType
@@ -43,6 +45,26 @@ class UserMapper(
         type = null // TODO добавить на фронте выбор типа юзера для системы рекомендаций
     )
 
+    fun dtoToDomain(akiUserDTO: AkiUserDTO) = SimpleUser(
+        id = null,
+        email = akiUserDTO.email.lowercase(),
+        firstName = akiUserDTO.firstName,
+        lastName = akiUserDTO.lastName,
+        middleName = akiUserDTO.middleName,
+        phone = akiUserDTO.phone,
+        userImage = null,
+        inn = akiUserDTO.inn,
+        organization = akiUserDTO.organization,
+        logoImage = null,
+        jobTitle = akiUserDTO.jobTitle,
+        isActivated = true,
+        activationCode = UUID.randomUUID().toString(),
+        isBanned = false,
+        admin = null,
+        banReason = null,
+        type = null
+    )
+
     fun domainToDto(user: AkiUser) = AkiUserDTO(
         id = user.id!!,
         email = user.email,
@@ -54,6 +76,19 @@ class UserMapper(
         userImage =
         if (!user.userImage.isNullOrEmpty())
             "${akiProperties.url}/${akiProperties.imageUrlPrefix}/${user.userImage}" else null,
+        inn = user.inn,
+        organization = user.organization,
+        jobTitle = user.jobTitle
+    )
+
+    fun domainToPlaceDto(user: AkiUser) = PlaceUserDTO(
+        id = user.id!!,
+        email = user.email,
+        firstName = user.firstName,
+        lastName = user.lastName,
+        middleName = user.middleName,
+        phone = user.phone,
+        userImage = user.userImage,
         inn = user.inn,
         organization = user.organization,
         jobTitle = user.jobTitle

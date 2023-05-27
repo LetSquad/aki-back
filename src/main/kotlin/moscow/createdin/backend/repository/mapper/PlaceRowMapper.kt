@@ -1,15 +1,21 @@
 package moscow.createdin.backend.repository.mapper
 
 import moscow.createdin.backend.model.entity.PlaceEntity
+import moscow.createdin.backend.model.enums.PriceType
+import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Component
 import java.sql.ResultSet
+import java.time.LocalDate
+import java.time.Period
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 @Component
 class PlaceRowMapper(
     private val coordinatesRowMapper: CoordinatesRowMapper,
     private val areaRowMapper: AreaRowMapper,
-    private val akiUserRowMapper: AkiUserRowMapper,
+    private val akiUserRowMapper: AkiUserRowMapper
 ) : RowMapper<PlaceEntity> {
 
     override fun mapRow(rs: ResultSet, rowNum: Int): PlaceEntity = PlaceEntity(
@@ -38,13 +44,37 @@ class PlaceRowMapper(
         rentableArea = rs.getInt("rentable_area"),
         capacityMin = rs.getInt("capacity_min"),
         capacityMax = rs.getInt("capacity_max"),
-        services = rs.getString("services"),
+        services = stringToPGObject(rs.getString("services")),
         rules = rs.getString("rules"),
         accessibility = rs.getString("accessibility"),
-        facilities = rs.getString("facilities"),
-        equipments = rs.getString("equipments"),
+        facilities = stringToPGObject(rs.getString("facilities")),
+        equipments = stringToPGObject(rs.getString("equipments")),
         status = rs.getString("place_status"),
         banReason = rs.getString("place_ban_reason"),
-        admin = rs.getLong("place_admin_id")
+        admin = rs.getLong("place_admin_id"),
+        minPrice = rs.getDouble("min_price"),
+        priceType = findPriceType(rs.getDate("time_start"), rs.getDate("time_end"))
     )
+
+    fun findPriceType(timeStart: Date?, timeEnd: Date?): String {
+        if (timeStart != null && timeEnd != null) {
+            val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+            val from = LocalDate.parse(timeStart.toString(), dateFormatter)
+            val to = LocalDate.parse(timeEnd.toString(), dateFormatter)
+
+            val period = Period.between(from, to)
+            val days = period.days
+            if (days >= 1) return PriceType.DAY.name
+            return PriceType.HOUR.name
+        }
+        return PriceType.FREE.name
+    }
+
+    fun stringToPGObject(value: String?): PGobject {
+        val pGobject: PGobject = PGobject()
+        pGobject.type = "jsonb"
+        pGobject.value = value
+        return pGobject
+    }
 }

@@ -1,6 +1,6 @@
 package moscow.createdin.backend.mapper
 
-import moscow.createdin.backend.model.domain.PlaceReview
+import moscow.createdin.backend.model.domain.place.PlaceReview
 import moscow.createdin.backend.model.entity.PlaceReviewEntity
 import moscow.createdin.backend.model.enums.AdminStatusType
 import org.springframework.stereotype.Component

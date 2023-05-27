@@ -9,7 +9,7 @@ import java.sql.ResultSet
 class AkiUserRowMapper : RowMapper<AkiUserEntity> {
 
     override fun mapRow(rs: ResultSet, rowNum: Int): AkiUserEntity = AkiUserEntity(
-        id = rs.getLong("id"),
+        id = rs.getLong("user_id"),
         email = rs.getString("user_email"),
         password = rs.getString("password"),
         role = rs.getString("role"),
