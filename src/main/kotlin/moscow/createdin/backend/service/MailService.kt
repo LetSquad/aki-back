@@ -24,6 +24,32 @@ class MailService(
         sendMail(email, "Код активации", message)
     }
 
+    // TODO придумать нормальный текст
+    fun sendRentEmailToRenter(email: String) {
+        val message =
+            """
+               Привет, $email!
+               Бронь по площадке успешно создана на сервисе АКИ "Агрегатор креативных пространств Москвы"!
+               
+               Зайдите в личный кабинет для просмотра деталей
+            """
+
+        sendMail(email, "Уведомление о брони площадки", message)
+    }
+
+    // TODO придумать нормальный текст
+    fun sendRentEmailToLandlord(email: String) {
+        val message =
+            """
+               Привет, $email!
+               Уведомляем вас о брони по вашей площадке на сервисе АКИ "Агрегатор креативных пространств Москвы"!
+               
+               Зайдите в личный кабинет для просмотра деталей
+            """
+
+        sendMail(email, "Уведомление о брони площадки", message)
+    }
+
     fun sendResetEmail(email: String, token: String?) {
         val message =
             """

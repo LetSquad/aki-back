@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service
 class RentService(
     private val userService: UserService,
     private val rentSlotService: RentSlotService,
+    private val mailService: MailService,
+    private val placeService: PlaceService,
 
     private val rentMapper: RentMapper,
     private val rentSlotMapper: RentSlotMapper,
@@ -29,6 +31,10 @@ class RentService(
         val newRentId = rentRepository.create(req.placeId, renter.id)
         rentSlotService.updateStatus(req.rentSlotIds, RentSlotStatusType.BOOKED)
         rentSlotToRentRepository.create(newRentId, req.rentSlotIds)
+
+        mailService.sendRentEmailToRenter(renter.email)
+        val landlordEmail = placeService.findById(req.placeId).user.email
+        mailService.sendRentEmailToLandlord(landlordEmail)
 
         return get(newRentId)
     }
