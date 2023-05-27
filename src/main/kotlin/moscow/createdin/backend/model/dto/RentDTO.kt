@@ -1,6 +1,7 @@
 package moscow.createdin.backend.model.dto
 
 import moscow.createdin.backend.model.dto.place.PlaceDTO
+import moscow.createdin.backend.model.enums.RentConfirmationStatus
 
 data class RentDTO(
     val id: Long,
@@ -9,7 +10,7 @@ data class RentDTO(
     val renter: AkiUserDTO,
     val rentSlots: List<RentSlotDTO>,
 
-    val status: String,
+    val status: RentConfirmationStatus,
     val banReason: String?,
     val adminId: Long?
 )
