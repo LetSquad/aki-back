@@ -23,8 +23,8 @@ data class SimplePlace(
     val levelNumber: Int?,
     val fullArea: Int,
     val rentableArea: Int,
-    val capacityMin: Int,
-    val capacityMax: Int,
+    val minCapacity: Int,
+    val maxCapacity: Int,
 
     val services: List<PlaceService>?,
     val rules: String?,

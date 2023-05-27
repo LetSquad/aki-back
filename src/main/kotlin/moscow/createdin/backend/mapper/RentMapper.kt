@@ -38,7 +38,7 @@ class RentMapper(
 
     fun entityToDomain(rent: RentEntity, rentSlots: List<RentSlot>) = Rent(
         id = rent.id,
-        place = placeMapper.entityToDomain(rent.place),
+        place = placeMapper.entityToDomain(rent.place, listOf()),
         renter = userMapper.entityToDomain(rent.user),
         rentSlots = rentSlots,
 

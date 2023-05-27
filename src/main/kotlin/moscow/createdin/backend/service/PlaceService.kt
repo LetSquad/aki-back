@@ -3,6 +3,8 @@ package moscow.createdin.backend.service
 import moscow.createdin.backend.exception.WrongUserExceptionException
 import moscow.createdin.backend.mapper.AreaMapper
 import moscow.createdin.backend.mapper.PlaceMapper
+import moscow.createdin.backend.mapper.RentSlotMapper
+import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.dto.place.NewPlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
@@ -11,6 +13,7 @@ import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
 import moscow.createdin.backend.repository.PlaceRepository
+import moscow.createdin.backend.repository.RentSlotRepository
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,6 +24,8 @@ class PlaceService(
     private val placeImageService: PlaceImageService,
     private val areaService: AreaService,
     private val userService: UserService,
+    private val rentSlotMapper: RentSlotMapper,
+    private val rentSlotRepository: RentSlotRepository,
     private val filesystemService: FilesystemService
 ) {
 
@@ -46,7 +51,10 @@ class PlaceService(
         }
 
         val places: List<PlaceDTO> = placeEntityList
-            .map { placeMapper.entityToDomain(it) }
+            .map {
+                val rentSlots = getByPlaceId(it.id!!)
+                placeMapper.entityToDomain(it, rentSlots)
+            }
             .map { placeMapper.domainToDto(it, placeImageMap[it.id]) }
 
         return PlaceListDTO(places, total)
@@ -80,7 +88,10 @@ class PlaceService(
             .let { placeMapper.simpleDomainToEntity(it, user, area) }
             .let { placeRepository.save(it) }
             .let { placeRepository.findById(it) }
-            .let { placeMapper.entityToDomain(it) }
+            .let {
+                val rentSlots = getByPlaceId(it.id!!)
+                placeMapper.entityToDomain(it, rentSlots)
+            }
             .let { placeMapper.domainToDto(it, placeImages) }
     }
 
@@ -93,7 +104,10 @@ class PlaceService(
             .let { placeMapper.simpleDomainToEntity(it, user, oldPlace.area) }
             .let { placeRepository.update(it) }
             .let { placeRepository.findById(updatePlaceDTO.id) }
-            .let { placeMapper.entityToDomain(it) }
+            .let {
+                val rentSlots = getByPlaceId(it.id!!)
+                placeMapper.entityToDomain(it, rentSlots)
+            }
             .let { placeMapper.domainToDto(it, emptyList()) }
     }
 
@@ -104,19 +118,31 @@ class PlaceService(
     fun get(id: Long): PlaceDTO {
         val placeImages = getImages(id)
         return placeRepository.findById(id)
-            .let { placeMapper.entityToDomain(it) }
+            .let {
+                val rentSlots = getByPlaceId(it.id!!)
+                placeMapper.entityToDomain(it, rentSlots)
+            }
             .let { placeMapper.domainToDto(it, placeImages) }
     }
 
     fun getCurrentUserPlaces(): PlaceListDTO {
         val user = userService.getCurrentUserDomain()
         val places = placeRepository.findByUserId(user.id!!)
-            .map { placeMapper.entityToDomain(it) }
+            .map {
+                val rentSlots = getByPlaceId(it.id!!)
+                placeMapper.entityToDomain(it, rentSlots)
+            }
             .map {
                 val placeImages = getImages(it.id!!)
-                placeMapper.domainToDto(it, placeImages) }
+                placeMapper.domainToDto(it, placeImages)
+            }
 
         return PlaceListDTO(places, places.size)
+    }
+
+    private fun getByPlaceId(placeId: Long): List<RentSlot> {
+        return rentSlotRepository.findByPlaceId(placeId)
+            .map { rentSlotMapper.entityToDomain(it) }
     }
 
     // todo добавить получение картинок
