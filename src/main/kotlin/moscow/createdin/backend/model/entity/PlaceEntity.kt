@@ -4,7 +4,7 @@ data class PlaceEntity(
     val id: Long?,
 
     val user: AkiUserEntity,
-    val area: AreaEntity,
+    val area: AreaEntity?,
     val coordinates: CoordinatesEntity?,
 
     val type: String,
@@ -29,5 +29,5 @@ data class PlaceEntity(
 
     val status: String,
     val banReason: String?,
-    val admin: AkiUserEntity?,
+    val admin: Long?,
 )

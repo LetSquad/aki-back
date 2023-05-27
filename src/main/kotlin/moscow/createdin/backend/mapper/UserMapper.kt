@@ -13,13 +13,12 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
-import java.util.UUID
+import java.util.*
 
 @Component
 class UserMapper(
     private val akiProperties: AkiProperties,
     private val passwordEncoder: PasswordEncoder,
-    private val akiUserAdminMapper: AkiUserAdminMapper
 ) {
 
     fun registrationDtoToDomain(registrationRequest: RegistrationRequestDTO) = AkiUser(
@@ -93,7 +92,7 @@ class UserMapper(
         isBanned = user.isBanned,
         type = user.type?.name,
         banReason = user.banReason,
-        admin = user.admin?.let { akiUserAdminMapper.domainToEntity(user.admin) }
+        admin = user.admin
     )
 
     fun entityToDomain(user: AkiUserEntity) = AkiUser(
@@ -114,7 +113,7 @@ class UserMapper(
         activationCode = user.activationCode,
         isBanned = user.isBanned,
         type = user.type?.let { UserType.valueOf(user.type) },
-        admin = user.admin?.let { akiUserAdminMapper.entityToDomain(user.admin) },
+        admin = user.admin,
         banReason = user.banReason
     )
 }

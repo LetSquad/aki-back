@@ -6,7 +6,7 @@ data class Place(
     val id: Long?,
 
     val user: AkiUser,
-    val area: Area,
+    val area: Area?,
     val coordinates: Coordinates?,
 
     val type: String,
@@ -31,5 +31,5 @@ data class Place(
 
     val status: AdminStatusType,
     val banReason: String?,
-    val admin: AkiUser?,
+    val admin: Long?,
 )

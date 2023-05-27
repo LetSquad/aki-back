@@ -37,14 +37,21 @@ class RentSlotService(
     }
 
     fun delete(ids: List<Long>): PlaceDTO {
-        ids
-            .map { getById(it) }
-            .map { it.copy(status = RentSlotStatusType.DELETED) }
-            .map { rentSlotMapper.domainToEntity(it) }
-            .let { rentSlotRepository.update(it) }
+        updateStatus(ids, RentSlotStatusType.DELETED)
 
         // TODO добавить нормальное создание модели площадки
         return PlaceDTO(id = 0)
+    }
+
+    fun updateStatus(
+        ids: List<Long>,
+        statusType: RentSlotStatusType
+    ) {
+        ids
+            .map { getById(it) }
+            .map { it.copy(status = statusType) }
+            .map { rentSlotMapper.domainToEntity(it) }
+            .let { rentSlotRepository.update(it) }
     }
 
     companion object {

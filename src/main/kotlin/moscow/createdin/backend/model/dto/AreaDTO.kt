@@ -18,5 +18,5 @@ data class AreaDTO(
 
     val status: AdminStatusType,
     val banReason: String?,
-    val admin: AkiUserDTO?
+    val admin: Long?
 )

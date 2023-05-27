@@ -8,7 +8,6 @@ import java.sql.ResultSet
 @Component
 class PlaceReviewRowMapper(
     private val rentRowMapper: RentRowMapper,
-    private val akiUserAdminRowMapper: AkiUserAdminRowMapper
 ) : RowMapper<PlaceReviewEntity> {
 
     override fun mapRow(rs: ResultSet, rowNum: Int): PlaceReviewEntity = PlaceReviewEntity(
@@ -16,12 +15,8 @@ class PlaceReviewRowMapper(
         rent = rentRowMapper.mapRow(rs, rowNum),
         rating = rs.getInt("rating"),
         reviewText = rs.getString("reviewText"),
-        status = rs.getString("status"),
-        banReason = rs.getString("ban_reason"),
-        admin = if (rs.getLongOrNull("admin_id") == null) {
-            null
-        } else {
-            akiUserAdminRowMapper.mapRow(rs, rowNum)
-        },
+        status = rs.getString("place_review_status"),
+        banReason = rs.getString("place_review_ban_reason"),
+        admin = rs.getLong("place_review_admin_id")
     )
 }

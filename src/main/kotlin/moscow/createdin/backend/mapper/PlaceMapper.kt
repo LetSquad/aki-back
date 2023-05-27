@@ -1,6 +1,7 @@
 package moscow.createdin.backend.mapper
 
 import moscow.createdin.backend.model.domain.Place
+import moscow.createdin.backend.model.dto.PlaceDTO
 import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.AdminStatusType
 import org.springframework.stereotype.Component
@@ -9,13 +10,16 @@ import org.springframework.stereotype.Component
 class PlaceMapper(
     private val userMapper: UserMapper,
     private val areaMapper: AreaMapper,
-    private val akiUserAdminMapper: AkiUserAdminMapper,
     private val coordinatesMapper: CoordinatesMapper
 ) {
+    fun domainToDto(place: Place) = PlaceDTO(
+        id = place.id!!
+    )
+
     fun domainToEntity(place: Place) = PlaceEntity(
         id = place.id,
         user = userMapper.domainToEntity(place.user),
-        area = areaMapper.domainToEntity(place.area),
+        area = place.area?.let { areaMapper.domainToEntity(place.area) },
         coordinates = place.coordinates?.let { coordinatesMapper.domainToEntity(place.coordinates) },
 
         type = place.type,
@@ -40,13 +44,13 @@ class PlaceMapper(
 
         status = place.status.name,
         banReason = place.banReason,
-        admin = place.admin?.let { akiUserAdminMapper.domainToEntity(place.admin) },
+        admin = place.admin
     )
 
     fun entityToDomain(place: PlaceEntity) = Place(
         id = place.id,
         user = userMapper.entityToDomain(place.user),
-        area = areaMapper.entityToDomain(place.area),
+        area = place.area?.let { areaMapper.entityToDomain(place.area) },
         coordinates = place.coordinates?.let { coordinatesMapper.entityToDomain(place.coordinates) },
 
         type = place.type,
@@ -71,6 +75,6 @@ class PlaceMapper(
 
         status = AdminStatusType.valueOf(place.status),
         banReason = place.banReason,
-        admin = place.admin?.let { akiUserAdminMapper.entityToDomain(place.admin) },
+        admin = place.admin
     )
 }
