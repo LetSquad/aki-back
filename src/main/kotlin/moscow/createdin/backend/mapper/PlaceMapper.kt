@@ -2,22 +2,12 @@ package moscow.createdin.backend.mapper
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import moscow.createdin.backend.config.properties.AkiProperties
 import moscow.createdin.backend.model.domain.AkiUser
 import moscow.createdin.backend.model.domain.Price
 import moscow.createdin.backend.model.domain.RentSlot
-import moscow.createdin.backend.model.domain.place.Place
-import moscow.createdin.backend.model.domain.place.PlaceEquipment
-import moscow.createdin.backend.model.domain.place.PlaceFacility
-import moscow.createdin.backend.model.domain.place.PlacePrice
-import moscow.createdin.backend.model.domain.place.PlaceService
-import moscow.createdin.backend.model.domain.place.SimplePlace
-import moscow.createdin.backend.model.dto.place.NewPlaceDTO
-import moscow.createdin.backend.model.dto.place.PlaceDTO
-import moscow.createdin.backend.model.dto.place.PlaceEquipmentDTO
-import moscow.createdin.backend.model.dto.place.PlaceFacilitiesDTO
-import moscow.createdin.backend.model.dto.place.PlacePriceDTO
-import moscow.createdin.backend.model.dto.place.PlaceServiceDTO
-import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
+import moscow.createdin.backend.model.domain.place.*
+import moscow.createdin.backend.model.dto.place.*
 import moscow.createdin.backend.model.entity.AreaEntity
 import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
@@ -28,6 +18,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PlaceMapper(
+    private val properties: AkiProperties,
     private val userMapper: UserMapper,
     private val areaMapper: AreaMapper,
     private val rentSlotMapper: RentSlotMapper,

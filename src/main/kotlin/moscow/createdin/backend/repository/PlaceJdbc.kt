@@ -140,8 +140,8 @@ class PlaceJdbc(
 
         jdbcTemplate.update(
             """
-                UPDATE place SET name = :name, email = :email, website = :website, specialization = :specialization, 
-                    phone = :phone, description = :description, rentable_area = :rentableArea, capacity_min = :capacityMin,
+                UPDATE place SET place_name = :name, place_email = :email, place_website = :website, specialization = :specialization, 
+                    place_phone = :phone, place_description = :description, rentable_area = :rentableArea, capacity_min = :capacityMin,
                     capacity_max = :capacityMax, services = :services, equipments = :equipments, facilities = :facilities 
                 WHERE place.id = :id
             """,
