@@ -25,20 +25,43 @@ class PlaceController(private val placeService: PlaceService) {
     @GetMapping
     fun getPlaces(
         @Parameter(description = "Специализация площадки") @RequestParam specialization: String?,
-        @Parameter(description = "Желаемая вместимость площадки") @RequestParam capacity: Int?,
-        @Parameter(description = "Площадь площадки минимальная") @RequestParam fullAreaMin: Int?,
-        @Parameter(description = "Площадь площадки максимальная") @RequestParam fullAreaMax: Int?,
+        @Parameter(description = "Рейтинг") @RequestParam rating: Int?,
+        @Parameter(description = "Минимальная цена площадки") @RequestParam priceMin: Int?,
+        @Parameter(description = "Максимальная цена площадки") @RequestParam priceMax: Int?,
+        @Parameter(description = "Минимальная вместимость площадки") @RequestParam capacityMin: Int?,
+        @Parameter(description = "Максимальная вместимость площадки") @RequestParam capacityMax: Int?,
+        @Parameter(description = "Площадь площадки минимальная") @RequestParam squareMin: Int?,
+        @Parameter(description = "Площадь площадки максимальная") @RequestParam squareMax: Int?,
         @Parameter(description = "Минимальный этаж") @RequestParam levelNumberMin: Int?,
         @Parameter(description = "Максимальный этаж") @RequestParam levelNumberMax: Int?,
-        @Parameter(description = "Наличие парковки") @RequestParam parking: Boolean?,
+        @Parameter(description = "Наличие парковки") @RequestParam withParking: Boolean?,
+        @Parameter(description = "Начальная дата бронирования") @RequestParam dateFrom: Int?,
+        @Parameter(description = "Конечная дата бронирования") @RequestParam dateTo: Int?,
+
         @Parameter(description = "Страница на фронте") @RequestParam pageNumber: Long,
         @Parameter(description = "Количество площадок на страницу") @RequestParam limit: Int,
         @Parameter(description = "Сортировка") @RequestParam sortType: PlaceSortType,
         @Parameter(description = "Направление сортировки") @RequestParam sortDirection: PlaceSortDirection,
     ): PlaceListDTO {
         return placeService.getPlaces(
-            specialization, capacity, fullAreaMin, fullAreaMax,
-            levelNumberMin, levelNumberMax, parking, pageNumber, limit, sortType, sortDirection
+            specialization,
+            rating,
+            priceMin,
+            priceMax,
+            capacityMin,
+            capacityMax,
+            squareMin,
+            squareMax,
+            levelNumberMin,
+            levelNumberMax,
+            withParking,
+            dateFrom,
+            dateTo,
+
+            pageNumber,
+            limit,
+            sortType,
+            sortDirection
         )
     }
 

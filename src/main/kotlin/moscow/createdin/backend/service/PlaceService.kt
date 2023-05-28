@@ -82,8 +82,23 @@ class PlaceService(
     }
 
     fun getPlaces(
-        specialization: String?, capacity: Int?, fullAreaMin: Int?, fullAreaMax: Int?, levelNumberMin: Int?,
-        levelNumberMax: Int?, parking: Boolean?, pageNumber: Long, limit: Int, sortType: PlaceSortType,
+        specialization: String?,
+        rating: Int?,
+        priceMin: Int?,
+        priceMax: Int?,
+        capacityMin: Int?,
+        capacityMax: Int?,
+        squareMin: Int?,
+        squareMax: Int?,
+        levelNumberMin: Int?,
+        levelNumberMax: Int?,
+        withParking: Boolean?,
+        dateFrom: Int?,
+        dateTo: Int?,
+
+        pageNumber: Long,
+        limit: Int,
+        sortType: PlaceSortType,
         sortDirection: PlaceSortDirection
     ): PlaceListDTO {
         val total = placeRepository.countByFilter(
