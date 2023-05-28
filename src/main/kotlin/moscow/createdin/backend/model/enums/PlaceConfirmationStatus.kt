@@ -1,5 +1,8 @@
 package moscow.createdin.backend.model.enums
 
 enum class PlaceConfirmationStatus {
-    CONFIRMED, PENDING, REJECTED, BANNED
+    UNVERIFIED,
+    VERIFIED,
+    BANNED,
+    DELETED
 }

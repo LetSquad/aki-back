@@ -1,7 +1,7 @@
 package moscow.createdin.backend.service
 
 import moscow.createdin.backend.exception.ImageNotSavedException
-import moscow.createdin.backend.exception.WrongUserExceptionException
+import moscow.createdin.backend.exception.WrongUserException
 import moscow.createdin.backend.mapper.AreaMapper
 import moscow.createdin.backend.mapper.PlaceMapper
 import moscow.createdin.backend.mapper.RentSlotMapper
@@ -40,7 +40,7 @@ class PlaceService(
         val editable = getDomain(banRequestDTO.bannedId)
 
         val result = editable.copy(
-            status = PlaceConfirmationStatus.CONFIRMED,
+            status = PlaceConfirmationStatus.BANNED,
             banReason = banRequestDTO.reason,
             admin = adminUser.id
         )
@@ -117,7 +117,7 @@ class PlaceService(
     fun edit(updatePlace: UpdatePlaceDTO, images: Collection<MultipartFile>): PlaceDTO {
         val user = userService.getCurrentUserDomain()
         val oldPlace = findById(updatePlace.id)
-        if (user.id != oldPlace.user.id) throw WrongUserExceptionException("wrong user with id = ${user.id} was id = ${oldPlace.user.id}")
+        if (user.id != oldPlace.user.id) throw WrongUserException("wrong user with id = ${user.id} was id = ${oldPlace.user.id}")
 
         val placeImages: List<String> = if (images.isNotEmpty()) {
             placeImageService.clearPlaceImages(updatePlace.id)

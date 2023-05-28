@@ -36,7 +36,9 @@ class PlaceJdbc(
                 AND (:withCapacityFilter = false OR :capacity >= capacity_min AND :capacity <= capacity_max)
                 AND (:withAreaFilter = false OR :fullAreaMin <= full_area AND :fullAreaMax >= full_area)
                 AND (:withLevelFilter = false OR :levelNumberMin <= level_number AND :levelNumberMax >= level_number)
-                AND p.place_status = 'CONFIRMED' AND rs.rent_slot_status = 'OPEN' 
+                AND (:withParkingFilter = false OR p.parking = :parking)
+                AND p.place_status = 'CONFIRMED' 
+                AND rs.rent_slot_status = 'OPEN' 
             """, namedParameters
         ) { rs, _ -> rs.getInt("count") }!!
     }
@@ -52,7 +54,8 @@ class PlaceJdbc(
                 AND (:withCapacityFilter = false OR :capacity >= capacity_min AND :capacity <= capacity_max)
                 AND (:withAreaFilter = false OR :fullAreaMin <= full_area AND :fullAreaMax >= full_area)
                 AND (:withLevelFilter = false OR :levelNumberMin <= level_number AND :levelNumberMax >= level_number)
-                AND p.place_status = 'CONFIRMED'
+                AND (:withParkingFilter = false OR p.parking = :parking)
+                AND p.place_status = 'CONFIRMED' 
                 ORDER BY $sortType $sortDirection
                 LIMIT :limit OFFSET :offset
         """
@@ -92,8 +95,9 @@ class PlaceJdbc(
         parameters.addValue("rentable_area", place.rentableArea)
         parameters.addValue("facilities", place.facilities)
         parameters.addValue("equipments", place.equipments)
-        parameters.addValue("capacity_min", place.capacityMin)
-        parameters.addValue("capacity_max", place.capacityMax)
+        parameters.addValue("capacity_min", place.minCapacity)
+        parameters.addValue("capacity_max", place.maxCapacity)
+        parameters.addValue("parking", place.parking)
         parameters.addValue("ban_reason", place.banReason)
         parameters.addValue("admin_id", place.admin)
         parameters.addValue("status", place.status)
@@ -102,10 +106,10 @@ class PlaceJdbc(
             """
                 INSERT INTO place (user_id, area_id, place_type, place_name, specialization, place_description, place_address, place_coordinates_id, place_phone, place_email, 
                 place_website, level_number, services, rules, accessibility, full_area, rentable_area, facilities, equipments, capacity_min, 
-                capacity_max, place_status, place_ban_reason, place_admin_id) 
+                capacity_max, place_status, place_ban_reason, place_admin_id, parking) 
                 VALUES (:user_id, :area_id, :type, :name, :specialization, :description, :address, :coordinates_id, :phone, :email, 
                 :website, :level_number, :services, :rules, :accessibility, :full_area, :rentable_area, :facilities, :equipments, :capacity_min, 
-                :capacity_max, :status, :ban_reason, :admin_id)
+                :capacity_max, :status, :ban_reason, :admin_id, :parking)
             """,
             parameters, keyHolder, arrayOf("id")
         )
@@ -127,22 +131,36 @@ class PlaceJdbc(
         parameters.addValue("name", place.name)
         parameters.addValue("email", place.email)
         parameters.addValue("website", place.website)
-        parameters.addValue("specialization", place.specialization)
+        parameters.addValue("specialization", createSqlArray(place.specialization))
         parameters.addValue("phone", place.phone)
         parameters.addValue("description", place.description)
         parameters.addValue("rentableArea", place.rentableArea)
-        parameters.addValue("capacityMin", place.capacityMin)
-        parameters.addValue("capacityMax", place.capacityMax)
+        parameters.addValue("minCapacity", place.minCapacity)
+        parameters.addValue("maxCapacity", place.maxCapacity)
         parameters.addValue("services", place.services)
         parameters.addValue("equipments", place.equipments)
         parameters.addValue("facilities", place.facilities)
+        parameters.addValue("parking", place.parking)
         parameters.addValue("id", place.id)
 
         jdbcTemplate.update(
             """
-                UPDATE place SET place_name = :name, place_email = :email, place_website = :website, specialization = :specialization, 
-                    place_phone = :phone, place_description = :description, rentable_area = :rentableArea, capacity_min = :capacityMin,
-                    capacity_max = :capacityMax, services = :services, equipments = :equipments, facilities = :facilities 
+                UPDATE 
+                    place 
+                SET 
+                    place_name = :name, 
+                    place_email = :email, 
+                    place_website = :website, 
+                    specialization = :specialization, 
+                    place_phone = :phone, 
+                    place_description = :description, 
+                    rentable_area = :rentableArea, 
+                    capacity_min = :minCapacity,
+                    capacity_max = :maxCapacity, 
+                    services = :services, 
+                    equipments = :equipments, 
+                    facilities = :facilities,
+                    parking = :parking
                 WHERE place.id = :id
             """,
             parameters
@@ -209,6 +227,7 @@ class PlaceJdbc(
             .addValue("withLevelFilter", levelNumberMin != null && levelNumberMax != null)
             .addValue("levelNumberMin", levelNumberMin)
             .addValue("levelNumberMax", levelNumberMax)
+            .addValue("withParkingFilter", parking != null)
             .addValue("parking", parking)
     }
 
@@ -238,6 +257,7 @@ class PlaceJdbc(
                     p.equipments, 
                     p.capacity_min, 
                     p.capacity_max, 
+                    p.parking, 
                     p.place_status, 
                     p.place_admin_id, 
                     p.place_ban_reason,
@@ -326,6 +346,7 @@ class PlaceJdbc(
                     p.place_coordinates_id, 
                     p.capacity_min, 
                     p.capacity_max, 
+                    p.parking, 
                     p.place_ban_reason, 
                     p.place_status, 
                     p.place_admin_id, 
