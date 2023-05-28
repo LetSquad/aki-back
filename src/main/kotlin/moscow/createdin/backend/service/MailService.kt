@@ -1,6 +1,8 @@
 package moscow.createdin.backend.service
 
 import moscow.createdin.backend.config.properties.AkiProperties
+import moscow.createdin.backend.controller.RentSlotController
+import moscow.createdin.backend.getLogger
 import org.springframework.boot.autoconfigure.mail.MailProperties
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
@@ -67,11 +69,19 @@ class MailService(
     }
 
     private fun sendMail(emailTo: String, subject: String, message: String) {
-        val mailMessage = SimpleMailMessage()
-        mailMessage.from = mailProperties.username
-        mailMessage.setTo(emailTo)
-        mailMessage.subject = subject
-        mailMessage.text = message
-        mailSender.send(mailMessage)
+        try {
+            val mailMessage = SimpleMailMessage()
+            mailMessage.from = mailProperties.username
+            mailMessage.setTo(emailTo)
+            mailMessage.subject = subject
+            mailMessage.text = message
+            mailSender.send(mailMessage)
+        } catch (ignore: Exception) {
+            log.warn("mail send fail", ignore)
+        }
+    }
+
+    companion object {
+        private val log = getLogger<MailService>()
     }
 }
