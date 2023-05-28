@@ -349,7 +349,7 @@ class PlaceJdbc(
             .addValue("withLevelMaxFilter", levelNumberMax != null)
             .addValue("levelNumberMin", levelNumberMin)
             .addValue("levelNumberMax", levelNumberMax)
-            .addValue("withParkingFilter", withParking != null)
+            .addValue("withParkingFilter", withParking != false)
             .addValue("withParking", withParking)
             .addValue("withDateFromFilter", dateFrom != null)
             .addValue("withDateToFilter", dateTo != null)
