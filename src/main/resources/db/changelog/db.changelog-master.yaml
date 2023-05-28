@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/sql/4_uniq_field_name.sql
   - include:
       file: db/changelog/sql/5_fix_place_table.sql
+  - include:
+      file: db/changelog/sql/6_user_activation_code_idx.sql

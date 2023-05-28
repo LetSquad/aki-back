@@ -2,6 +2,7 @@ package moscow.createdin.backend.service
 
 import moscow.createdin.backend.context.UserContext
 import moscow.createdin.backend.exception.ImageNotSavedException
+import moscow.createdin.backend.exception.IncorrectActivationCodeException
 import moscow.createdin.backend.getLogger
 import moscow.createdin.backend.mapper.UserMapper
 import moscow.createdin.backend.model.domain.AkiUser
@@ -67,6 +68,11 @@ class UserService(
         return userRepository.findById(req.id)
             .let { userMapper.entityToDomain(it) }
             .let { userMapper.domainToDto(it) }
+    }
+
+    fun activateUser(activationCode: String) {
+        val isUserActivated: Boolean = userRepository.activateUser(activationCode)
+        if (!isUserActivated) throw IncorrectActivationCodeException(activationCode)
     }
 
     fun getCurrentUserDomain(): AkiUser {
