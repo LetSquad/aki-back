@@ -22,6 +22,7 @@ import moscow.createdin.backend.repository.RentSlotRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import java.sql.Timestamp
 
 @Service
 class PlaceService(
@@ -93,8 +94,8 @@ class PlaceService(
         levelNumberMin: Int?,
         levelNumberMax: Int?,
         withParking: Boolean?,
-        dateFrom: Int?,
-        dateTo: Int?,
+        dateFrom: Timestamp?,
+        dateTo: Timestamp?,
 
         pageNumber: Long,
         limit: Int,
@@ -102,13 +103,39 @@ class PlaceService(
         sortDirection: PlaceSortDirection
     ): PlaceListDTO {
         val total = placeRepository.countByFilter(
-            specialization, capacity, fullAreaMin, fullAreaMax,
-            levelNumberMin, levelNumberMax, parking
+            specialization,
+            rating,
+            priceMin,
+            priceMax,
+            capacityMin,
+            capacityMax,
+            squareMin,
+            squareMax,
+            levelNumberMin,
+            levelNumberMax,
+            withParking,
+            dateFrom,
+            dateTo
         )
 
         val placeEntityList = placeRepository.findAll(
-            specialization, capacity, fullAreaMin, fullAreaMax,
-            levelNumberMin, levelNumberMax, parking, pageNumber, limit, getSortType(sortType), sortDirection
+            specialization,
+            rating,
+            priceMin,
+            priceMax,
+            capacityMin,
+            capacityMax,
+            squareMin,
+            squareMax,
+            levelNumberMin,
+            levelNumberMax,
+            withParking,
+            dateFrom,
+            dateTo,
+            pageNumber,
+            limit,
+            sortType,
+            sortDirection
         )
 
         val placeImageMap = mutableMapOf<Long?, List<String>>()

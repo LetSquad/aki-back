@@ -2,17 +2,45 @@ package moscow.createdin.backend.repository
 
 import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PlaceSortDirection
+import moscow.createdin.backend.model.enums.PlaceSortType
+import java.sql.Timestamp
 
 interface PlaceRepository {
 
     fun countByFilter(
-        specialization: String?, capacity: Int?, fullAreaMin: Int?, fullAreaMax: Int?, levelNumberMin: Int?,
-        levelNumberMax: Int?, parking: Boolean?
+        specialization: String?,
+        rating: Int?,
+        priceMin: Int?,
+        priceMax: Int?,
+        capacityMin: Int?,
+        capacityMax: Int?,
+        squareMin: Int?,
+        squareMax: Int?,
+        levelNumberMin: Int?,
+        levelNumberMax: Int?,
+        withParking: Boolean?,
+        dateFrom: Timestamp?,
+        dateTo: Timestamp?
     ): Int
 
     fun findAll(
-        specialization: String?, capacity: Int?, fullAreaMin: Int?, fullAreaMax: Int?, levelNumberMin: Int?,
-        levelNumberMax: Int?, parking: Boolean?, pageNumber: Long, limit: Int, sortType: String,
+        specialization: String?,
+        rating: Int?,
+        priceMin: Int?,
+        priceMax: Int?,
+        capacityMin: Int?,
+        capacityMax: Int?,
+        squareMin: Int?,
+        squareMax: Int?,
+        levelNumberMin: Int?,
+        levelNumberMax: Int?,
+        withParking: Boolean?,
+        dateFrom: Timestamp?,
+        dateTo: Timestamp?,
+
+        pageNumber: Long,
+        limit: Int,
+        sortType: PlaceSortType,
         sortDirection: PlaceSortDirection
     ): List<PlaceEntity>
 
@@ -25,12 +53,14 @@ interface PlaceRepository {
         limit: Int,
         userId: Long
     ): List<PlaceEntity>
+
     fun countByUserId(userId: Long): Int
 
     fun findUnverified(
         pageNumber: Long,
         limit: Int
     ): List<PlaceEntity>
+
     fun countUnverified(): Int
 
     fun update(place: PlaceEntity)

@@ -2,6 +2,7 @@ package moscow.createdin.backend.repository
 
 import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PlaceSortDirection
+import moscow.createdin.backend.model.enums.PlaceSortType
 import moscow.createdin.backend.model.enums.SpecializationType
 import moscow.createdin.backend.repository.mapper.PlaceRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -11,6 +12,7 @@ import org.springframework.jdbc.support.KeyHolder
 import org.springframework.stereotype.Repository
 import java.sql.Array
 import java.sql.SQLException
+import java.sql.Timestamp
 
 
 @Repository
@@ -19,55 +21,112 @@ class PlaceJdbc(
     private val rowMapper: PlaceRowMapper
 ) : PlaceRepository {
     override fun countByFilter(
-        specialization: String?, capacity: Int?, fullAreaMin: Int?, fullAreaMax: Int?, levelNumberMin: Int?,
-        levelNumberMax: Int?, parking: Boolean?
+        specialization: String?,
+        rating: Int?,
+        priceMin: Int?,
+        priceMax: Int?,
+        capacityMin: Int?,
+        capacityMax: Int?,
+        squareMin: Int?,
+        squareMax: Int?,
+        levelNumberMin: Int?,
+        levelNumberMax: Int?,
+        withParking: Boolean?,
+        dateFrom: Timestamp?,
+        dateTo: Timestamp?
     ): Int {
         val namedParameters =
             getNamedParameters(
-                specialization, capacity, fullAreaMin, fullAreaMax,
-                levelNumberMin, levelNumberMax, parking
+                specialization, rating, priceMin, priceMax, capacityMin, capacityMax, squareMin,
+                squareMax, levelNumberMin, levelNumberMax, withParking, dateFrom, dateTo
             )
         return jdbcTemplate.queryForObject(
             """
                 SELECT COUNT(distinct p.id) as count
                 FROM place p
                 INNER JOIN rent_slot rs on p.id = rs.place_id
+                LEFT JOIN (
+                    SELECT
+                        count(distinct r.id) as popular_count,
+                        avg(pr.rating) as rating,
+                        min(rs.price) as min_price,
+                        max(rs.price) as max_price,
+                        min(rs.time_start) as time_start,
+                        min(rs.time_end) as time_end,
+                        r.place_id as place_id
+                    FROM rent r
+                    INNER JOIN rent_slot rs on rs.place_id = r.place_id
+                    LEFT JOIN place_review pr on r.id = pr.rent_id
+                    WHERE rs.rent_slot_status = 'OPEN'
+                    GROUP BY r.place_id
+                ) as st on p.id = st.place_id
                 WHERE (:withSpecializationFilter = false OR :specialization::SPECIALIZATION_ENUM = ANY (specialization))
-                AND (:withCapacityFilter = false OR :capacity >= capacity_min AND :capacity <= capacity_max)
-                AND (:withAreaFilter = false OR :fullAreaMin <= full_area AND :fullAreaMax >= full_area)
-                AND (:withLevelFilter = false OR :levelNumberMin <= level_number AND :levelNumberMax >= level_number)
-                AND (:withParkingFilter = false OR p.parking = :parking)
-                AND p.place_status = 'VERIFIED' AND p.place_status != 'DELETED' 
+                AND (:withRatingFilter = false OR :rating >= (rating))
+                AND (:withPriceMinFilter = false OR :priceMin >= min_price)
+                AND (:withPriceMaxFilter = false OR :priceMax <= max_price)
+                AND (:withCapacityMinFilter = false OR :capacityMin >= capacity_min)
+                AND (:withCapacityMaxFilter = false OR :capacityMax <= capacity_max)
+                AND (:withSquareMinFilter = false OR :squareMin >= full_area)
+                AND (:withSquareMaxFilter = false OR :squareMax <= full_area)
+                AND (:withLevelMinFilter = false OR :levelNumberMin >= level_number)
+                AND (:withLevelMaxFilter = false OR :levelNumberMax <= level_number)
+                AND (:withParkingFilter = false OR p.parking = :withParking)
+                AND (:withDateFromFilter = false OR rs.time_start > :dateFrom)
+                AND (:withDateToFilter = false OR rs.time_end < :dateTo)
+                AND p.place_status = 'VERIFIED' 
                 AND rs.rent_slot_status = 'OPEN' 
             """, namedParameters
         ) { rs, _ -> rs.getInt("count") }!!
     }
 
     override fun findAll(
-        specialization: String?, capacity: Int?, fullAreaMin: Int?, fullAreaMax: Int?, levelNumberMin: Int?,
-        levelNumberMax: Int?, parking: Boolean?, pageNumber: Long, limit: Int, sortType: String,
+        specialization: String?,
+        rating: Int?,
+        priceMin: Int?,
+        priceMax: Int?,
+        capacityMin: Int?,
+        capacityMax: Int?,
+        squareMin: Int?,
+        squareMax: Int?,
+        levelNumberMin: Int?,
+        levelNumberMax: Int?,
+        withParking: Boolean?,
+        dateFrom: Timestamp?,
+        dateTo: Timestamp?,
+
+        pageNumber: Long,
+        limit: Int,
+        sortType: PlaceSortType,
         sortDirection: PlaceSortDirection
     ): List<PlaceEntity> {
+        val sortTypeColumnName = sortType.columnName
         val query = """
             $SQL_SELECT_FILTER_ENTITY
                 WHERE (:withSpecializationFilter = false OR :specialization::SPECIALIZATION_ENUM = ANY (specialization))
-                AND (:withCapacityFilter = false OR :capacity >= capacity_min AND :capacity <= capacity_max)
-                AND (:withAreaFilter = false OR :fullAreaMin <= full_area AND :fullAreaMax >= full_area)
-                AND (:withLevelFilter = false OR :levelNumberMin <= level_number AND :levelNumberMax >= level_number)
-                AND (:withParkingFilter = false OR p.parking = :parking)
-                AND p.place_status = 'VERIFIED' AND p.place_status != 'DELETED' 
-                ORDER BY $sortType $sortDirection
+                AND (:withRatingFilter = false OR :rating >= (rating))
+                AND (:withPriceMinFilter = false OR :priceMin >= min_price)
+                AND (:withPriceMaxFilter = false OR :priceMax <= max_price)
+                AND (:withCapacityMinFilter = false OR :capacityMin >= capacity_min)
+                AND (:withCapacityMaxFilter = false OR :capacityMax <= capacity_max)
+                AND (:withSquareMinFilter = false OR :squareMin >= full_area)
+                AND (:withSquareMaxFilter = false OR :squareMax <= full_area)
+                AND (:withLevelMinFilter = false OR :levelNumberMin >= level_number)
+                AND (:withLevelMaxFilter = false OR :levelNumberMax <= level_number)
+                AND (:withParkingFilter = false OR p.parking = :withParking)
+                AND (:withDateFromFilter = false OR rs.time_start > :dateFrom)
+                AND (:withDateToFilter = false OR rs.time_end < :dateTo)
+                AND p.place_status = 'VERIFIED' 
+                ORDER BY $sortTypeColumnName $sortDirection
                 LIMIT :limit OFFSET :offset
         """
         val namedParameters =
             getNamedParameters(
-                specialization, capacity, fullAreaMin, fullAreaMax,
-                levelNumberMin, levelNumberMax, parking
+                specialization, rating, priceMin, priceMax, capacityMin, capacityMax,
+                squareMin, squareMax, levelNumberMin, levelNumberMax, withParking,
+                dateFrom, dateTo
             )
         namedParameters.addValue("limit", limit)
         namedParameters.addValue("offset", (pageNumber - 1) * limit)
-        namedParameters.addValue("sort", sortType)
-        namedParameters.addValue("sortDirection", sortDirection.name)
         return jdbcTemplate.query(
             query, namedParameters, rowMapper
         )
@@ -254,23 +313,48 @@ class PlaceJdbc(
     }
 
     private fun getNamedParameters(
-        specialization: String?, capacity: Int?, fullAreaMin: Int?, fullAreaMax: Int?, levelNumberMin: Int?,
-        levelNumberMax: Int?, parking: Boolean?
+        specialization: String?,
+        rating: Int?,
+        priceMin: Int?,
+        priceMax: Int?,
+        capacityMin: Int?,
+        capacityMax: Int?,
+        squareMin: Int?,
+        squareMax: Int?,
+        levelNumberMin: Int?,
+        levelNumberMax: Int?,
+        withParking: Boolean?,
+        dateFrom: Timestamp?,
+        dateTo: Timestamp?
     ): MapSqlParameterSource {
         val mapSqlParameterSource = MapSqlParameterSource()
         return mapSqlParameterSource
             .addValue("withSpecializationFilter", !specialization.isNullOrBlank())
             .addValue("specialization", specialization)
-            .addValue("withCapacityFilter", capacity != null)
-            .addValue("capacity", capacity)
-            .addValue("withAreaFilter", fullAreaMin != null && fullAreaMax != null)
-            .addValue("fullAreaMin", fullAreaMin)
-            .addValue("fullAreaMax", fullAreaMax)
-            .addValue("withLevelFilter", levelNumberMin != null && levelNumberMax != null)
+            .addValue("rating", rating)
+            .addValue("withRatingFilter", rating != null)
+            .addValue("withPriceMinFilter", priceMin != null)
+            .addValue("withPriceMaxFilter", priceMax != null)
+            .addValue("priceMin", priceMin)
+            .addValue("priceMax", priceMax)
+            .addValue("withCapacityMinFilter", capacityMin != null)
+            .addValue("withCapacityMaxFilter", capacityMax != null)
+            .addValue("capacityMin", capacityMin)
+            .addValue("capacityMax", capacityMax)
+            .addValue("withSquareMinFilter", squareMin != null)
+            .addValue("withSquareMaxFilter", squareMax != null)
+            .addValue("squareMin", squareMin)
+            .addValue("squareMax", squareMax)
+            .addValue("withLevelMinFilter", levelNumberMin != null)
+            .addValue("withLevelMaxFilter", levelNumberMax != null)
             .addValue("levelNumberMin", levelNumberMin)
             .addValue("levelNumberMax", levelNumberMax)
-            .addValue("withParkingFilter", parking != null)
-            .addValue("parking", parking)
+            .addValue("withParkingFilter", withParking != null)
+            .addValue("withParking", withParking)
+            .addValue("withDateFromFilter", dateFrom != null)
+            .addValue("withDateToFilter", dateTo != null)
+            .addValue("dateFrom", dateFrom)
+            .addValue("dateTo", dateTo)
     }
 
     companion object {
@@ -338,20 +422,23 @@ class PlaceJdbc(
                     a.area_ban_reason,
                     a.area_admin_id,
                 
-                    st.popular_count,
-                    st.avg_rating,
+                    st.popular,
+                    st.rating,
                     st.min_price,
+                    st.max_price,
                     st.time_start,
                     st.time_end
                     /**/
                 FROM place p
                 INNER JOIN aki_user u on p.user_id = u.id
                 LEFT JOIN area a on p.area_id = a.id
+                INNER JOIN rent_slot rs on p.id = rs.place_id
                 LEFT JOIN (
                     SELECT
-                        count(distinct r.id) as popular_count,
-                        avg(pr.rating) as avg_rating,
+                        count(distinct r.id) as popular,
+                        avg(pr.rating) as rating,
                         min(rs.price) as min_price,
+                        max(rs.price) as max_price,
                         min(rs.time_start) as time_start,
                         min(rs.time_end) as time_end,
                         r.place_id as place_id

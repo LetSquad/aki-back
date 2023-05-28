@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.springframework.web.server.UnsupportedMediaTypeStatusException
+import java.sql.Timestamp
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -35,8 +36,8 @@ class PlaceController(private val placeService: PlaceService) {
         @Parameter(description = "Минимальный этаж") @RequestParam levelNumberMin: Int?,
         @Parameter(description = "Максимальный этаж") @RequestParam levelNumberMax: Int?,
         @Parameter(description = "Наличие парковки") @RequestParam withParking: Boolean?,
-        @Parameter(description = "Начальная дата бронирования") @RequestParam dateFrom: Int?,
-        @Parameter(description = "Конечная дата бронирования") @RequestParam dateTo: Int?,
+        @Parameter(description = "Начальная дата бронирования") @RequestParam dateFrom: Timestamp?,
+        @Parameter(description = "Конечная дата бронирования") @RequestParam dateTo: Timestamp?,
 
         @Parameter(description = "Страница на фронте") @RequestParam pageNumber: Long,
         @Parameter(description = "Количество площадок на страницу") @RequestParam limit: Int,
