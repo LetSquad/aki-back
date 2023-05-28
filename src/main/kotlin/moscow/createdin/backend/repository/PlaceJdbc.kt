@@ -357,7 +357,7 @@ class PlaceJdbc(
                         r.place_id as place_id
                     FROM rent r
                     INNER JOIN rent_slot rs on rs.place_id = r.place_id
-                    INNER JOIN place_review pr on r.id = pr.rent_id
+                    LEFT JOIN place_review pr on r.id = pr.rent_id
                     WHERE rs.rent_slot_status = 'OPEN'
                     GROUP BY r.place_id
                 ) as st on p.id = st.place_id
