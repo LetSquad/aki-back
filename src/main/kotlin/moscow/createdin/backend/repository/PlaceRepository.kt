@@ -27,5 +27,11 @@ interface PlaceRepository {
     ): List<PlaceEntity>
     fun countByUserId(userId: Long): Int
 
+    fun findUnverified(
+        pageNumber: Long,
+        limit: Int
+    ): List<PlaceEntity>
+    fun countUnverified(): Int
+
     fun update(place: PlaceEntity)
 }

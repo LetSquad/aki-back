@@ -146,11 +146,7 @@ class PlaceJdbc(
         parameters.addValue("status", place.status)
         parameters.addValue("banReason", place.banReason)
 
-        jdbcTemplate.update(
-            """
-                UPDATE 
-                    place 
-                SET 
+        var sqlSet = """
                     place_name = :name, 
                     place_email = :email, 
                     place_website = :website, 
@@ -165,10 +161,19 @@ class PlaceJdbc(
                     facilities = :facilities,
                     parking = :parking,
                     
-                    place_admin_id = :adminId,
                     place_status = :status,
                     place_ban_reason = :banReason
-                
+        """
+        if (place.admin != 0L) {
+            sqlSet += ",place_admin_id = :adminId"
+        }
+
+        jdbcTemplate.update(
+            """
+                UPDATE 
+                    place 
+                SET 
+                    $sqlSet
                 WHERE place.id = :id
             """,
             parameters
@@ -196,6 +201,35 @@ class PlaceJdbc(
                 SELECT COUNT(distinct p.id) as count
                 FROM place p
                 WHERE p.user_id = :userId
+            """, parameters
+        ) { rs, _ -> rs.getInt("count") }!!
+    }
+
+    override fun findUnverified(
+        pageNumber: Long,
+        limit: Int
+    ): List<PlaceEntity> {
+        val parameters = MapSqlParameterSource()
+            .addValue("limit", limit)
+            .addValue("offset", (pageNumber - 1) * limit)
+
+        return jdbcTemplate.query(
+            """
+                $SQL_SELECT_ENTITY
+                WHERE p.place_status = 'UNVERIFIED' 
+                LIMIT :limit OFFSET :offset
+            """, parameters, rowMapper
+        )
+    }
+
+    override fun countUnverified(): Int {
+        val parameters = MapSqlParameterSource()
+
+        return jdbcTemplate.queryForObject(
+            """
+                SELECT COUNT(distinct p.id) as count
+                FROM place p
+                WHERE p.place_status = 'UNVERIFIED'
             """, parameters
         ) { rs, _ -> rs.getInt("count") }!!
     }

@@ -87,7 +87,7 @@ class PlaceController(private val placeService: PlaceService) {
         return placeService.get(id)
     }
 
-    @PreAuthorize("hasRole('LANDLORD')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LANDLORD')")
     @GetMapping("my")
     fun getCurrentUserPlaces(
         @Parameter(description = "Страница на фронте") @RequestParam pageNumber: Long,

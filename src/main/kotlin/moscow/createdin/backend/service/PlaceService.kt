@@ -17,6 +17,7 @@ import moscow.createdin.backend.model.enums.AdminStatusType
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
+import moscow.createdin.backend.model.enums.UserRole
 import moscow.createdin.backend.repository.PlaceRepository
 import moscow.createdin.backend.repository.RentSlotRepository
 import org.springframework.stereotype.Service
@@ -189,18 +190,34 @@ class PlaceService(
         limit: Int
     ): PlaceListDTO {
         val user = userService.getCurrentUserDomain()
-        val total = placeRepository.countByUserId(user.id!!)
-        val places = placeRepository.findByUserId(pageNumber, limit, user.id)
-            .map {
-                val rentSlots = getByPlaceId(it.id!!)
-                placeMapper.entityToDomain(it, rentSlots)
-            }
-            .map {
-                val placeImages = placeImageService.getPlaceImages(it.id!!)
-                placeMapper.domainToDto(it, placeImages)
-            }
 
-        return PlaceListDTO(places, total)
+        if (user.role == UserRole.LANDLORD) {
+            val total = placeRepository.countByUserId(user.id!!)
+            val places = placeRepository.findByUserId(pageNumber, limit, user.id)
+                .map {
+                    val rentSlots = getByPlaceId(it.id!!)
+                    placeMapper.entityToDomain(it, rentSlots)
+                }
+                .map {
+                    val placeImages = placeImageService.getPlaceImages(it.id!!)
+                    placeMapper.domainToDto(it, placeImages)
+                }
+
+            return PlaceListDTO(places, total)
+        } else {
+            val total = placeRepository.countUnverified()
+            val places = placeRepository.findUnverified(pageNumber, limit)
+                .map {
+                    val rentSlots = getByPlaceId(it.id!!)
+                    placeMapper.entityToDomain(it, rentSlots)
+                }
+                .map {
+                    val placeImages = placeImageService.getPlaceImages(it.id!!)
+                    placeMapper.domainToDto(it, placeImages)
+                }
+
+            return PlaceListDTO(places, total)
+        }
     }
 
     fun getByPlaceId(placeId: Long): List<RentSlot> {
