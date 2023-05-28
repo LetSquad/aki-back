@@ -49,7 +49,8 @@ class RentService(
     ): RentListDTO {
         val renter = userService.getCurrentUser()
 
-        val rents = rentRepository.findByRenterId(renter.id)
+        val total = rentRepository.countByRenterId(renter.id)
+        val rents = rentRepository.findByRenterId(pageNumber, limit, renter.id)
             .map { rent ->
                 val slots = rentSlotToRentRepository.findSlotsByRentId(rent.id!!)
                     .map { rentSlotMapper.entityToDomain(it) }
@@ -57,7 +58,7 @@ class RentService(
             }
             .map { rentMapper.domainToDto(it) }
 
-        return RentListDTO(rents, rents.size)
+        return RentListDTO(rents, total)
     }
 
     fun get(id: Long): RentDTO {
