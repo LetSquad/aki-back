@@ -35,13 +35,32 @@ class PlaceService(
     private val filesystemService: FilesystemService
 ) {
 
+    fun approve(id: Long): PlaceDTO {
+        val adminUser = userService.getCurrentUserDomain()
+        val editable = getDomain(id)
+
+        val result = editable.copy(
+            status = PlaceConfirmationStatus.VERIFIED,
+            admin = adminUser.id
+        )
+
+        return placeMapper.domainToEntity(result)
+            .also { placeRepository.update(it) }
+            .let { placeRepository.findById(result.id!!) }
+            .let {
+                val rentSlots = getByPlaceId(it.id!!)
+                placeMapper.entityToDomain(it, rentSlots)
+            }
+            .let { placeMapper.domainToDto(it, emptyList()) }
+    }
+
     fun ban(banRequestDTO: BanRequestDTO): PlaceDTO {
         val adminUser = userService.getCurrentUserDomain()
-        val editable = getDomain(banRequestDTO.bannedId)
+        val editable = getDomain(banRequestDTO.id)
 
         val result = editable.copy(
             status = PlaceConfirmationStatus.BANNED,
-            banReason = banRequestDTO.reason,
+            banReason = banRequestDTO.banReason,
             admin = adminUser.id
         )
 
@@ -174,7 +193,7 @@ class PlaceService(
         return PlaceListDTO(places, total)
     }
 
-    private fun getByPlaceId(placeId: Long): List<RentSlot> {
+    fun getByPlaceId(placeId: Long): List<RentSlot> {
         return rentSlotRepository.findByPlaceId(placeId)
             .map { rentSlotMapper.entityToDomain(it) }
     }

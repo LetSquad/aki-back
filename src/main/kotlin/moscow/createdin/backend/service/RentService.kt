@@ -1,12 +1,14 @@
 package moscow.createdin.backend.service
 
 import moscow.createdin.backend.getLogger
+import moscow.createdin.backend.mapper.PlaceMapper
 import moscow.createdin.backend.mapper.RentMapper
 import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.Rent
 import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.CreateRentRequestDTO
 import moscow.createdin.backend.model.dto.RentDTO
+import moscow.createdin.backend.model.dto.RentListDTO
 import moscow.createdin.backend.model.enums.AdminStatusType
 import moscow.createdin.backend.model.enums.RentConfirmationStatus
 import moscow.createdin.backend.model.enums.RentSlotStatusType
@@ -20,9 +22,11 @@ class RentService(
     private val rentSlotService: RentSlotService,
     private val mailService: MailService,
     private val placeService: PlaceService,
+    private val placeImageService: PlaceImageService,
 
     private val rentMapper: RentMapper,
     private val rentSlotMapper: RentSlotMapper,
+    private val placeMapper: PlaceMapper,
 
     private val rentRepository: RentRepository,
     private val rentSlotToRentRepository: RentSlotToRentRepository
@@ -42,16 +46,21 @@ class RentService(
         return get(newRentId)
     }
 
-    fun getAll(): List<RentDTO> {
+    fun getAll(
+        pageNumber: Long,
+        limit: Int
+    ): RentListDTO {
         val renter = userService.getCurrentUser()
 
-        return rentRepository.findByRenterId(renter.id)
+        val rents = rentRepository.findByRenterId(renter.id)
             .map { rent ->
                 val slots = rentSlotToRentRepository.findSlotsByRentId(rent.id!!)
                     .map { rentSlotMapper.entityToDomain(it) }
                 rentMapper.entityToDomain(rent, slots)
             }
             .map { rentMapper.domainToDto(it) }
+
+        return RentListDTO(rents, rents.size)
     }
 
     fun get(id: Long): RentDTO {
@@ -80,11 +89,11 @@ class RentService(
 
     fun ban(banRequestDTO: BanRequestDTO): RentDTO {
         val adminUser = userService.getCurrentUserDomain()
-        val editable = getDomain(banRequestDTO.bannedId)
+        val editable = getDomain(banRequestDTO.id)
 
         val result = editable.copy(
             status = RentConfirmationStatus.BANNED,
-            banReason = banRequestDTO.reason,
+            banReason = banRequestDTO.banReason,
             admin = adminUser.id
         )
 

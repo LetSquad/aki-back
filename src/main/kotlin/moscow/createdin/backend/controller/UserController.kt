@@ -61,7 +61,7 @@ class UserController(
         summary = "Восстановление пароля пользователя",
         description = "Отправляем email-сообщение с ссылкой на восстановление пароля пользователя"
     )
-    fun resetUserPassword(@Parameter(ref = "Email пользователя") @RequestParam userEmail: String) {
+    fun resetUserPassword(@Parameter(ref = "Email пользователя") @RequestBody userEmail: String) {
         resetPasswordService.resetPassword(userEmail)
     }
 

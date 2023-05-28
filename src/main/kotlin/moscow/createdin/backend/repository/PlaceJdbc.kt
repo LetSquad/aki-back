@@ -37,7 +37,7 @@ class PlaceJdbc(
                 AND (:withAreaFilter = false OR :fullAreaMin <= full_area AND :fullAreaMax >= full_area)
                 AND (:withLevelFilter = false OR :levelNumberMin <= level_number AND :levelNumberMax >= level_number)
                 AND (:withParkingFilter = false OR p.parking = :parking)
-                AND p.place_status = 'CONFIRMED' 
+                AND p.place_status = 'VERIFIED' 
                 AND rs.rent_slot_status = 'OPEN' 
             """, namedParameters
         ) { rs, _ -> rs.getInt("count") }!!
@@ -55,7 +55,7 @@ class PlaceJdbc(
                 AND (:withAreaFilter = false OR :fullAreaMin <= full_area AND :fullAreaMax >= full_area)
                 AND (:withLevelFilter = false OR :levelNumberMin <= level_number AND :levelNumberMax >= level_number)
                 AND (:withParkingFilter = false OR p.parking = :parking)
-                AND p.place_status = 'CONFIRMED' 
+                AND p.place_status = 'VERIFIED' 
                 ORDER BY $sortType $sortDirection
                 LIMIT :limit OFFSET :offset
         """
@@ -142,6 +142,9 @@ class PlaceJdbc(
         parameters.addValue("facilities", place.facilities)
         parameters.addValue("parking", place.parking)
         parameters.addValue("id", place.id)
+        parameters.addValue("adminId", place.admin)
+        parameters.addValue("status", place.status)
+        parameters.addValue("banReason", place.banReason)
 
         jdbcTemplate.update(
             """
@@ -160,7 +163,12 @@ class PlaceJdbc(
                     services = :services, 
                     equipments = :equipments, 
                     facilities = :facilities,
-                    parking = :parking
+                    parking = :parking,
+                    
+                    place_admin_id = :adminId,
+                    place_status = :status,
+                    place_ban_reason = :banReason
+                
                 WHERE place.id = :id
             """,
             parameters
@@ -234,91 +242,91 @@ class PlaceJdbc(
     companion object {
         private const val SQL_SELECT_FILTER_ENTITY =
             """
-                SELECT distinct 
-                    p.id, 
-                    p.user_id, 
-                    p.area_id, 
-                    p.place_type, 
-                    p.place_coordinates_id, 
-                    p.place_description, 
-                    p.place_name, 
-                    p.specialization, 
-                    p.place_address, 
-                    p.place_phone, 
+                SELECT distinct
+                    p.id,
+                    p.user_id,
+                    p.area_id,
+                    p.place_type,
+                    p.place_coordinates_id,
+                    p.place_description,
+                    p.place_name,
+                    p.specialization,
+                    p.place_address,
+                    p.place_phone,
                     p.place_email,
-                    p.place_website, 
-                    p.level_number, 
-                    p.services, 
-                    p.rules, 
-                    p.accessibility, 
-                    p.full_area, 
-                    p.rentable_area, 
+                    p.place_website,
+                    p.level_number,
+                    p.services,
+                    p.rules,
+                    p.accessibility,
+                    p.full_area,
+                    p.rentable_area,
                     p.facilities,
-                    p.equipments, 
-                    p.capacity_min, 
-                    p.capacity_max, 
-                    p.parking, 
-                    p.place_status, 
-                    p.place_admin_id, 
+                    p.equipments,
+                    p.capacity_min,
+                    p.capacity_max,
+                    p.parking,
+                    p.place_status,
+                    p.place_admin_id,
                     p.place_ban_reason,
-
-                    u.id, 
-                    u.user_email, 
-                    u.password, 
-                    u.role, 
+                
+                    u.id,
+                    u.user_email,
+                    u.password,
+                    u.role,
                     u.user_type,
-                    u.first_name, 
-                    u.last_name, 
+                    u.first_name,
+                    u.last_name,
                     u.middle_name,
-                    u.user_phone, 
-                    u.user_image, 
-                    u.inn, 
-                    u.organization, 
-                    u.logo_image, 
-                    u.job_title, 
-                    u.is_activated, 
-                    u.is_banned, 
-                    u.user_ban_reason, 
+                    u.user_phone,
+                    u.user_image,
+                    u.inn,
+                    u.organization,
+                    u.logo_image,
+                    u.job_title,
+                    u.is_activated,
+                    u.is_banned,
+                    u.user_ban_reason,
                     u.user_admin_id,
-
-                    a.id, 
-                    a.user_id, 
-                    a.area_name, 
-                    a.area_description, 
-                    a.area_image, 
-                    a.area_status, 
-                    a.area_address, 
-                    a.area_website, 
-                    a.area_email, 
-                    a.area_phone, 
+                
+                    a.id,
+                    a.user_id,
+                    a.area_name,
+                    a.area_description,
+                    a.area_image,
+                    a.area_status,
+                    a.area_address,
+                    a.area_website,
+                    a.area_email,
+                    a.area_phone,
                     a.area_coordinates_id,
-                    a.area_ban_reason, 
-                    a.area_admin_id, 
+                    a.area_ban_reason,
+                    a.area_admin_id,
                     u.activation_code,
-
+                
                     st.popular_count,
                     st.avg_rating,
                     st.min_price,
                     st.time_start,
                     st.time_end
                     
-                    FROM place p
-                    INNER JOIN aki_user u on p.user_id = u.id
-                    LEFT JOIN area a on p.area_id = a.id
-                    INNER JOIN (
-                        SELECT 
-                            count(distinct r.id) as popular_count, 
-                            avg(rating) as avg_rating, 
-                            min(price) as min_price,
-                            min(time_start) as time_start, 
-                            min(time_end) as time_end, 
-                            r.place_id
-                        FROM rent r
-                        INNER JOIN rent_slot rs on rs.place_id = r.place_id
-                        INNER JOIN place_review pr on r.id = pr.rent_id
-                                         WHERE rs.rent_slot_status = 'OPEN'
-                                         GROUP BY r.place_id
-                              ) as st on p.id = st.place_id
+                FROM place p
+                INNER JOIN aki_user u on p.user_id = u.id
+                LEFT JOIN area a on p.area_id = a.id
+                LEFT JOIN (
+                    SELECT
+                        count(distinct r.id) as popular_count,
+                        avg(pr.rating) as avg_rating,
+                        min(rs.price) as min_price,
+                        min(rs.time_start) as time_start,
+                        min(rs.time_end) as time_end,
+                        r.place_id as place_id
+                    FROM rent r
+                    INNER JOIN rent_slot rs on rs.place_id = r.place_id
+                    INNER JOIN place_review pr on r.id = pr.rent_id
+                    WHERE rs.rent_slot_status = 'OPEN'
+                    GROUP BY r.place_id
+                ) as st on p.id = st.place_id
                     """
 
         private const val SQL_SELECT_ENTITY =

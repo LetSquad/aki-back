@@ -2,6 +2,7 @@ package moscow.createdin.backend.repository
 
 import moscow.createdin.backend.model.entity.RentEntity
 import moscow.createdin.backend.model.enums.AdminStatusType
+import moscow.createdin.backend.model.enums.RentConfirmationStatus
 import moscow.createdin.backend.repository.mapper.RentRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -74,6 +75,7 @@ class RentJdbc(
                     p.place_admin_id,
                     p.area_id,
                     p.place_coordinates_id,
+                    0 as min_price, null as time_start, null as time_end,
                     
                     up.id,
                     up.user_email,
@@ -181,6 +183,7 @@ class RentJdbc(
                     p.place_admin_id,
                     p.area_id,
                     p.place_coordinates_id,
+                    0 as min_price, null as time_start, null as time_end,
                     
                     up.id,
                     up.user_email,
@@ -223,7 +226,7 @@ class RentJdbc(
         val parameters = MapSqlParameterSource()
         parameters.addValue("placeId", placeId)
         parameters.addValue("userId", renterId)
-        parameters.addValue("status", AdminStatusType.UNVERIFIED.name)
+        parameters.addValue("status", RentConfirmationStatus.OPEN.name)
 
         jdbcTemplate.update(
             """
