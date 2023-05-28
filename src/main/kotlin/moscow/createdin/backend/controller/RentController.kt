@@ -5,10 +5,12 @@ import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.CreateRentRequestDTO
 import moscow.createdin.backend.model.dto.RentDTO
 import moscow.createdin.backend.model.dto.RentListDTO
+import moscow.createdin.backend.model.dto.place.RentDeleteDTO
 import moscow.createdin.backend.service.RentService
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -36,14 +38,14 @@ class RentController(
     }
 
     @GetMapping("{id}")
-    fun get(@RequestParam id: Long): RentDTO {
+    fun get(@PathVariable id: Long): RentDTO {
         return rentService.get(id)
     }
 
     @PreAuthorize("hasRole('RENTER')")
     @DeleteMapping
-    fun delete(@RequestBody id: Long) {
-        rentService.delete(id)
+    fun delete(@RequestBody req: RentDeleteDTO) {
+        rentService.delete(req.rentId)
     }
 
     @PreAuthorize("hasRole('ADMIN')")

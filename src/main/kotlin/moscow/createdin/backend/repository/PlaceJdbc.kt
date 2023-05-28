@@ -37,7 +37,7 @@ class PlaceJdbc(
                 AND (:withAreaFilter = false OR :fullAreaMin <= full_area AND :fullAreaMax >= full_area)
                 AND (:withLevelFilter = false OR :levelNumberMin <= level_number AND :levelNumberMax >= level_number)
                 AND (:withParkingFilter = false OR p.parking = :parking)
-                AND p.place_status = 'VERIFIED' 
+                AND p.place_status = 'VERIFIED' AND p.place_status != 'DELETED' 
                 AND rs.rent_slot_status = 'OPEN' 
             """, namedParameters
         ) { rs, _ -> rs.getInt("count") }!!
@@ -55,7 +55,7 @@ class PlaceJdbc(
                 AND (:withAreaFilter = false OR :fullAreaMin <= full_area AND :fullAreaMax >= full_area)
                 AND (:withLevelFilter = false OR :levelNumberMin <= level_number AND :levelNumberMax >= level_number)
                 AND (:withParkingFilter = false OR p.parking = :parking)
-                AND p.place_status = 'VERIFIED' 
+                AND p.place_status = 'VERIFIED' AND p.place_status != 'DELETED' 
                 ORDER BY $sortType $sortDirection
                 LIMIT :limit OFFSET :offset
         """
@@ -213,7 +213,7 @@ class PlaceJdbc(
         return jdbcTemplate.query(
             """
                 $SQL_SELECT_ENTITY
-                WHERE p.user_id = :userId
+                WHERE p.user_id = :userId AND p.place_status != 'DELETED' 
                 LIMIT :limit OFFSET :offset
             """, parameters, rowMapper
         )

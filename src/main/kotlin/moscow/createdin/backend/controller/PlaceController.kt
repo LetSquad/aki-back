@@ -3,7 +3,6 @@ package moscow.createdin.backend.controller
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import moscow.createdin.backend.model.dto.BanDataRequestDTO
-import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.place.NewPlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
@@ -110,5 +109,11 @@ class PlaceController(private val placeService: PlaceService) {
             }
         }
         return images
+    }
+
+    @PreAuthorize("hasRole('LANDLORD')")
+    @DeleteMapping("{id}")
+    fun delete(@PathVariable id: Long) {
+        placeService.delete(id)
     }
 }

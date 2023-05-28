@@ -212,7 +212,7 @@ class RentJdbc(
                          JOIN place p              on r.place_id = p.id
                          JOIN aki_user up          on p.user_id = up.id
                 WHERE
-                   r.user_id = :renterId
+                   r.user_id = :renterId AND r.rent_status != 'DELETED'
                 GROUP BY r.id, p.id, u.id, up.id
             """, parameters, rowMapper
         )

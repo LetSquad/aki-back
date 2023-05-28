@@ -13,6 +13,7 @@ import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
 import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
 import moscow.createdin.backend.model.entity.PlaceEntity
+import moscow.createdin.backend.model.enums.AdminStatusType
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
@@ -103,6 +104,15 @@ class PlaceService(
             .map { placeMapper.domainToDto(it, placeImageMap[it.id]) }
 
         return PlaceListDTO(places, total)
+    }
+
+    fun delete(id: Long) {
+        val editableArea = getDomain(id)
+
+        val result = editableArea.copy(status = PlaceConfirmationStatus.DELETED)
+
+        placeMapper.domainToEntity(result)
+            .also { placeRepository.update(it) }
     }
 
     @Transactional

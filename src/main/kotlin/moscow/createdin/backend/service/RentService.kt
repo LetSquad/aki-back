@@ -1,7 +1,6 @@
 package moscow.createdin.backend.service
 
 import moscow.createdin.backend.getLogger
-import moscow.createdin.backend.mapper.PlaceMapper
 import moscow.createdin.backend.mapper.RentMapper
 import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.Rent
@@ -22,11 +21,9 @@ class RentService(
     private val rentSlotService: RentSlotService,
     private val mailService: MailService,
     private val placeService: PlaceService,
-    private val placeImageService: PlaceImageService,
 
     private val rentMapper: RentMapper,
     private val rentSlotMapper: RentSlotMapper,
-    private val placeMapper: PlaceMapper,
 
     private val rentRepository: RentRepository,
     private val rentSlotToRentRepository: RentSlotToRentRepository
