@@ -10,6 +10,7 @@ import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
 import moscow.createdin.backend.service.PlaceService
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -17,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.springframework.web.server.UnsupportedMediaTypeStatusException
 import java.sql.Timestamp
+import java.time.LocalDate
+import java.time.ZonedDateTime
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -36,8 +39,8 @@ class PlaceController(private val placeService: PlaceService) {
         @Parameter(description = "Минимальный этаж") @RequestParam levelNumberMin: Int?,
         @Parameter(description = "Максимальный этаж") @RequestParam levelNumberMax: Int?,
         @Parameter(description = "Наличие парковки") @RequestParam withParking: Boolean?,
-        @Parameter(description = "Начальная дата бронирования") @RequestParam dateFrom: Timestamp?,
-        @Parameter(description = "Конечная дата бронирования") @RequestParam dateTo: Timestamp?,
+        @Parameter(description = "Начальная дата бронирования") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") dateFrom: LocalDate?,
+        @Parameter(description = "Конечная дата бронирования") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") dateTo: LocalDate?,
 
         @Parameter(description = "Страница на фронте") @RequestParam pageNumber: Long,
         @Parameter(description = "Количество площадок на страницу") @RequestParam limit: Int,

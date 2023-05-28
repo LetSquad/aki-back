@@ -23,6 +23,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.sql.Timestamp
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
 import kotlin.math.roundToInt
 
 @Service
@@ -95,8 +98,8 @@ class PlaceService(
         levelNumberMin: Int?,
         levelNumberMax: Int?,
         withParking: Boolean?,
-        dateFrom: Timestamp?,
-        dateTo: Timestamp?,
+        dateFrom: LocalDate?,
+        dateTo: LocalDate?,
 
         pageNumber: Long,
         limit: Int,
@@ -115,8 +118,8 @@ class PlaceService(
             levelNumberMin,
             levelNumberMax,
             withParking,
-            dateFrom,
-            dateTo
+            dateFrom?.let { Timestamp.from(dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC)) },
+            dateTo?.let { Timestamp.from(dateTo.atStartOfDay().toInstant(ZoneOffset.UTC)) }
         )
 
         val total = (count / limit.toDouble()).roundToInt()
@@ -133,8 +136,9 @@ class PlaceService(
             levelNumberMin,
             levelNumberMax,
             withParking,
-            dateFrom,
-            dateTo,
+            dateFrom?.let { Timestamp.from(dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC)) },
+            dateTo?.let { Timestamp.from(dateTo.atStartOfDay().toInstant(ZoneOffset.UTC)) },
+
             pageNumber,
             limit,
             sortType,
