@@ -1,6 +1,8 @@
 package moscow.createdin.backend.controller
 
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Schema
+import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.place.NewPlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
@@ -8,14 +10,13 @@ import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
 import moscow.createdin.backend.service.PlaceService
+import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.multipart.MultipartHttpServletRequest
+import org.springframework.web.server.UnsupportedMediaTypeStatusException
+import javax.servlet.http.HttpServletRequest
 
 @RestController
 @RequestMapping("/api/places")
@@ -42,20 +43,65 @@ class PlaceController(private val placeService: PlaceService) {
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
-    @PostMapping
+    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun create(
-        @RequestBody newPlaceDTO: NewPlaceDTO,
-//        @Parameter(ref = "Фотографии площадки") image: List<MultipartFile>
+        @Parameter(
+            ref = "Модель данных площадки",
+            schema = Schema(type = "string", format = "binary")
+        )
+        @RequestPart place: NewPlaceDTO,
+
+        request: HttpServletRequest
     ): PlaceDTO {
-        return placeService.create(newPlaceDTO)
+        return placeService.create(place, request.retrieveImages())
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("ban")
+    fun ban(@RequestBody banRequestDTO: BanRequestDTO): PlaceDTO {
+        return placeService.ban(banRequestDTO)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
-    @PutMapping("edit")
+    @PutMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun edit(
-        @RequestBody updatePlaceDTO: UpdatePlaceDTO,
-//        @Parameter(ref = "Фотографии площадки") image: List<MultipartFile>
+        @Parameter(
+            ref = "Модель данных площадки",
+            schema = Schema(type = "string", format = "binary")
+        )
+        @RequestPart place: UpdatePlaceDTO,
+
+        request: HttpServletRequest
     ): PlaceDTO {
-        return placeService.edit(updatePlaceDTO)
+        return placeService.edit(place, request.retrieveImages())
+    }
+
+    @GetMapping("{id}")
+    fun get(@Parameter(description = "ID площадки") @PathVariable id: Long): PlaceDTO {
+        return placeService.get(id)
+    }
+
+    @PreAuthorize("hasRole('LANDLORD')")
+    @GetMapping("my")
+    fun getCurrentUserPlaces(
+        @Parameter(description = "Страница на фронте") @RequestParam pageNumber: Long,
+        @Parameter(description = "Количество площадок на страницу") @RequestParam limit: Int
+    ): PlaceListDTO {
+        return placeService.getCurrentUserPlaces(pageNumber, limit)
+    }
+
+    private fun HttpServletRequest.retrieveImages(): Collection<MultipartFile> {
+        val images: Collection<MultipartFile> = if (this is MultipartHttpServletRequest) {
+            fileMap.values
+                .filter { it.name != "place" }
+        } else {
+            emptyList()
+        }
+        for (image in images) {
+            if (image.contentType != MediaType.IMAGE_JPEG_VALUE && image.contentType != MediaType.IMAGE_PNG_VALUE) {
+                throw UnsupportedMediaTypeStatusException("Media type ${image.contentType} is not supported")
+            }
+        }
+        return images
     }
 }

@@ -1,5 +1,6 @@
 package moscow.createdin.backend.model.dto.place
 
+import moscow.createdin.backend.model.dto.RentSlotDTO
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.SpecializationType
 
@@ -10,7 +11,7 @@ data class PlaceDTO(
     val address: String,
     val email: String,
     val site: String?,
-    val specialization: SpecializationType,
+    val specialization: List<SpecializationType>,
     val phone: String,
     val description: String,
     val fullSquare: Int,
@@ -19,6 +20,8 @@ data class PlaceDTO(
     val capacityMax: Int,
     val levelNumber: Int?,
     val parking: Boolean?,
+
+    val rentSlots: List<RentSlotDTO>?,
 
     val price: PlacePriceDTO,
     val status: PlaceConfirmationStatus,

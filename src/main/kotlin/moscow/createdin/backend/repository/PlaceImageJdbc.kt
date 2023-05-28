@@ -12,6 +12,7 @@ class PlaceImageJdbc(
     private val jdbcTemplate: NamedParameterJdbcTemplate,
     private val rowMapper: PlaceImageRowMapper
 ) : PlaceImageRepository {
+
     override fun findByPlaceId(placeId: Long?): List<PlaceImageEntity> {
         val query = """
             $SQL_SELECT_ENTITY
@@ -21,6 +22,23 @@ class PlaceImageJdbc(
         return jdbcTemplate.query(
             query, namedParameters, rowMapper
         )
+    }
+
+    override fun save(placeImage: PlaceImageEntity) {
+        val namedParameters = MapSqlParameterSource()
+            .addValue("placeId", placeImage.placeId)
+            .addValue("image", placeImage.image)
+            .addValue("priority", placeImage.priority)
+        jdbcTemplate.update(
+            "INSERT INTO place_image (place_id, image, priority) VALUES (:placeId, :image, :priority)",
+            namedParameters
+        )
+    }
+
+    override fun deleteByPlaceId(placeId: Long) {
+        val namedParameters = MapSqlParameterSource()
+            .addValue("placeId", placeId)
+        jdbcTemplate.update("DELETE FROM place_image WHERE place_id = :place_id", namedParameters)
     }
 
     companion object {

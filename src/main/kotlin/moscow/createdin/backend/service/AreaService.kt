@@ -99,8 +99,11 @@ class AreaService(
             admin = adminUser.id
         )
 
-        areaMapper.domainToEntity(result)
+        return areaMapper.domainToEntity(result)
             .also { areaRepository.update(it) }
+            .let { areaRepository.findById(result.id!!) }
+            .let { areaMapper.entityToDomain(it) }
+            .let { areaMapper.domainToDto(it) }
     }
 
     fun delete(areaId: Long) {

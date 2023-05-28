@@ -12,9 +12,9 @@ data class SimplePlace(
     val area: Long?,
     val coordinates: Long?,
 
-    val type: String,
+    val type: String?,
     val name: String,
-    val specialization: SpecializationType,
+    val specialization: List<SpecializationType>,
     val description: String,
     val address: String,
     val phone: String,
@@ -23,8 +23,8 @@ data class SimplePlace(
     val levelNumber: Int?,
     val fullArea: Int,
     val rentableArea: Int,
-    val capacityMin: Int,
-    val capacityMax: Int,
+    val minCapacity: Int,
+    val maxCapacity: Int,
 
     val services: List<PlaceService>?,
     val rules: String?,

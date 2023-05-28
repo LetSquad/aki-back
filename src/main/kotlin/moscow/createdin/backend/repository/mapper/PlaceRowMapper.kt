@@ -2,6 +2,7 @@ package moscow.createdin.backend.repository.mapper
 
 import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PriceType
+import moscow.createdin.backend.model.enums.SpecializationType
 import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Component
@@ -33,7 +34,7 @@ class PlaceRowMapper(
         },
         type = rs.getString("place_type"),
         name = rs.getString("place_name"),
-        specialization = rs.getString("specialization"),
+        specialization = getArrayEnum(rs.getString("specialization")),
         description = rs.getString("place_description"),
         address = rs.getString("place_address"),
         phone = rs.getString("place_phone"),
@@ -55,6 +56,12 @@ class PlaceRowMapper(
         minPrice = rs.getDouble("min_price"),
         priceType = findPriceType(rs.getDate("time_start"), rs.getDate("time_end"))
     )
+
+    private fun getArrayEnum(arrayStr: String): List<SpecializationType> {
+        return arrayStr.substring(1, arrayStr.length - 1)
+            .split(',')
+            .map { SpecializationType.valueOf(it) }
+    }
 
     fun findPriceType(timeStart: Date?, timeEnd: Date?): String {
         if (timeStart != null && timeEnd != null) {

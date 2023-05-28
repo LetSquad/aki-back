@@ -6,7 +6,6 @@ import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.dto.CreateRentSlotRequestDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
-import moscow.createdin.backend.model.dto.RentSlotDTO
 import moscow.createdin.backend.model.enums.RentSlotStatusType
 import moscow.createdin.backend.repository.RentSlotRepository
 import org.springframework.stereotype.Service
@@ -25,7 +24,9 @@ class RentSlotService(
             .also { rentSlotRepository.save(it) }
 
         return placeService.findById(list[0].placeId)
-            .let { placeMapper.entityToDomain(it) }
+            .let {
+                val rentSlots = getByPlaceId(it.id!!)
+                placeMapper.entityToDomain(it, rentSlots) }
             .let { placeMapper.domainToDto(it, listOf()) }
     }
 
@@ -34,10 +35,9 @@ class RentSlotService(
             .let { rentSlotMapper.entityToDomain(it) }
     }
 
-    fun getByPlaceId(placeId: Long): List<RentSlotDTO> {
+    private fun getByPlaceId(placeId: Long): List<RentSlot> {
         return rentSlotRepository.findByPlaceId(placeId)
             .map { rentSlotMapper.entityToDomain(it) }
-            .map { rentSlotMapper.domainToDto(it) }
     }
 
     fun delete(ids: List<Long>): PlaceDTO {
@@ -45,7 +45,9 @@ class RentSlotService(
 
         val placeId = getById(ids[0]).placeId!!
         return placeService.findById(placeId)
-            .let { placeMapper.entityToDomain(it) }
+            .let {
+                val rentSlots = getByPlaceId(it.id!!)
+                placeMapper.entityToDomain(it, rentSlots) }
             .let { placeMapper.domainToDto(it, listOf()) }
     }
 

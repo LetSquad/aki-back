@@ -19,5 +19,13 @@ interface PlaceRepository {
     fun save(place: PlaceEntity): Long
 
     fun findById(id: Long): PlaceEntity
+
+    fun findByUserId(
+        pageNumber: Long,
+        limit: Int,
+        userId: Long
+    ): List<PlaceEntity>
+    fun countByUserId(userId: Long): Int
+
     fun update(place: PlaceEntity)
 }

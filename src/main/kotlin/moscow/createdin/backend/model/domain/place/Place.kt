@@ -4,6 +4,7 @@ import moscow.createdin.backend.model.domain.AkiUser
 import moscow.createdin.backend.model.domain.Area
 import moscow.createdin.backend.model.domain.Coordinates
 import moscow.createdin.backend.model.domain.Price
+import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.SpecializationType
 
@@ -14,9 +15,9 @@ data class Place(
     val area: Area?,
     val coordinates: Coordinates?,
 
-    val type: String,
+    val type: String?,
     val name: String,
-    val specialization: SpecializationType,
+    val specialization: List<SpecializationType>,
     val description: String,
     val address: String,
     val phone: String,
@@ -38,5 +39,6 @@ data class Place(
     val status: PlaceConfirmationStatus,
     val banReason: String?,
     val admin: Long?,
-    val price: Price?
+    val price: Price?,
+    val rentSlots: List<RentSlot>?
 )

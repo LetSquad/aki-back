@@ -5,19 +5,14 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import moscow.createdin.backend.model.dto.AkiUserDTO
 import moscow.createdin.backend.model.dto.AkiUserUpdateDTO
+import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.ResetUserPasswordTO
 import moscow.createdin.backend.service.ResetPasswordService
 import moscow.createdin.backend.service.UserService
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RequestPart
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 @RequestMapping("/api/user")
@@ -26,12 +21,18 @@ class UserController(
     private val resetPasswordService: ResetPasswordService
 ) {
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("ban")
+    fun ban(@RequestBody banRequestDTO: BanRequestDTO): AkiUserDTO {
+        return userService.ban(banRequestDTO)
+    }
+
     @GetMapping
     fun getCurrentUser(): AkiUserDTO {
         return userService.getCurrentUser()
     }
 
-    @PutMapping()
+    @PutMapping
     fun edit(
         @Parameter(
             ref = "Модель данных юзера",
@@ -40,6 +41,19 @@ class UserController(
         @Parameter(ref = "Фотография юзера") image: MultipartFile?
     ): AkiUserDTO {
         return userService.update(user, image)
+    }
+
+    @GetMapping("activate/{code}")
+    @Operation(
+        summary = "Подтверждение зарегистрированного пользователя",
+        description = "После перехода по ссылке пользователь становится активным"
+    )
+    fun activate(
+        @Parameter(ref = "Пользовательский код подтверждения") @PathVariable code: String,
+        response: HttpServletResponse
+    ) {
+        userService.activateUser(code)
+        response.sendRedirect("/?activation=true")
     }
 
     @PostMapping("reset-password")

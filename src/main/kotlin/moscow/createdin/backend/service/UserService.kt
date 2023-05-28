@@ -2,13 +2,16 @@ package moscow.createdin.backend.service
 
 import moscow.createdin.backend.context.UserContext
 import moscow.createdin.backend.exception.ImageNotSavedException
+import moscow.createdin.backend.exception.IncorrectActivationCodeException
 import moscow.createdin.backend.getLogger
 import moscow.createdin.backend.mapper.UserMapper
 import moscow.createdin.backend.model.domain.AkiUser
 import moscow.createdin.backend.model.dto.AkiUserDTO
 import moscow.createdin.backend.model.dto.AkiUserDTOList
 import moscow.createdin.backend.model.dto.AkiUserUpdateDTO
+import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.entity.AkiUserEntity
+import moscow.createdin.backend.model.enums.AdminStatusType
 import moscow.createdin.backend.repository.AkiUserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -22,6 +25,24 @@ class UserService(
     private val userMapper: UserMapper,
     private val userRepository: AkiUserRepository
 ) {
+
+    fun ban(banRequestDTO: BanRequestDTO): AkiUserDTO {
+        val adminUser = getCurrentUserDomain()
+        val editable = userRepository.findById(banRequestDTO.bannedId)
+            .let { userMapper.entityToDomain(it) }
+
+        val result = editable.copy(
+            isBanned = true,
+            banReason = banRequestDTO.reason,
+            admin = adminUser.id
+        )
+
+        return userMapper.domainToEntity(result)
+            .also { userRepository.update(it) }
+            .let { userRepository.findById(result.id!!) }
+            .let { userMapper.entityToDomain(it) }
+            .let { userMapper.domainToDto(it) }
+    }
 
     fun isEmailExists(email: String): Boolean = userRepository.existsByEmail(email)
 
@@ -67,6 +88,11 @@ class UserService(
         return userRepository.findById(req.id)
             .let { userMapper.entityToDomain(it) }
             .let { userMapper.domainToDto(it) }
+    }
+
+    fun activateUser(activationCode: String) {
+        val isUserActivated: Boolean = userRepository.activateUser(activationCode)
+        if (!isUserActivated) throw IncorrectActivationCodeException(activationCode)
     }
 
     fun getCurrentUserDomain(): AkiUser {
