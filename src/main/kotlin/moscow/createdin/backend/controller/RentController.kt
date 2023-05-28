@@ -1,5 +1,6 @@
 package moscow.createdin.backend.controller
 
+import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.CreateRentRequestDTO
 import moscow.createdin.backend.model.dto.RentDTO
 import moscow.createdin.backend.service.RentService
@@ -39,5 +40,11 @@ class RentController(
     @DeleteMapping
     fun delete(@RequestBody id: Long) {
         rentService.delete(id)
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("ban")
+    fun ban(@RequestBody banRequestDTO: BanRequestDTO): RentDTO {
+        return rentService.ban(banRequestDTO)
     }
 }

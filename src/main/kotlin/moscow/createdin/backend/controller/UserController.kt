@@ -5,9 +5,11 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import moscow.createdin.backend.model.dto.AkiUserDTO
 import moscow.createdin.backend.model.dto.AkiUserUpdateDTO
+import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.ResetUserPasswordTO
 import moscow.createdin.backend.service.ResetPasswordService
 import moscow.createdin.backend.service.UserService
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import javax.servlet.http.HttpServletResponse
@@ -18,6 +20,12 @@ class UserController(
     private val userService: UserService,
     private val resetPasswordService: ResetPasswordService
 ) {
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("ban")
+    fun ban(@RequestBody banRequestDTO: BanRequestDTO): AkiUserDTO {
+        return userService.ban(banRequestDTO)
+    }
 
     @GetMapping
     fun getCurrentUser(): AkiUserDTO {

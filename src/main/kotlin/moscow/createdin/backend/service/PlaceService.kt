@@ -7,11 +7,13 @@ import moscow.createdin.backend.mapper.PlaceMapper
 import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.domain.place.Place
+import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.place.NewPlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
 import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
 import moscow.createdin.backend.model.entity.PlaceEntity
+import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
 import moscow.createdin.backend.repository.PlaceRepository
@@ -32,6 +34,26 @@ class PlaceService(
     private val rentSlotRepository: RentSlotRepository,
     private val filesystemService: FilesystemService
 ) {
+
+    fun ban(banRequestDTO: BanRequestDTO): PlaceDTO {
+        val adminUser = userService.getCurrentUserDomain()
+        val editable = getDomain(banRequestDTO.bannedId)
+
+        val result = editable.copy(
+            status = PlaceConfirmationStatus.CONFIRMED,
+            banReason = banRequestDTO.reason,
+            admin = adminUser.id
+        )
+
+        return placeMapper.domainToEntity(result)
+            .also { placeRepository.update(it) }
+            .let { placeRepository.findById(result.id!!) }
+            .let {
+                val rentSlots = getByPlaceId(it.id!!)
+                placeMapper.entityToDomain(it, rentSlots)
+            }
+            .let { placeMapper.domainToDto(it, emptyList()) }
+    }
 
     fun getPlaces(
         specialization: String?, capacity: Int?, fullAreaMin: Int?, fullAreaMax: Int?, levelNumberMin: Int?,
@@ -121,12 +143,16 @@ class PlaceService(
 
     fun get(id: Long): PlaceDTO {
         val placeImages = placeImageService.getPlaceImages(id)
+        return getDomain(id)
+            .let { placeMapper.domainToDto(it, placeImages) }
+    }
+
+    fun getDomain(id: Long): Place {
         return placeRepository.findById(id)
             .let {
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, placeImages) }
     }
 
     fun getCurrentUserPlaces(

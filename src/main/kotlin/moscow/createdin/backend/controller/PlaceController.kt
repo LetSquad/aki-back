@@ -2,6 +2,7 @@ package moscow.createdin.backend.controller
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
+import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.place.NewPlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
@@ -53,6 +54,12 @@ class PlaceController(private val placeService: PlaceService) {
         request: HttpServletRequest
     ): PlaceDTO {
         return placeService.create(place, request.retrieveImages())
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("ban")
+    fun ban(@RequestBody banRequestDTO: BanRequestDTO): PlaceDTO {
+        return placeService.ban(banRequestDTO)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
