@@ -203,12 +203,8 @@ class PlaceService(
         val oldPlace = findById(updatePlace.id)
         if (user.id != oldPlace.user.id) throw WrongUserException("wrong user with id = ${user.id} was id = ${oldPlace.user.id}")
 
-        val placeImages: List<String> = if (images.isNotEmpty()) {
-            placeImageService.clearPlaceImages(updatePlace.id)
-            saveImages(updatePlace.id, images)
-        } else {
-            emptyList()
-        }
+        placeImageService.clearPlaceImages(updatePlace.id, updatePlace.placeImages)
+        saveImages(updatePlace.id, images)
 
         return placeMapper.updatedDtoToDomain(updatePlace, user, oldPlace.area?.id)
             .let { placeMapper.simpleDomainToEntity(it, user, oldPlace.area) }
@@ -218,7 +214,7 @@ class PlaceService(
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, placeImages) }
+            .let { placeMapper.domainToDto(it, placeImageService.getPlaceImages(it.id)) }
     }
 
     fun findById(id: Long): PlaceEntity {

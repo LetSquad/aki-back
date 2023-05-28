@@ -35,10 +35,13 @@ class PlaceImageJdbc(
         )
     }
 
-    override fun deleteByPlaceId(placeId: Long) {
+    override fun deleteByPlaceId(placeId: Long, images: List<String>?) {
         val namedParameters = MapSqlParameterSource()
             .addValue("placeId", placeId)
-        jdbcTemplate.update("DELETE FROM place_image WHERE place_id = :placeId", namedParameters)
+            .addValue("images", images)
+        jdbcTemplate.update(
+            "DELETE FROM place_image WHERE place_id = :placeId AND image NOT IN (:images)",
+            namedParameters)
     }
 
     companion object {

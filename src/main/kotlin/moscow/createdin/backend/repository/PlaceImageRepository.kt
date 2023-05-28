@@ -10,5 +10,5 @@ interface PlaceImageRepository {
 
     fun save(placeImage: PlaceImageEntity)
 
-    fun deleteByPlaceId(placeId: Long)
+    fun deleteByPlaceId(placeId: Long, images: List<String>?)
 }

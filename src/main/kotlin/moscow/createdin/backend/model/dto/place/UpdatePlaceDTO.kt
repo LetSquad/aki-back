@@ -14,6 +14,7 @@ data class UpdatePlaceDTO(
     val minCapacity: Int?,
     val maxCapacity: Int?,
     val parking: Boolean?,
+    val placeImages: List<String>?,
 
     val services: List<PlaceServiceDTO>?,
     val equipments: List<PlaceEquipmentDTO>?,

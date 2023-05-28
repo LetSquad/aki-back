@@ -32,7 +32,7 @@ class RentSlotJdbc(
         return jdbcTemplate.query(
             """
                 $SQL_SELECT_ENTITY
-                WHERE rent_slot.place_id = :placeId
+                WHERE rent_slot.place_id = :placeId AND rent_slot.rent_slot_status != 'DELETED'
             """,
             parameters, rowMapper
         )

@@ -20,7 +20,7 @@ class PlaceImageService(
         placeImageRepository.save(PlaceImageEntity(null, placeId, image, priority))
     }
 
-    fun clearPlaceImages(placeId: Long) {
-        placeImageRepository.deleteByPlaceId(placeId)
+    fun clearPlaceImages(placeId: Long, images: List<String>?) {
+        placeImageRepository.deleteByPlaceId(placeId, images)
     }
 }
