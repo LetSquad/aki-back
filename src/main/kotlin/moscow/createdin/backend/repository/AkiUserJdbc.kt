@@ -55,14 +55,34 @@ class AkiUserJdbc(
 
     override fun findByEmail(email: String): AkiUserEntity {
         val parameters = MapSqlParameterSource()
-            .addValue("email", email)
+        parameters.addValue("email", email)
+
         return jdbcTemplate.queryForObject(
             """
-                SELECT id as user_id, user_type, user_email, password, role, first_name, last_name, middle_name, 
-                    user_phone, user_image, logo_image, inn, organization, job_title, is_activated, 
-                    activation_code, is_banned, user_admin_id, user_ban_reason
-                FROM aki_user 
-                WHERE user_email = :email
+                SELECT 
+                    id as user_id, 
+                    user_type, 
+                    user_email, 
+                    password, 
+                    role, 
+                    first_name, 
+                    last_name, 
+                    middle_name, 
+                    user_phone, 
+                    user_image, 
+                    logo_image, 
+                    inn, 
+                    organization, 
+                    job_title, 
+                    is_activated, 
+                    activation_code, 
+                    is_banned, 
+                    user_admin_id, 
+                    user_ban_reason
+                FROM 
+                    aki_user 
+                WHERE 
+                    user_email = :email
             """, parameters, rowMapper
         )!!
     }

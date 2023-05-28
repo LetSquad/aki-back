@@ -13,7 +13,6 @@ import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
 import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
 import moscow.createdin.backend.model.entity.PlaceEntity
-import moscow.createdin.backend.model.enums.AdminStatusType
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
@@ -53,7 +52,10 @@ class PlaceService(
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, emptyList()) }
+            .let {
+                val placeImages = placeImageService.getPlaceImages(it.id)
+                placeMapper.domainToDto(it, placeImages)
+            }
     }
 
     fun ban(banRequestDTO: BanRequestDTO): PlaceDTO {
@@ -73,7 +75,10 @@ class PlaceService(
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, emptyList()) }
+            .let {
+                val placeImages = placeImageService.getPlaceImages(it.id)
+                placeMapper.domainToDto(it, placeImages)
+            }
     }
 
     fun getPlaces(

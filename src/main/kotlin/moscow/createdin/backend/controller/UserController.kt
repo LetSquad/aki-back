@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import moscow.createdin.backend.model.dto.AkiUserDTO
 import moscow.createdin.backend.model.dto.AkiUserUpdateDTO
 import moscow.createdin.backend.model.dto.BanRequestDTO
+import moscow.createdin.backend.model.dto.ResetPasswordAkiUserDTOList
 import moscow.createdin.backend.model.dto.ResetUserPasswordTO
 import moscow.createdin.backend.service.ResetPasswordService
 import moscow.createdin.backend.service.UserService
@@ -61,8 +62,8 @@ class UserController(
         summary = "Восстановление пароля пользователя",
         description = "Отправляем email-сообщение с ссылкой на восстановление пароля пользователя"
     )
-    fun resetUserPassword(@Parameter(ref = "Email пользователя") @RequestBody userEmail: String) {
-        resetPasswordService.resetPassword(userEmail)
+    fun resetUserPassword(@Parameter(ref = "Email пользователя") @RequestBody req: ResetPasswordAkiUserDTOList) {
+        resetPasswordService.resetPassword(req.userEmail)
     }
 
     @GetMapping("validate-reset-password-token/{token}")

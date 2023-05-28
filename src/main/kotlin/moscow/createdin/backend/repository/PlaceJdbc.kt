@@ -322,6 +322,7 @@ class PlaceJdbc(
                     u.is_banned,
                     u.user_ban_reason,
                     u.user_admin_id,
+                    u.activation_code,
                 
                     a.id,
                     a.user_id,
@@ -336,14 +337,13 @@ class PlaceJdbc(
                     a.area_coordinates_id,
                     a.area_ban_reason,
                     a.area_admin_id,
-                    u.activation_code,
                 
                     st.popular_count,
                     st.avg_rating,
                     st.min_price,
                     st.time_start,
                     st.time_end
-                    
+                    /**/
                 FROM place p
                 INNER JOIN aki_user u on p.user_id = u.id
                 LEFT JOIN area a on p.area_id = a.id
