@@ -53,12 +53,12 @@ class PlaceJdbc(
         max(rs.price) as max_price,
         min(rs.time_start) as time_start,
         min(rs.time_end) as time_end,
-        r.place_id as place_id
+        rs.place_id as place_id
     FROM rent_slot rs
              LEFT JOIN rent r on rs.place_id = r.place_id
              LEFT JOIN place_review pr on r.id = pr.rent_id
     WHERE rs.rent_slot_status = 'OPEN'
-    GROUP BY r.place_id
+    GROUP BY rs.place_id
                 ) as st on p.id = st.place_id
                 WHERE (:withSpecializationFilter = false OR :specialization::SPECIALIZATION_ENUM = ANY (specialization))
                 AND (:withRatingFilter = false OR :rating >= (rating))
@@ -444,12 +444,12 @@ class PlaceJdbc(
         max(rs.price) as max_price,
         min(rs.time_start) as time_start,
         min(rs.time_end) as time_end,
-        r.place_id as place_id
+        rs.place_id as place_id
     FROM rent_slot rs
              LEFT JOIN rent r on rs.place_id = r.place_id
              LEFT JOIN place_review pr on r.id = pr.rent_id
     WHERE rs.rent_slot_status = 'OPEN'
-    GROUP BY r.place_id
+    GROUP BY rs.place_id
                 ) as st on p.id = st.place_id
                     """
 
