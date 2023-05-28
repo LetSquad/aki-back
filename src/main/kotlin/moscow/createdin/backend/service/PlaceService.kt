@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.sql.Timestamp
+import kotlin.math.roundToInt
 
 @Service
 class PlaceService(
@@ -102,7 +103,7 @@ class PlaceService(
         sortType: PlaceSortType,
         sortDirection: PlaceSortDirection
     ): PlaceListDTO {
-        val total = placeRepository.countByFilter(
+        val count = placeRepository.countByFilter(
             specialization,
             rating,
             priceMin,
@@ -117,6 +118,8 @@ class PlaceService(
             dateFrom,
             dateTo
         )
+
+        val total = (count / limit.toDouble()).roundToInt()
 
         val placeEntityList = placeRepository.findAll(
             specialization,
