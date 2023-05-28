@@ -15,4 +15,11 @@ interface RentRepository {
         renterId: Long
     ): Long
 
+    fun findByRenterId(
+        pageNumber: Long,
+        limit: Int,
+        userId: Long
+    ): List<RentEntity>
+    fun countByRenterId(userId: Long): Int
+
 }

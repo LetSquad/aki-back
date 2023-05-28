@@ -14,6 +14,6 @@ class UserPasswordResetTokenRowMapper(
         id = rs.getLong("id"),
         user = akiUserRowMapper.mapRow(rs, rowNum),
         resetToken = rs.getString("reset_token"),
-        expire = rs.getDate("expire").toInstant()
+        expire = rs.getTimestamp("expire")
     )
 }

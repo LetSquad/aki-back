@@ -1,7 +1,7 @@
 package moscow.createdin.backend.service
 
 import moscow.createdin.backend.exception.ImageNotSavedException
-import moscow.createdin.backend.exception.WrongUserExceptionException
+import moscow.createdin.backend.exception.WrongUserException
 import moscow.createdin.backend.mapper.AreaMapper
 import moscow.createdin.backend.mapper.PlaceMapper
 import moscow.createdin.backend.mapper.RentSlotMapper
@@ -16,11 +16,17 @@ import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
+import moscow.createdin.backend.model.enums.UserRole
 import moscow.createdin.backend.repository.PlaceRepository
 import moscow.createdin.backend.repository.RentSlotRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
+import java.sql.Timestamp
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+import kotlin.math.roundToInt
 
 @Service
 class PlaceService(
@@ -35,13 +41,12 @@ class PlaceService(
     private val filesystemService: FilesystemService
 ) {
 
-    fun ban(banRequestDTO: BanRequestDTO): PlaceDTO {
+    fun approve(id: Long): PlaceDTO {
         val adminUser = userService.getCurrentUserDomain()
-        val editable = getDomain(banRequestDTO.bannedId)
+        val editable = getDomain(id)
 
         val result = editable.copy(
-            status = PlaceConfirmationStatus.CONFIRMED,
-            banReason = banRequestDTO.reason,
+            status = PlaceConfirmationStatus.VERIFIED,
             admin = adminUser.id
         )
 
@@ -52,22 +57,92 @@ class PlaceService(
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, emptyList()) }
+            .let {
+                val placeImages = placeImageService.getPlaceImages(it.id)
+                placeMapper.domainToDto(it, placeImages)
+            }
+    }
+
+    fun ban(banRequestDTO: BanRequestDTO): PlaceDTO {
+        val adminUser = userService.getCurrentUserDomain()
+        val editable = getDomain(banRequestDTO.id)
+
+        val result = editable.copy(
+            status = PlaceConfirmationStatus.BANNED,
+            banReason = banRequestDTO.banReason,
+            admin = adminUser.id
+        )
+
+        return placeMapper.domainToEntity(result)
+            .also { placeRepository.update(it) }
+            .let { placeRepository.findById(result.id!!) }
+            .let {
+                val rentSlots = getByPlaceId(it.id!!)
+                placeMapper.entityToDomain(it, rentSlots)
+            }
+            .let {
+                val placeImages = placeImageService.getPlaceImages(it.id)
+                placeMapper.domainToDto(it, placeImages)
+            }
     }
 
     fun getPlaces(
-        specialization: String?, capacity: Int?, fullAreaMin: Int?, fullAreaMax: Int?, levelNumberMin: Int?,
-        levelNumberMax: Int?, parking: Boolean?, pageNumber: Long, limit: Int, sortType: PlaceSortType,
+        specialization: String?,
+        rating: Int?,
+        priceMin: Int?,
+        priceMax: Int?,
+        capacityMin: Int?,
+        capacityMax: Int?,
+        squareMin: Int?,
+        squareMax: Int?,
+        levelNumberMin: Int?,
+        levelNumberMax: Int?,
+        withParking: Boolean?,
+        dateFrom: LocalDate?,
+        dateTo: LocalDate?,
+
+        pageNumber: Long,
+        limit: Int,
+        sortType: PlaceSortType,
         sortDirection: PlaceSortDirection
     ): PlaceListDTO {
-        val total = placeRepository.countByFilter(
-            specialization, capacity, fullAreaMin, fullAreaMax,
-            levelNumberMin, levelNumberMax, parking
+        val count = placeRepository.countByFilter(
+            specialization,
+            rating,
+            priceMin,
+            priceMax,
+            capacityMin,
+            capacityMax,
+            squareMin,
+            squareMax,
+            levelNumberMin,
+            levelNumberMax,
+            withParking,
+            dateFrom?.let { Timestamp.from(dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC)) },
+            dateTo?.let { Timestamp.from(dateTo.atStartOfDay().toInstant(ZoneOffset.UTC)) }
         )
 
+        val total = (count / limit.toDouble()).roundToInt()
+
         val placeEntityList = placeRepository.findAll(
-            specialization, capacity, fullAreaMin, fullAreaMax,
-            levelNumberMin, levelNumberMax, parking, pageNumber, limit, getSortType(sortType), sortDirection
+            specialization,
+            rating,
+            priceMin,
+            priceMax,
+            capacityMin,
+            capacityMax,
+            squareMin,
+            squareMax,
+            levelNumberMin,
+            levelNumberMax,
+            withParking,
+            dateFrom?.let { Timestamp.from(dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC)) },
+            dateTo?.let { Timestamp.from(dateTo.atStartOfDay().toInstant(ZoneOffset.UTC)) },
+
+            pageNumber,
+            limit,
+            sortType,
+            sortDirection
         )
 
         val placeImageMap = mutableMapOf<Long?, List<String>>()
@@ -84,6 +159,15 @@ class PlaceService(
             .map { placeMapper.domainToDto(it, placeImageMap[it.id]) }
 
         return PlaceListDTO(places, total)
+    }
+
+    fun delete(id: Long) {
+        val editableArea = getDomain(id)
+
+        val result = editableArea.copy(status = PlaceConfirmationStatus.DELETED)
+
+        placeMapper.domainToEntity(result)
+            .also { placeRepository.update(it) }
     }
 
     @Transactional
@@ -117,14 +201,10 @@ class PlaceService(
     fun edit(updatePlace: UpdatePlaceDTO, images: Collection<MultipartFile>): PlaceDTO {
         val user = userService.getCurrentUserDomain()
         val oldPlace = findById(updatePlace.id)
-        if (user.id != oldPlace.user.id) throw WrongUserExceptionException("wrong user with id = ${user.id} was id = ${oldPlace.user.id}")
+        if (user.id != oldPlace.user.id) throw WrongUserException("wrong user with id = ${user.id} was id = ${oldPlace.user.id}")
 
-        val placeImages: List<String> = if (images.isNotEmpty()) {
-            placeImageService.clearPlaceImages(updatePlace.id)
-            saveImages(updatePlace.id, images)
-        } else {
-            emptyList()
-        }
+        placeImageService.clearPlaceImages(updatePlace.id, updatePlace.placeImages)
+        saveImages(updatePlace.id, images)
 
         return placeMapper.updatedDtoToDomain(updatePlace, user, oldPlace.area?.id)
             .let { placeMapper.simpleDomainToEntity(it, user, oldPlace.area) }
@@ -134,7 +214,7 @@ class PlaceService(
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, placeImages) }
+            .let { placeMapper.domainToDto(it, placeImageService.getPlaceImages(it.id)) }
     }
 
     fun findById(id: Long): PlaceEntity {
@@ -160,21 +240,37 @@ class PlaceService(
         limit: Int
     ): PlaceListDTO {
         val user = userService.getCurrentUserDomain()
-        val total = placeRepository.countByUserId(user.id!!)
-        val places = placeRepository.findByUserId(pageNumber, limit, user.id)
-            .map {
-                val rentSlots = getByPlaceId(it.id!!)
-                placeMapper.entityToDomain(it, rentSlots)
-            }
-            .map {
-                val placeImages = placeImageService.getPlaceImages(it.id!!)
-                placeMapper.domainToDto(it, placeImages)
-            }
 
-        return PlaceListDTO(places, total)
+        if (user.role == UserRole.LANDLORD) {
+            val total = placeRepository.countByUserId(user.id!!)
+            val places = placeRepository.findByUserId(pageNumber, limit, user.id)
+                .map {
+                    val rentSlots = getByPlaceId(it.id!!)
+                    placeMapper.entityToDomain(it, rentSlots)
+                }
+                .map {
+                    val placeImages = placeImageService.getPlaceImages(it.id!!)
+                    placeMapper.domainToDto(it, placeImages)
+                }
+
+            return PlaceListDTO(places, total)
+        } else {
+            val total = placeRepository.countUnverified()
+            val places = placeRepository.findUnverified(pageNumber, limit)
+                .map {
+                    val rentSlots = getByPlaceId(it.id!!)
+                    placeMapper.entityToDomain(it, rentSlots)
+                }
+                .map {
+                    val placeImages = placeImageService.getPlaceImages(it.id!!)
+                    placeMapper.domainToDto(it, placeImages)
+                }
+
+            return PlaceListDTO(places, total)
+        }
     }
 
-    private fun getByPlaceId(placeId: Long): List<RentSlot> {
+    fun getByPlaceId(placeId: Long): List<RentSlot> {
         return rentSlotRepository.findByPlaceId(placeId)
             .map { rentSlotMapper.entityToDomain(it) }
     }

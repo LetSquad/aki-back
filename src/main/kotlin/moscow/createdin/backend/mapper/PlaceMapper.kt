@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PlaceMapper(
+    private val akiProperties: AkiProperties,
     private val properties: AkiProperties,
     private val userMapper: UserMapper,
     private val areaMapper: AreaMapper,
@@ -45,6 +46,7 @@ class PlaceMapper(
         rentableArea = place.freeSquare,
         minCapacity = place.minCapacity,
         maxCapacity = place.maxCapacity,
+        parking = place.parking,
 
         services = place.services?.map { dtoToPlaceService(it) },
         rules = place.rules,
@@ -52,7 +54,7 @@ class PlaceMapper(
         facilities = place.facilities?.map { dtoToPlaceFacilities(it) },
         equipments = place.equipments?.map { dtoToPlaceEquipments(it) },
 
-        status = PlaceConfirmationStatus.PENDING,
+        status = PlaceConfirmationStatus.UNVERIFIED,
         banReason = null,
         admin = place.admin,
         price = null
@@ -75,8 +77,9 @@ class PlaceMapper(
         levelNumber = -1,
         fullArea = -1,
         rentableArea = place.freeSquare,
-        minCapacity = place.capacityMin,
-        maxCapacity = place.capacityMax,
+        minCapacity = place.minCapacity,
+        maxCapacity = place.maxCapacity,
+        parking = place.parking,
 
         services = place.services?.map { dtoToPlaceService(it) },
         rules = place.rules,
@@ -84,7 +87,7 @@ class PlaceMapper(
         facilities = place.facilities?.map { dtoToPlaceFacilities(it) },
         equipments = place.equipments?.map { dtoToPlaceEquipments(it) },
 
-        status = PlaceConfirmationStatus.PENDING,
+        status = PlaceConfirmationStatus.UNVERIFIED,
         banReason = null,
         admin = place.admin,
         price = null
@@ -110,8 +113,9 @@ class PlaceMapper(
         levelNumber = place.levelNumber,
         fullArea = place.fullArea,
         rentableArea = place.rentableArea,
-        capacityMin = place.minCapacity,
-        capacityMax = place.maxCapacity,
+        minCapacity = place.minCapacity,
+        maxCapacity = place.maxCapacity,
+        parking = place.parking,
 
         services = stringToPGObject(gson.toJson(place.services)),
         rules = place.rules,
@@ -143,8 +147,9 @@ class PlaceMapper(
         levelNumber = place.levelNumber,
         fullArea = place.fullArea,
         rentableArea = place.rentableArea,
-        capacityMin = place.capacityMin,
-        capacityMax = place.capacityMax,
+        minCapacity = place.minCapacity,
+        maxCapacity = place.maxCapacity,
+        parking = place.parking,
 
         services = stringToPGObject(gson.toJson(place.services)),
         rules = place.rules,
@@ -176,8 +181,9 @@ class PlaceMapper(
         levelNumber = place.levelNumber,
         fullArea = place.fullArea,
         rentableArea = place.rentableArea,
-        capacityMin = place.capacityMin,
-        capacityMax = place.capacityMax,
+        minCapacity = place.minCapacity,
+        maxCapacity = place.maxCapacity,
+        parking = place.parking,
 
         services = gson.fromJson(
             place.services?.value ?: "[]",
@@ -217,12 +223,12 @@ class PlaceMapper(
         status = place.status,
         freeSquare = place.rentableArea,
         fullSquare = place.fullArea,
-        capacityMin = place.capacityMin,
-        capacityMax = place.capacityMax,
-        parking = true, //??? Откуда брать
+        minCapacity = place.minCapacity,
+        maxCapacity = place.maxCapacity,
+        parking = place.parking,
         price = PlacePriceDTO(place.price?.price, place.price?.priceType),
         services = place.services?.map { placeServiceToDTO(it) },
-        placeImages = placeImages,
+        placeImages = placeImages?.map { "${akiProperties.url}/${akiProperties.imageUrlPrefix}/${it}"},
         equipments = place.equipments?.map { placeEquipmentsToDTO(it) },
         facilities = place.facilities?.map { placeFacilitiesToDTO(it) },
         admin = place.admin,

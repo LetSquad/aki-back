@@ -2,7 +2,7 @@ package moscow.createdin.backend.controller
 
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
-import moscow.createdin.backend.model.dto.BanRequestDTO
+import moscow.createdin.backend.model.dto.BanDataRequestDTO
 import moscow.createdin.backend.model.dto.place.NewPlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
@@ -10,12 +10,16 @@ import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
 import moscow.createdin.backend.service.PlaceService
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.springframework.web.server.UnsupportedMediaTypeStatusException
+import java.sql.Timestamp
+import java.time.LocalDate
+import java.time.ZonedDateTime
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -25,20 +29,43 @@ class PlaceController(private val placeService: PlaceService) {
     @GetMapping
     fun getPlaces(
         @Parameter(description = "Специализация площадки") @RequestParam specialization: String?,
-        @Parameter(description = "Желаемая вместимость площадки") @RequestParam capacity: Int?,
-        @Parameter(description = "Площадь площадки минимальная") @RequestParam fullAreaMin: Int?,
-        @Parameter(description = "Площадь площадки максимальная") @RequestParam fullAreaMax: Int?,
+        @Parameter(description = "Рейтинг") @RequestParam rating: Int?,
+        @Parameter(description = "Минимальная цена площадки") @RequestParam priceMin: Int?,
+        @Parameter(description = "Максимальная цена площадки") @RequestParam priceMax: Int?,
+        @Parameter(description = "Минимальная вместимость площадки") @RequestParam capacityMin: Int?,
+        @Parameter(description = "Максимальная вместимость площадки") @RequestParam capacityMax: Int?,
+        @Parameter(description = "Площадь площадки минимальная") @RequestParam squareMin: Int?,
+        @Parameter(description = "Площадь площадки максимальная") @RequestParam squareMax: Int?,
         @Parameter(description = "Минимальный этаж") @RequestParam levelNumberMin: Int?,
         @Parameter(description = "Максимальный этаж") @RequestParam levelNumberMax: Int?,
-        @Parameter(description = "Наличие парковки") @RequestParam parking: Boolean?,
+        @Parameter(description = "Наличие парковки") @RequestParam withParking: Boolean?,
+        @Parameter(description = "Начальная дата бронирования") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") dateFrom: LocalDate?,
+        @Parameter(description = "Конечная дата бронирования") @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") dateTo: LocalDate?,
+
         @Parameter(description = "Страница на фронте") @RequestParam pageNumber: Long,
         @Parameter(description = "Количество площадок на страницу") @RequestParam limit: Int,
         @Parameter(description = "Сортировка") @RequestParam sortType: PlaceSortType,
         @Parameter(description = "Направление сортировки") @RequestParam sortDirection: PlaceSortDirection,
     ): PlaceListDTO {
         return placeService.getPlaces(
-            specialization, capacity, fullAreaMin, fullAreaMax,
-            levelNumberMin, levelNumberMax, parking, pageNumber, limit, sortType, sortDirection
+            specialization,
+            rating,
+            priceMin,
+            priceMax,
+            capacityMin,
+            capacityMax,
+            squareMin,
+            squareMax,
+            levelNumberMin,
+            levelNumberMax,
+            withParking,
+            dateFrom,
+            dateTo,
+
+            pageNumber,
+            limit,
+            sortType,
+            sortDirection
         )
     }
 
@@ -58,8 +85,14 @@ class PlaceController(private val placeService: PlaceService) {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("ban")
-    fun ban(@RequestBody banRequestDTO: BanRequestDTO): PlaceDTO {
-        return placeService.ban(banRequestDTO)
+    fun ban(@RequestBody banRequestDTO: BanDataRequestDTO): PlaceDTO {
+        return placeService.ban(banRequestDTO.data)
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("{id}/approve")
+    fun approve(@PathVariable id: Long): PlaceDTO {
+        return placeService.approve(id)
     }
 
     @PreAuthorize("hasRole('LANDLORD')")
@@ -81,7 +114,7 @@ class PlaceController(private val placeService: PlaceService) {
         return placeService.get(id)
     }
 
-    @PreAuthorize("hasRole('LANDLORD')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('LANDLORD')")
     @GetMapping("my")
     fun getCurrentUserPlaces(
         @Parameter(description = "Страница на фронте") @RequestParam pageNumber: Long,
@@ -103,5 +136,11 @@ class PlaceController(private val placeService: PlaceService) {
             }
         }
         return images
+    }
+
+    @PreAuthorize("hasRole('LANDLORD')")
+    @DeleteMapping("{id}")
+    fun delete(@PathVariable id: Long) {
+        placeService.delete(id)
     }
 }

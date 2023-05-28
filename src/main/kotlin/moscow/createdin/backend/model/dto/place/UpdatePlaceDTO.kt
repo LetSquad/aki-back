@@ -11,9 +11,10 @@ data class UpdatePlaceDTO(
     val phone: String,
     val description: String,
     val freeSquare: Int,
-    val capacityMin: Int,
-    val capacityMax: Int,
+    val minCapacity: Int?,
+    val maxCapacity: Int?,
     val parking: Boolean?,
+    val placeImages: List<String>?,
 
     val services: List<PlaceServiceDTO>?,
     val equipments: List<PlaceEquipmentDTO>?,

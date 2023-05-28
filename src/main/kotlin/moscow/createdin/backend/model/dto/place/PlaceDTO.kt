@@ -16,8 +16,8 @@ data class PlaceDTO(
     val description: String,
     val fullSquare: Int,
     val freeSquare: Int,
-    val capacityMin: Int,
-    val capacityMax: Int,
+    val minCapacity: Int?,
+    val maxCapacity: Int?,
     val levelNumber: Int?,
     val parking: Boolean?,
 

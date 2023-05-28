@@ -90,12 +90,12 @@ class AreaService(
 
     fun ban(banRequestDTO: BanRequestDTO) {
         val adminUser = userService.getCurrentUserDomain()
-        val editable = areaRepository.findById(banRequestDTO.bannedId)
+        val editable = areaRepository.findById(banRequestDTO.id)
             .let { areaMapper.entityToDomain(it) }
 
         val result = editable.copy(
             status = AdminStatusType.BANNED,
-            banReason = banRequestDTO.reason,
+            banReason = banRequestDTO.banReason,
             admin = adminUser.id
         )
 

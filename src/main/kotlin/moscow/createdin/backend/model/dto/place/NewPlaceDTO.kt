@@ -14,8 +14,8 @@ data class NewPlaceDTO(
     val description: String,
     val fullSquare: Int,
     val freeSquare: Int,
-    val minCapacity: Int,
-    val maxCapacity: Int,
+    val minCapacity: Int?,
+    val maxCapacity: Int?,
     val levelNumber: Int?,
     val parking: Boolean?,
 

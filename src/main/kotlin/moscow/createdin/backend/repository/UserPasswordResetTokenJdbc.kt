@@ -39,28 +39,30 @@ class UserPasswordResetTokenJdbc(
                     uprt.reset_token,
                     uprt.expire,
                     
-                    aki_user.id,
-                    aki_user.email,
-                    aki_user.password,
-                    aki_user.role,
-                    aki_user.first_name,
-                    aki_user.last_name,
-                    aki_user.middle_name,
-                    aki_user.phone,
-                    aki_user.user_image,
-                    aki_user.inn,
-                    aki_user.organization,
-                    aki_user.logo_image,
-                    aki_user.job_title,
-                    aki_user.is_activated,
-                    aki_user.activation_code,
-                    aki_user.is_banned,
-                    aki_user.admin_id,
-                    aki_user.ban_reason,
-                    aki_user.type
-                FROM user_password_reset_token uprt
-                INNER JOIN aki_user on uprt.user_id = aki_user.id
-                WHERE uprt.reset_token = :token
+                    u.id,
+                    u.user_email,
+                    u.password,
+                    u.role,
+                    u.user_type,
+                    u.first_name,
+                    u.last_name,
+                    u.middle_name,
+                    u.user_phone,
+                    u.user_image,
+                    u.inn,
+                    u.organization,
+                    u.activation_code,
+                    u.logo_image,
+                    u.job_title,
+                    u.is_activated,
+                    u.is_banned,
+                    u.user_ban_reason,
+                    u.user_admin_id
+                FROM 
+                    user_password_reset_token uprt
+                INNER JOIN aki_user u on uprt.user_id = u.id
+                WHERE 
+                    uprt.reset_token = :token
             """, parameters, rowMapper
         )!!
     }

@@ -55,7 +55,7 @@ class JwtTokenService(
                 userRole = parsedToken.body.get(CLAIM_ROLE, String::class.java)
             )
         } catch (e: ExpiredJwtException) {
-            log.warn("Received expired jwt", e)
+//            log.warn("Received expired jwt", e)
             null
         }
     }

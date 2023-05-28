@@ -45,6 +45,7 @@ class SecurityConfig(
             .authorizeRequests()
             .antMatchers(HttpMethod.POST, "/api/user/register", "/api/user/reset-password", "/api/user/change-password").permitAll()
             .antMatchers(HttpMethod.GET, "/api/user/activate/*", "/api/user/validate-reset-password-token/*").permitAll()
+            .antMatchers(HttpMethod.GET, "/api/places/**").permitAll()
             .antMatchers(HttpMethod.POST, "/api/auth", "/api/auth/refresh").permitAll()
             .antMatchers("/api/**").authenticated()
             .anyRequest().permitAll()

@@ -11,7 +11,6 @@ import moscow.createdin.backend.model.dto.AkiUserDTOList
 import moscow.createdin.backend.model.dto.AkiUserUpdateDTO
 import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.entity.AkiUserEntity
-import moscow.createdin.backend.model.enums.AdminStatusType
 import moscow.createdin.backend.repository.AkiUserRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -28,12 +27,12 @@ class UserService(
 
     fun ban(banRequestDTO: BanRequestDTO): AkiUserDTO {
         val adminUser = getCurrentUserDomain()
-        val editable = userRepository.findById(banRequestDTO.bannedId)
+        val editable = userRepository.findById(banRequestDTO.id)
             .let { userMapper.entityToDomain(it) }
 
         val result = editable.copy(
             isBanned = true,
-            banReason = banRequestDTO.reason,
+            banReason = banRequestDTO.banReason,
             admin = adminUser.id
         )
 

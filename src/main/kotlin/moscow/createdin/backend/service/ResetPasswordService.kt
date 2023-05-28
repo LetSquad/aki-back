@@ -6,6 +6,7 @@ import moscow.createdin.backend.model.dto.ResetUserPasswordTO
 import moscow.createdin.backend.model.entity.UserPasswordResetTokenEntity
 import moscow.createdin.backend.repository.UserPasswordResetTokenRepository
 import org.springframework.stereotype.Service
+import java.sql.Timestamp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
@@ -32,7 +33,7 @@ class ResetPasswordService(
             id = null,
             user = userService.getUserById(userId),
             resetToken = token,
-            expire = calculateExpiryDate(akiProperties.resetPasswordExpirationMin)
+            expire = Timestamp.from(calculateExpiryDate(akiProperties.resetPasswordExpirationMin))
         )
         userPasswordResetRepository.save(userPasswordReset)
     }
@@ -45,7 +46,7 @@ class ResetPasswordService(
     fun isTokenValid(token: String): Boolean {
         val expiryDate = getByToken(token).expire
         val now = Instant.now()
-        return now < expiryDate
+        return now < expiryDate.toInstant()
     }
 
     private fun getByToken(token: String): UserPasswordResetTokenEntity {
