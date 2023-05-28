@@ -1,10 +1,12 @@
 package moscow.createdin.backend.service
 
+import moscow.createdin.backend.exception.ImageNotSavedException
 import moscow.createdin.backend.exception.WrongUserExceptionException
 import moscow.createdin.backend.mapper.AreaMapper
 import moscow.createdin.backend.mapper.PlaceMapper
 import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.RentSlot
+import moscow.createdin.backend.model.domain.place.Place
 import moscow.createdin.backend.model.dto.place.NewPlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
@@ -15,6 +17,8 @@ import moscow.createdin.backend.model.enums.PlaceSortType
 import moscow.createdin.backend.repository.PlaceRepository
 import moscow.createdin.backend.repository.RentSlotRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.multipart.MultipartFile
 
 @Service
 class PlaceService(
@@ -60,7 +64,8 @@ class PlaceService(
         return PlaceListDTO(places, total)
     }
 
-    fun create(newPlaceDTO: NewPlaceDTO): PlaceDTO {
+    @Transactional
+    fun create(newPlaceDTO: NewPlaceDTO, images: Collection<MultipartFile>): PlaceDTO {
         val user = userService.getCurrentUserDomain()
         val area = newPlaceDTO.area?.let {
             areaService.get(newPlaceDTO.area)
@@ -68,23 +73,7 @@ class PlaceService(
                 .let { areaMapper.domainToEntity(it) }
         }
 
-
-//        if (images.isNotEmpty()) {
-//            try {
-//                val placeImages = mutableListOf<String>()
-//                for (image in images) {
-//                    placeImages.add(filesystemService.saveImage(image))
-//                }
-//            } catch (e: Exception) {
-//                throw ImageNotSavedException(place.id, e)
-//            }
-//        }
-//        val placeImages = placeImageService.getPlaceImages(place.id)
-
-        //TODO add placeImages...
-        val placeImages = emptyList<String>()
-
-        return placeMapper.dtoToDomain(newPlaceDTO, user)
+        val place: Place = placeMapper.dtoToDomain(newPlaceDTO, user)
             .let { placeMapper.simpleDomainToEntity(it, user, area) }
             .let { placeRepository.save(it) }
             .let { placeRepository.findById(it) }
@@ -92,23 +81,38 @@ class PlaceService(
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, placeImages) }
+
+        val placeImages: List<String> = try {
+            saveImages(place.id!!, images)
+        } catch (e: Exception) {
+            throw ImageNotSavedException(place.id, e)
+        }
+
+        return place.let { placeMapper.domainToDto(it, placeImages) }
     }
 
-    fun edit(updatePlaceDTO: UpdatePlaceDTO): PlaceDTO {
+    @Transactional
+    fun edit(updatePlace: UpdatePlaceDTO, images: Collection<MultipartFile>): PlaceDTO {
         val user = userService.getCurrentUserDomain()
-        val oldPlace = findById(updatePlaceDTO.id)
+        val oldPlace = findById(updatePlace.id)
         if (user.id != oldPlace.user.id) throw WrongUserExceptionException("wrong user with id = ${user.id} was id = ${oldPlace.user.id}")
 
-        return placeMapper.updatedDtoToDomain(updatePlaceDTO, user, oldPlace.area?.id)
+        val placeImages: List<String> = if (images.isNotEmpty()) {
+            placeImageService.clearPlaceImages(updatePlace.id)
+            saveImages(updatePlace.id, images)
+        } else {
+            emptyList()
+        }
+
+        return placeMapper.updatedDtoToDomain(updatePlace, user, oldPlace.area?.id)
             .let { placeMapper.simpleDomainToEntity(it, user, oldPlace.area) }
             .let { placeRepository.update(it) }
-            .let { placeRepository.findById(updatePlaceDTO.id) }
+            .let { placeRepository.findById(updatePlace.id) }
             .let {
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, emptyList()) }
+            .let { placeMapper.domainToDto(it, placeImages) }
     }
 
     fun findById(id: Long): PlaceEntity {
@@ -116,7 +120,7 @@ class PlaceService(
     }
 
     fun get(id: Long): PlaceDTO {
-        val placeImages = getImages(id)
+        val placeImages = placeImageService.getPlaceImages(id)
         return placeRepository.findById(id)
             .let {
                 val rentSlots = getByPlaceId(it.id!!)
@@ -137,7 +141,7 @@ class PlaceService(
                 placeMapper.entityToDomain(it, rentSlots)
             }
             .map {
-                val placeImages = getImages(it.id!!)
+                val placeImages = placeImageService.getPlaceImages(it.id!!)
                 placeMapper.domainToDto(it, placeImages)
             }
 
@@ -149,9 +153,12 @@ class PlaceService(
             .map { rentSlotMapper.entityToDomain(it) }
     }
 
-    // todo добавить получение картинок
-    fun getImages(placeId: Long): List<String>? {
-        return null
+    private fun saveImages(placeId: Long, images: Collection<MultipartFile>): List<String> = try {
+        images.map { filesystemService.saveImage(it) to it.name.split("_")[1].toInt() }
+            .onEach { (image, priority) -> placeImageService.savePlaceImage(placeId, image, priority) }
+            .map { (image, _) -> image }
+    } catch (e: Exception) {
+        throw ImageNotSavedException(placeId, e)
     }
 
     private fun getSortType(sortType: PlaceSortType): String {
