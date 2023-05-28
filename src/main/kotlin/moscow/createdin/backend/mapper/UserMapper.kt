@@ -37,7 +37,7 @@ class UserMapper(
         organization = registrationRequest.organization,
         logoImage = null,
         jobTitle = registrationRequest.jobTitle,
-        isActivated = true, // TODO прикрутить подтверждение через почту
+        isActivated = false,
         activationCode = UUID.randomUUID().toString(),
         isBanned = false,
         admin = null,

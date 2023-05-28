@@ -16,6 +16,8 @@ interface AkiUserRepository {
 
     fun update(user: AkiUserEntity)
 
+    fun activateUser(activationCode: String): Boolean
+
     fun findAll(
         email: String?, role: String?, firstName: String?, lastName: String?, middleName: String?,
         phone: String?, inn: String?, organization: String?, jobTitle: String?, offset: Long, limit: Int
