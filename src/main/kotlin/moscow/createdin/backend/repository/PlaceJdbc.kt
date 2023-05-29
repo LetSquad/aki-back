@@ -11,7 +11,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.jdbc.support.KeyHolder
 import org.springframework.stereotype.Repository
 import java.sql.Array
-import java.sql.SQLException
 import java.sql.Timestamp
 
 
@@ -20,8 +19,9 @@ class PlaceJdbc(
     private val jdbcTemplate: NamedParameterJdbcTemplate,
     private val rowMapper: PlaceRowMapper
 ) : PlaceRepository {
+
     override fun countByFilter(
-        specialization: String?,
+        specialization: List<SpecializationType>,
         rating: Int?,
         priceMin: Int?,
         priceMax: Int?,
@@ -60,7 +60,7 @@ class PlaceJdbc(
     WHERE rs.rent_slot_status = 'OPEN'
     GROUP BY rs.place_id
                 ) as st on p.id = st.place_id
-                WHERE (:withSpecializationFilter = false OR :specialization::SPECIALIZATION_ENUM = ANY (specialization))
+                WHERE (:withSpecializationFilter = false OR :specialization && specialization)
                 AND (:withRatingFilter = false OR :rating >= (rating))
                 AND (:withPriceMinFilter = false OR :priceMin <= min_price)
                 AND (:withPriceMaxFilter = false OR :priceMax >= min_price)
@@ -80,7 +80,7 @@ class PlaceJdbc(
     }
 
     override fun findAll(
-        specialization: String?,
+        specialization: List<SpecializationType>,
         rating: Int?,
         priceMin: Int?,
         priceMax: Int?,
@@ -102,7 +102,7 @@ class PlaceJdbc(
         val sortTypeColumnName = sortType.columnName
         val query = """
             $SQL_SELECT_FILTER_ENTITY
-                WHERE (:withSpecializationFilter = false OR :specialization::SPECIALIZATION_ENUM = ANY (specialization))
+                WHERE (:withSpecializationFilter = false OR :specialization && specialization)
                 AND (:withRatingFilter = false OR :rating >= (rating))
                 AND (:withPriceMinFilter = false OR :priceMin <= min_price)
                 AND (:withPriceMaxFilter = false OR :priceMax >= min_price)
@@ -176,16 +176,13 @@ class PlaceJdbc(
         return keyHolder.key?.toLong() ?: -1
     }
 
-    private fun createSqlArray(list: List<SpecializationType>): Array? {
-        var intArray: Array? = null
-        try {
-            intArray = jdbcTemplate.jdbcTemplate.dataSource.connection.createArrayOf(
+    private fun createSqlArray(list: List<SpecializationType>): Array {
+        return jdbcTemplate.jdbcTemplate.dataSource!!.connection.use {
+            it.createArrayOf(
                 "SPECIALIZATION_ENUM",
                 list.toTypedArray()
             )
-        } catch (ignore: SQLException) {
         }
-        return intArray
     }
 
     override fun update(place: PlaceEntity) {
@@ -316,7 +313,7 @@ class PlaceJdbc(
     }
 
     private fun getNamedParameters(
-        specialization: String?,
+        specialization: List<SpecializationType>,
         rating: Int?,
         priceMin: Int?,
         priceMax: Int?,
@@ -332,8 +329,8 @@ class PlaceJdbc(
     ): MapSqlParameterSource {
         val mapSqlParameterSource = MapSqlParameterSource()
         return mapSqlParameterSource
-            .addValue("withSpecializationFilter", !specialization.isNullOrBlank())
-            .addValue("specialization", specialization)
+            .addValue("withSpecializationFilter", specialization.isNotEmpty())
+            .addValue("specialization", createSqlArray(specialization))
             .addValue("rating", rating)
             .addValue("withRatingFilter", rating != null)
             .addValue("withPriceMinFilter", priceMin != null)

@@ -9,17 +9,25 @@ import moscow.createdin.backend.model.dto.place.PlaceListDTO
 import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
+import moscow.createdin.backend.model.enums.SpecializationType
 import moscow.createdin.backend.service.PlaceService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.multipart.MultipartHttpServletRequest
 import org.springframework.web.server.UnsupportedMediaTypeStatusException
-import java.sql.Timestamp
 import java.time.LocalDate
-import java.time.ZonedDateTime
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -28,7 +36,7 @@ class PlaceController(private val placeService: PlaceService) {
 
     @GetMapping
     fun getPlaces(
-        @Parameter(description = "Специализация площадки") @RequestParam specialization: String?,
+        @Parameter(description = "Специализация площадки") @RequestParam specialization: List<SpecializationType>?,
         @Parameter(description = "Рейтинг") @RequestParam rating: Int?,
         @Parameter(description = "Минимальная цена площадки") @RequestParam priceMin: Int?,
         @Parameter(description = "Максимальная цена площадки") @RequestParam priceMax: Int?,

@@ -14,6 +14,8 @@ import moscow.createdin.backend.model.enums.RentSlotStatusType
 import moscow.createdin.backend.repository.RentRepository
 import moscow.createdin.backend.repository.RentSlotToRentRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import kotlin.math.ceil
 
 @Service
 class RentService(
@@ -29,6 +31,7 @@ class RentService(
     private val rentSlotToRentRepository: RentSlotToRentRepository
 ) {
 
+    @Transactional
     fun create(req: CreateRentRequestDTO): RentDTO {
         val renter = userService.getCurrentUser()
 
@@ -43,13 +46,16 @@ class RentService(
         return get(newRentId)
     }
 
+    @Transactional
     fun getAll(
         pageNumber: Long,
         limit: Int
     ): RentListDTO {
         val renter = userService.getCurrentUser()
 
-        val total = rentRepository.countByRenterId(renter.id)
+        val count = rentRepository.countByRenterId(renter.id)
+        val total = ceil(count / limit.toDouble()).toInt()
+
         val rents = rentRepository.findByRenterId(pageNumber, limit, renter.id)
             .map { rent ->
                 val slots = rentSlotToRentRepository.findSlotsByRentId(rent.id!!)
@@ -75,6 +81,7 @@ class RentService(
             }
     }
 
+    @Transactional
     fun delete(id: Long) {
         val rent = rentRepository.findById(id)
         val deleteRent = rent.copy(status = AdminStatusType.DELETED.name)
@@ -85,6 +92,7 @@ class RentService(
         rentSlotToRentRepository.delete(id)
     }
 
+    @Transactional
     fun ban(banRequestDTO: BanRequestDTO): RentDTO {
         val adminUser = userService.getCurrentUserDomain()
         val editable = getDomain(banRequestDTO.id)

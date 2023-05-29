@@ -3,12 +3,13 @@ package moscow.createdin.backend.repository
 import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
+import moscow.createdin.backend.model.enums.SpecializationType
 import java.sql.Timestamp
 
 interface PlaceRepository {
 
     fun countByFilter(
-        specialization: String?,
+        specialization: List<SpecializationType>,
         rating: Int?,
         priceMin: Int?,
         priceMax: Int?,
@@ -24,7 +25,7 @@ interface PlaceRepository {
     ): Int
 
     fun findAll(
-        specialization: String?,
+        specialization: List<SpecializationType>,
         rating: Int?,
         priceMin: Int?,
         priceMax: Int?,

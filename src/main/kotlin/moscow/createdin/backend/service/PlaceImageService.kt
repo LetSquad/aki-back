@@ -21,6 +21,6 @@ class PlaceImageService(
     }
 
     fun clearPlaceImages(placeId: Long, images: List<String>?) {
-        placeImageRepository.deleteByPlaceId(placeId, images)
+        placeImageRepository.deleteByPlaceId(placeId, if (images == null || images.isEmpty()) listOf("") else images)
     }
 }
