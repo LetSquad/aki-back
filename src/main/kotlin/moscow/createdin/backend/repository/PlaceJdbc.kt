@@ -116,6 +116,7 @@ class PlaceJdbc(
                 AND (:withDateFromFilter = false OR rs.time_start >= :dateFrom)
                 AND (:withDateToFilter = false OR rs.time_end <= :dateTo)
                 AND p.place_status = 'VERIFIED' 
+                AND rs.rent_slot_status = 'OPEN'
                 ORDER BY $sortTypeColumnName $sortDirection
                 LIMIT :limit OFFSET :offset
         """
