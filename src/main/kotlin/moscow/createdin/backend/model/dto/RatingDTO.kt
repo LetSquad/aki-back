@@ -1,6 +1,6 @@
 package moscow.createdin.backend.model.dto
 
 data class RatingDTO(
-    val rating: Double?,
+    val rate: Double?,
     val rateCount: Int?
 )
