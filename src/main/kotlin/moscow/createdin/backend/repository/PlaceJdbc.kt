@@ -117,7 +117,7 @@ class PlaceJdbc(
                 AND (:withDateToFilter = false OR rs.time_end <= :dateTo)
                 AND p.place_status = 'VERIFIED' 
                 AND rs.rent_slot_status = 'OPEN'
-                ORDER BY $sortTypeColumnName $sortDirection
+                ORDER BY $sortTypeColumnName $sortDirection NULLS LAST
                 LIMIT :limit OFFSET :offset
         """
         val namedParameters =
