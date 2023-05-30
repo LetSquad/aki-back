@@ -424,6 +424,7 @@ class PlaceJdbc(
                     a.area_admin_id,
                 
                     st.popular,
+                    st.rate_count,
                     st.rating,
                     st.min_price,
                     st.max_price,
@@ -439,6 +440,7 @@ class PlaceJdbc(
         min(rs.price) as min_price,
         max(rs.price) as max_price,
         count(distinct r.id) as popular,
+        count(distinct pr.id) as rate_count,
         avg(pr.rating) as rating,
         min(rs.time_start) as time_start,
         min(rs.time_end) as time_end,

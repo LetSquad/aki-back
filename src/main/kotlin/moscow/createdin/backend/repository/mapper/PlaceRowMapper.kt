@@ -57,7 +57,7 @@ class PlaceRowMapper(
         minPrice = rs.getDouble("min_price"),
         priceType = findPriceType(rs.getDate("time_start"), rs.getDate("time_end")),
         rating = rs.getDouble("rating"),
-        rateCount = rs.getInt("popular")
+        rateCount = rs.getInt("rate_count")
     )
 
     private fun getArrayEnum(arrayStr: String): List<SpecializationType> {
