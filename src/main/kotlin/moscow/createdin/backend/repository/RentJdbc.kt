@@ -1,8 +1,6 @@
 package moscow.createdin.backend.repository
 
-import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.entity.RentEntity
-import moscow.createdin.backend.model.enums.AdminStatusType
 import moscow.createdin.backend.model.enums.RentConfirmationStatus
 import moscow.createdin.backend.repository.mapper.RentRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -82,18 +80,20 @@ class RentJdbc(
 
     override fun create(
         placeId: Long,
-        renterId: Long
+        renterId: Long,
+        agreement: String
     ): Long {
         val keyHolder: KeyHolder = GeneratedKeyHolder()
         val parameters = MapSqlParameterSource()
         parameters.addValue("placeId", placeId)
         parameters.addValue("userId", renterId)
         parameters.addValue("status", RentConfirmationStatus.OPEN.name)
+        parameters.addValue("agreement", agreement)
 
         jdbcTemplate.update(
             """
-                INSERT INTO rent (place_id, user_id, rent_status) 
-                VALUES (:placeId, :userId, :status)
+                INSERT INTO rent (place_id, user_id, rent_status, agreement) 
+                VALUES (:placeId, :userId, :status, :agreement)
             """,
             parameters, keyHolder, arrayOf("id")
         )
@@ -125,6 +125,7 @@ class RentJdbc(
                     r.place_id,
                     r.user_id,
                     r.rent_status,
+                    r.agreement,
                     r.rent_admin_id,
                     r.rent_ban_reason,
             

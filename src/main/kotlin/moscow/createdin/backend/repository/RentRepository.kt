@@ -12,7 +12,8 @@ interface RentRepository {
 
     fun create(
         placeId: Long,
-        renterId: Long
+        renterId: Long,
+        agreement: String
     ): Long
 
     fun findByRenterId(

@@ -13,3 +13,5 @@ databaseChangeLog:
       file: db/changelog/sql/6_user_activation_code_idx.sql
   - include:
       file: db/changelog/sql/7_fix_place_fields.sql
+  - include:
+      file: db/changelog/sql/8_rent_agreement.sql

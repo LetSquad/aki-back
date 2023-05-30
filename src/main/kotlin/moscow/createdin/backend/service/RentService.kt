@@ -35,7 +35,7 @@ class RentService(
     fun create(req: CreateRentRequestDTO): RentDTO {
         val renter = userService.getCurrentUser()
 
-        val newRentId = rentRepository.create(req.placeId, renter.id)
+        val newRentId = rentRepository.create(req.placeId, renter.id, req.agreement)
         rentSlotService.updateStatus(req.rentSlotIds, RentSlotStatusType.BOOKED)
         rentSlotToRentRepository.create(newRentId, req.rentSlotIds)
 

@@ -11,6 +11,7 @@ data class Rent(
     val rentSlots: List<RentSlot>,
 
     val status: RentConfirmationStatus,
+    val agreement: String?,
     val banReason: String?,
     val admin: Long?,
 )

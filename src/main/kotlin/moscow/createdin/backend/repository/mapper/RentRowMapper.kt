@@ -20,6 +20,7 @@ class RentRowMapper(
             user = akiUserRowMapper.mapRow(rs, rowNum),
             rentSlotIds = arrayIds.substring(1, arrayIds.length-1).split(',').map { it.toLong() },
             status = rs.getString("rent_status"),
+            agreement = rs.getString("agreement"),
             banReason = rs.getString("rent_ban_reason"),
             admin = rs.getLong("rent_admin_id")
         )
