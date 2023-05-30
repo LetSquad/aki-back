@@ -46,11 +46,11 @@ class PlaceJdbc(
                 FROM place p
                 INNER JOIN rent_slot rs on p.id = rs.place_id
                 LEFT JOIN (
-                    SELECT
-        count(distinct r.id) as popular,
-        avg(pr.rating) as rating,
+    SELECT
         min(rs.price) as min_price,
         max(rs.price) as max_price,
+        count(distinct r.id) as popular,
+        avg(pr.rating) as rating,
         min(rs.time_start) as time_start,
         min(rs.time_end) as time_end,
         rs.place_id as place_id
@@ -59,7 +59,7 @@ class PlaceJdbc(
              LEFT JOIN place_review pr on r.id = pr.rent_id
     WHERE rs.rent_slot_status = 'OPEN'
     GROUP BY rs.place_id
-                ) as st on p.id = st.place_id
+) as st on p.id = st.place_id
                 WHERE (:withSpecializationFilter = false OR :specialization && specialization)
                 AND (:withRatingFilter = false OR :rating >= (rating))
                 AND (:withPriceMinFilter = false OR :priceMin <= min_price)
@@ -435,11 +435,11 @@ class PlaceJdbc(
                 LEFT JOIN area a on p.area_id = a.id
                 INNER JOIN rent_slot rs on p.id = rs.place_id
                 LEFT JOIN (
-                    SELECT
-        count(distinct r.id) as popular,
-        avg(pr.rating) as rating,
+    SELECT
         min(rs.price) as min_price,
         max(rs.price) as max_price,
+        count(distinct r.id) as popular,
+        avg(pr.rating) as rating,
         min(rs.time_start) as time_start,
         min(rs.time_end) as time_end,
         rs.place_id as place_id
@@ -448,7 +448,7 @@ class PlaceJdbc(
              LEFT JOIN place_review pr on r.id = pr.rent_id
     WHERE rs.rent_slot_status = 'OPEN'
     GROUP BY rs.place_id
-                ) as st on p.id = st.place_id
+) as st on p.id = st.place_id
                     """
 
         private const val SQL_SELECT_ENTITY =

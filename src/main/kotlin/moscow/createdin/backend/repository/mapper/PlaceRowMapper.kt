@@ -55,7 +55,9 @@ class PlaceRowMapper(
         banReason = rs.getString("place_ban_reason"),
         admin = rs.getLong("place_admin_id"),
         minPrice = rs.getDouble("min_price"),
-        priceType = findPriceType(rs.getDate("time_start"), rs.getDate("time_end"))
+        priceType = findPriceType(rs.getDate("time_start"), rs.getDate("time_end")),
+        rating = rs.getDouble("rating"),
+        rateCount = rs.getInt("popular")
     )
 
     private fun getArrayEnum(arrayStr: String): List<SpecializationType> {
@@ -80,7 +82,7 @@ class PlaceRowMapper(
     }
 
     fun stringToPGObject(value: String?): PGobject {
-        val pGobject: PGobject = PGobject()
+        val pGobject = PGobject()
         pGobject.type = "jsonb"
         pGobject.value = value
         return pGobject

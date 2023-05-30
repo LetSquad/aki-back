@@ -1,5 +1,6 @@
 package moscow.createdin.backend.model.dto.place
 
+import moscow.createdin.backend.model.dto.RatingDTO
 import moscow.createdin.backend.model.dto.RentSlotDTO
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.SpecializationType
@@ -32,5 +33,6 @@ data class PlaceDTO(
     val placeImages: List<String>?,
 
     val user: PlaceUserDTO,
+    val rating: RatingDTO,
     val admin: Long?
 )
