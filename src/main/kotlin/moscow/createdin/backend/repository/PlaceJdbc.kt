@@ -517,11 +517,31 @@ class PlaceJdbc(
                     a.area_ban_reason, 
                     a.area_admin_id,
                     
-                    0 as min_price, null as time_start, null as time_end 
+                    0 as min_price, 
+                    null as time_start, 
+                    null as time_end,
+                    st.rate_count,
+                    st.rating
                 FROM place p
                 
                 INNER JOIN aki_user u on p.user_id = u.id
                 LEFT JOIN area a on p.area_id = a.id 
+                LEFT JOIN (
+    SELECT
+        min(rs.price) as min_price,
+        max(rs.price) as max_price,
+        count(distinct r.id) as popular,
+        count(distinct pr.id) as rate_count,
+        avg(pr.rating) as rating,
+        min(rs.time_start) as time_start,
+        min(rs.time_end) as time_end,
+        rs.place_id as place_id
+    FROM rent_slot rs
+             LEFT JOIN rent r on rs.place_id = r.place_id
+             LEFT JOIN place_review pr on r.id = pr.rent_id
+    WHERE rs.rent_slot_status = 'OPEN'
+    GROUP BY rs.place_id
+) as st on p.id = st.place_id
             """
     }
 }
