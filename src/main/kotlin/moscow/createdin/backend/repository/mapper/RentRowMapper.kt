@@ -12,7 +12,7 @@ class RentRowMapper(
 ) : RowMapper<RentEntity> {
 
     override fun mapRow(rs: ResultSet, rowNum: Int): RentEntity {
-        val arrayIds = rs.getString("array_agg")
+        val arrayIds = rs.getString("array_agg").replace("\"", "")
 
         return RentEntity(
             id = rs.getLong("id"),
