@@ -174,6 +174,7 @@ class RentJdbc(
                     p.area_id,
                     p.place_coordinates_id,
                     0 as min_price, null as time_start, null as time_end,
+                    0 as rating, 0 as rate_count,
                     
                     up.id,
                     up.user_email,
