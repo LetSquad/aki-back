@@ -10,7 +10,7 @@ import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Date
 
 @Component
 class PlaceRowMapper(
@@ -40,11 +40,11 @@ class PlaceRowMapper(
         phone = rs.getString("place_phone"),
         email = rs.getString("place_email"),
         website = rs.getString("place_website"),
-        levelNumber = rs.getInt("level_number"),
+        levelNumber = rs.getIntOrNull("level_number"),
         fullArea = rs.getInt("full_area"),
         rentableArea = rs.getInt("rentable_area"),
-        minCapacity = rs.getInt("capacity_min"),
-        maxCapacity = rs.getInt("capacity_max"),
+        minCapacity = rs.getIntOrNull("capacity_min"),
+        maxCapacity = rs.getIntOrNull("capacity_max"),
         parking = rs.getBoolean("parking"),
         services = stringToPGObject(rs.getString("services")),
         rules = rs.getString("rules"),
@@ -53,7 +53,7 @@ class PlaceRowMapper(
         equipments = stringToPGObject(rs.getString("equipments")),
         status = rs.getString("place_status"),
         banReason = rs.getString("place_ban_reason"),
-        admin = rs.getLong("place_admin_id"),
+        admin = rs.getLongOrNull("place_admin_id"),
         minPrice = rs.getDouble("min_price"),
         priceType = findPriceType(rs.getDate("time_start"), rs.getDate("time_end")),
         rating = rs.getDouble("rating"),
