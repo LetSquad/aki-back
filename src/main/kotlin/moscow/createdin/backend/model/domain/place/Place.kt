@@ -44,4 +44,6 @@ data class Place(
     val rentSlots: List<RentSlot>?,
     val rating: Double?,
     val rateCount: Int?,
+
+    val favorite: Boolean
 )

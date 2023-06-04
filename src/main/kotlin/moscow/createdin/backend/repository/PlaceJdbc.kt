@@ -33,12 +33,13 @@ class PlaceJdbc(
         levelNumberMax: Int?,
         withParking: Boolean?,
         dateFrom: Timestamp?,
-        dateTo: Timestamp?
+        dateTo: Timestamp?,
+        userId: Long?
     ): Int {
         val namedParameters =
             getNamedParameters(
                 specialization, rating, priceMin, priceMax, capacityMin, capacityMax, squareMin,
-                squareMax, levelNumberMin, levelNumberMax, withParking, dateFrom, dateTo
+                squareMax, levelNumberMin, levelNumberMax, withParking, dateFrom, dateTo, userId
             )
         return jdbcTemplate.queryForObject(
             """
@@ -96,6 +97,7 @@ class PlaceJdbc(
 
         pageNumber: Long,
         limit: Int,
+        userId: Long?,
         sortType: PlaceSortType,
         sortDirection: PlaceSortDirection
     ): List<PlaceEntity> {
@@ -124,7 +126,7 @@ class PlaceJdbc(
             getNamedParameters(
                 specialization, rating, priceMin, priceMax, capacityMin, capacityMax,
                 squareMin, squareMax, levelNumberMin, levelNumberMax, withParking,
-                dateFrom, dateTo
+                dateFrom, dateTo, userId
             )
         namedParameters.addValue("limit", limit)
         namedParameters.addValue("offset", (pageNumber - 1) * limit)
@@ -240,13 +242,14 @@ class PlaceJdbc(
         )
     }
 
-    override fun findById(id: Long): PlaceEntity {
+    override fun findById(id: Long, userId: Long?): PlaceEntity {
         val query = """
             $SQL_SELECT_ENTITY
                 WHERE p.id = :id
         """
         val namedParameters = MapSqlParameterSource()
             .addValue("id", id)
+            .addValue("userId", userId)
         return jdbcTemplate.queryForObject(
             query, namedParameters, rowMapper
         )!!
@@ -282,6 +285,22 @@ class PlaceJdbc(
         )
     }
 
+    override fun findFavorite(pageNumber: Long, limit: Int, userId: Long?): List<PlaceEntity> {
+        val parameters = MapSqlParameterSource()
+            .addValue("limit", limit)
+            .addValue("offset", (pageNumber - 1) * limit)
+            .addValue("userId", userId)
+
+        return jdbcTemplate.query(
+            """
+                $SQL_SELECT_ENTITY
+                WHERE EXISTS(SELECT id FROM favorite_place
+             WHERE place_id = p.id AND user_id = :userId) 
+                LIMIT :limit OFFSET :offset
+            """, parameters, rowMapper
+        )
+    }
+
     override fun countUnverified(): Int {
         val parameters = MapSqlParameterSource()
 
@@ -290,6 +309,20 @@ class PlaceJdbc(
                 SELECT COUNT(distinct p.id) as count
                 FROM place p
                 WHERE p.place_status = 'UNVERIFIED'
+            """, parameters
+        ) { rs, _ -> rs.getInt("count") }!!
+    }
+
+    override fun countFavorite(userId: Long?): Int {
+        val parameters = MapSqlParameterSource()
+            .addValue("userId", userId)
+
+        return jdbcTemplate.queryForObject(
+            """
+                SELECT COUNT(distinct p.id) as count
+                FROM place p
+                LEFT JOIN favorite_place fp on p.id = fp.place_id
+                WHERE fp.user_id = :userId
             """, parameters
         ) { rs, _ -> rs.getInt("count") }!!
     }
@@ -326,7 +359,8 @@ class PlaceJdbc(
         levelNumberMax: Int?,
         withParking: Boolean?,
         dateFrom: Timestamp?,
-        dateTo: Timestamp?
+        dateTo: Timestamp?,
+        userId: Long?
     ): MapSqlParameterSource {
         val mapSqlParameterSource = MapSqlParameterSource()
         return mapSqlParameterSource
@@ -356,6 +390,7 @@ class PlaceJdbc(
             .addValue("withDateToFilter", dateTo != null)
             .addValue("dateFrom", dateFrom)
             .addValue("dateTo", dateTo)
+            .addValue("userId", userId)
     }
 
     companion object {
@@ -429,7 +464,12 @@ class PlaceJdbc(
                     st.min_price,
                     st.max_price,
                     st.time_start,
-                    st.time_end
+                    st.time_end,
+    CASE WHEN EXISTS (SELECT id FROM favorite_place
+                      WHERE place_id = p.id AND user_id = :userId)
+             THEN 'TRUE'
+         ELSE 'FALSE'
+        END AS favorite
                     /**/
                 FROM place p
                 INNER JOIN aki_user u on p.user_id = u.id
@@ -521,7 +561,12 @@ class PlaceJdbc(
                     null as time_start, 
                     null as time_end,
                     st.rate_count,
-                    st.rating
+                    st.rating,
+    CASE WHEN EXISTS (SELECT id FROM favorite_place
+                      WHERE place_id = p.id AND user_id = :userId)
+             THEN 'TRUE'
+         ELSE 'FALSE'
+        END AS favorite
                 FROM place p
                 
                 INNER JOIN aki_user u on p.user_id = u.id

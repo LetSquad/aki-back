@@ -1,8 +1,8 @@
-package moscow.createdin.backend.model.domain.place
+package moscow.createdin.backend.model.dto.place
 
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 
-data class PlaceReview(
+data class PlaceReviewDTO(
     val id: Long?,
 
     val rent: Long,

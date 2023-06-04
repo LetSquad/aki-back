@@ -21,7 +21,8 @@ interface PlaceRepository {
         levelNumberMax: Int?,
         withParking: Boolean?,
         dateFrom: Timestamp?,
-        dateTo: Timestamp?
+        dateTo: Timestamp?,
+        userId: Long?
     ): Int
 
     fun findAll(
@@ -41,13 +42,14 @@ interface PlaceRepository {
 
         pageNumber: Long,
         limit: Int,
+        userId: Long?,
         sortType: PlaceSortType,
         sortDirection: PlaceSortDirection
     ): List<PlaceEntity>
 
     fun save(place: PlaceEntity): Long
 
-    fun findById(id: Long): PlaceEntity
+    fun findById(id: Long, userId: Long?): PlaceEntity
 
     fun findByUserId(
         pageNumber: Long,
@@ -62,7 +64,15 @@ interface PlaceRepository {
         limit: Int
     ): List<PlaceEntity>
 
+    fun findFavorite(
+        pageNumber: Long,
+        limit: Int,
+        userId: Long?
+    ): List<PlaceEntity>
+
     fun countUnverified(): Int
+
+    fun countFavorite(userId: Long?): Int
 
     fun update(place: PlaceEntity)
 }

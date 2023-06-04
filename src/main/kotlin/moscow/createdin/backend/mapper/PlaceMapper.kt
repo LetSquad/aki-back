@@ -18,6 +18,7 @@ import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceEquipmentDTO
 import moscow.createdin.backend.model.dto.place.PlaceFacilitiesDTO
 import moscow.createdin.backend.model.dto.place.PlacePriceDTO
+import moscow.createdin.backend.model.dto.place.PlaceReviewDTO
 import moscow.createdin.backend.model.dto.place.PlaceServiceDTO
 import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
 import moscow.createdin.backend.model.entity.AreaEntity
@@ -140,7 +141,8 @@ class PlaceMapper(
         minPrice = null,
         priceType = null,
         rating = null,
-        rateCount = null
+        rateCount = null,
+        favorite = false
     )
 
     fun domainToEntity(place: Place) = PlaceEntity(
@@ -176,7 +178,8 @@ class PlaceMapper(
         minPrice = null,
         priceType = null,
         rating = null,
-        rateCount = null
+        rateCount = null,
+        favorite = false
     )
 
     fun entityToDomain(place: PlaceEntity, rentSlots: List<RentSlot>?) = Place(
@@ -221,10 +224,11 @@ class PlaceMapper(
         accessibility = place.accessibility,
         rentSlots = rentSlots,
         rating = place.rating,
-        rateCount = place.rateCount
+        rateCount = place.rateCount,
+        favorite = place.favorite
     )
 
-    fun domainToDto(place: Place, placeImages: List<String>?) = PlaceDTO(
+    fun domainToDto(place: Place, placeImages: List<String>?, reviews: List<PlaceReviewDTO>?) = PlaceDTO(
         id = place.id!!,
         user = userMapper.domainToPlaceDto(place.user),
 
@@ -250,7 +254,9 @@ class PlaceMapper(
         facilities = place.facilities?.map { placeFacilitiesToDTO(it) },
         admin = place.admin,
         rentSlots = place.rentSlots?.map { rentSlotMapper.domainToDto(it) },
-        rating = placeRatingToDTO(place.rating, place.rateCount)
+        rating = placeRatingToDTO(place.rating, place.rateCount),
+        favorite = place.favorite,
+        reviews = reviews
     )
 
     private fun stringToPGObject(value: String?): PGobject {

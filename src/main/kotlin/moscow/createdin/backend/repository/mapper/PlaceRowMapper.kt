@@ -10,7 +10,7 @@ import java.sql.ResultSet
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
-import java.util.Date
+import java.util.*
 
 @Component
 class PlaceRowMapper(
@@ -57,7 +57,8 @@ class PlaceRowMapper(
         minPrice = rs.getDouble("min_price"),
         priceType = findPriceType(rs.getDate("time_start"), rs.getDate("time_end")),
         rating = rs.getDouble("rating"),
-        rateCount = rs.getInt("rate_count")
+        rateCount = rs.getInt("rate_count"),
+        favorite = rs.getBoolean("favorite")
     )
 
     private fun getArrayEnum(arrayStr: String): List<SpecializationType> {

@@ -12,9 +12,9 @@ class PlaceReviewRowMapper(
 
     override fun mapRow(rs: ResultSet, rowNum: Int): PlaceReviewEntity = PlaceReviewEntity(
         id = rs.getLong("id"),
-        rent = rentRowMapper.mapRow(rs, rowNum),
+        rent = rs.getLong("rent_id"),
         rating = rs.getInt("rating"),
-        reviewText = rs.getString("reviewText"),
+        reviewText = rs.getString("review_text"),
         status = rs.getString("place_review_status"),
         banReason = rs.getString("place_review_ban_reason"),
         admin = rs.getLong("place_review_admin_id")
