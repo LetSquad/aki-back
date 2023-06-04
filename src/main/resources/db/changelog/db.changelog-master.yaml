@@ -15,3 +15,5 @@ databaseChangeLog:
       file: db/changelog/sql/7_fix_place_fields.sql
   - include:
       file: db/changelog/sql/8_rent_agreement.sql
+  - include:
+      file: db/changelog/sql/9_drop_review_constraint.sql

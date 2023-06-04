@@ -8,9 +8,11 @@ import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.CreateRentRequestDTO
 import moscow.createdin.backend.model.dto.RentDTO
 import moscow.createdin.backend.model.dto.RentListDTO
+import moscow.createdin.backend.model.dto.RentReviewDTO
 import moscow.createdin.backend.model.enums.AdminStatusType
 import moscow.createdin.backend.model.enums.RentConfirmationStatus
 import moscow.createdin.backend.model.enums.RentSlotStatusType
+import moscow.createdin.backend.repository.PlaceReviewRepository
 import moscow.createdin.backend.repository.RentRepository
 import moscow.createdin.backend.repository.RentSlotToRentRepository
 import org.springframework.stereotype.Service
@@ -28,7 +30,8 @@ class RentService(
     private val rentSlotMapper: RentSlotMapper,
 
     private val rentRepository: RentRepository,
-    private val rentSlotToRentRepository: RentSlotToRentRepository
+    private val rentSlotToRentRepository: RentSlotToRentRepository,
+    private val placeReviewRepository: PlaceReviewRepository
 ) {
 
     @Transactional
@@ -107,6 +110,13 @@ class RentService(
             .also { rentRepository.update(it) }
             .let { getDomain(it.id!!) }
             .let { rentMapper.domainToDto(it) }
+    }
+
+    @Transactional
+    fun rate(rentId: Long, rentReviewDTO: RentReviewDTO) {
+        val user = userService.getCurrentUserDomain()
+        rentRepository.findByRenterIdAndId(rentId, user.id)
+        placeReviewRepository.save(rentId, rentReviewDTO.rating)
     }
 
     companion object {

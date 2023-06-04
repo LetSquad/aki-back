@@ -557,9 +557,9 @@ class PlaceJdbc(
                     a.area_ban_reason, 
                     a.area_admin_id,
                     
-                    0 as min_price, 
-                    null as time_start, 
-                    null as time_end,
+                    st.min_price, 
+                    st.time_start, 
+                    st.time_end,
                     st.rate_count,
                     st.rating,
     CASE WHEN EXISTS (SELECT id FROM favorite_place

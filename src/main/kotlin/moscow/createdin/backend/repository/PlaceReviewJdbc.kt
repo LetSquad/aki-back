@@ -1,6 +1,7 @@
 package moscow.createdin.backend.repository
 
 import moscow.createdin.backend.model.entity.PlaceReviewEntity
+import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.repository.mapper.PlaceReviewRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
@@ -14,20 +15,17 @@ class PlaceReviewJdbc(
     private val jdbcTemplate: NamedParameterJdbcTemplate,
     private val rowMapper: PlaceReviewRowMapper
 ) : PlaceReviewRepository {
-    override fun save(placeReviewEntity: PlaceReviewEntity): Long {
+    override fun save(rentId: Long, rating: Int): Long {
         val keyHolder: KeyHolder = GeneratedKeyHolder()
         val parameters = MapSqlParameterSource()
-        parameters.addValue("rentId", placeReviewEntity.rent)
-        parameters.addValue("rating", placeReviewEntity.rating)
-        parameters.addValue("reviewText", placeReviewEntity.reviewText)
-        parameters.addValue("status", placeReviewEntity.status)
-        parameters.addValue("banReason", placeReviewEntity.banReason)
-        parameters.addValue("adminId", placeReviewEntity.admin)
+        parameters.addValue("rentId", rentId)
+        parameters.addValue("rating", rating)
+        parameters.addValue("status", PlaceConfirmationStatus.UNVERIFIED.name)
 
         jdbcTemplate.update(
             """
-                INSERT INTO place_review (rent_id, rating, review_text, place_review_status, place_review_ban_reason, place_review_admin_id) 
-                VALUES (:rentId, :rating, :reviewText, :status, :banReason, :adminId)
+                INSERT INTO place_review (rent_id, rating, place_review_status) 
+                VALUES (:rentId, :rating, :status)
             """,
             parameters, keyHolder, arrayOf("id")
         )

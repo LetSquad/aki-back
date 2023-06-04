@@ -18,7 +18,6 @@ import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceEquipmentDTO
 import moscow.createdin.backend.model.dto.place.PlaceFacilitiesDTO
 import moscow.createdin.backend.model.dto.place.PlacePriceDTO
-import moscow.createdin.backend.model.dto.place.PlaceReviewDTO
 import moscow.createdin.backend.model.dto.place.PlaceServiceDTO
 import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
 import moscow.createdin.backend.model.entity.AreaEntity
@@ -228,7 +227,7 @@ class PlaceMapper(
         favorite = place.favorite
     )
 
-    fun domainToDto(place: Place, placeImages: List<String>?, reviews: List<PlaceReviewDTO>?) = PlaceDTO(
+    fun domainToDto(place: Place, placeImages: List<String>?) = PlaceDTO(
         id = place.id!!,
         user = userMapper.domainToPlaceDto(place.user),
 
@@ -255,8 +254,7 @@ class PlaceMapper(
         admin = place.admin,
         rentSlots = place.rentSlots?.map { rentSlotMapper.domainToDto(it) },
         rating = placeRatingToDTO(place.rating, place.rateCount),
-        favorite = place.favorite,
-        reviews = reviews
+        favorite = place.favorite
     )
 
     private fun stringToPGObject(value: String?): PGobject {

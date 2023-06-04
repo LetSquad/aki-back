@@ -44,17 +44,18 @@ class RentJdbc(
         )
     }
 
-    override fun findByRenterId(id: Long): List<RentEntity> {
+    override fun findByRenterIdAndId(id: Long, renterId: Long?): RentEntity {
         val parameters = MapSqlParameterSource()
-            .addValue("renterId", id)
-        return jdbcTemplate.query(
+            .addValue("rentId", id)
+            .addValue("userId", renterId)
+        return jdbcTemplate.queryForObject(
             """
                 $SQL_SELECT_ENTITY
                 WHERE
-                   r.user_id = :renterId AND r.rent_status != 'DELETED'
+                   r.user_id = :userId AND r.rent_status != 'DELETED' AND r.id = :rentId
                 GROUP BY r.id, p.id, u.id, up.id
             """, parameters, rowMapper
-        )
+        )!!
     }
 
     override fun findByRenterId(
@@ -196,7 +197,12 @@ class RentJdbc(
                     up.user_admin_id,
                     up.user_ban_reason,
                     up.user_type,
-                    array_agg(rs.id)
+                    array_agg(rs.id),
+    CASE WHEN EXISTS (SELECT id FROM favorite_place
+                      WHERE place_id = p.id AND user_id = :userId)
+             THEN 'TRUE'
+         ELSE 'FALSE'
+        END AS favorite
                     
                     FROM rent r
                          JOIN rent_slot__rent rs_r on rs_r.rent_id = r.id

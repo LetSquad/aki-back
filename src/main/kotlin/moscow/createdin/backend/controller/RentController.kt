@@ -5,6 +5,7 @@ import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.CreateRentRequestDTO
 import moscow.createdin.backend.model.dto.RentDTO
 import moscow.createdin.backend.model.dto.RentListDTO
+import moscow.createdin.backend.model.dto.RentReviewDTO
 import moscow.createdin.backend.model.dto.place.RentDeleteDTO
 import moscow.createdin.backend.service.RentService
 import org.springframework.security.access.prepost.PreAuthorize
@@ -52,5 +53,11 @@ class RentController(
     @PostMapping("ban")
     fun ban(@RequestBody banRequestDTO: BanRequestDTO): RentDTO {
         return rentService.ban(banRequestDTO)
+    }
+
+    @PreAuthorize("hasRole('RENTER')")
+    @PostMapping("{rentId}/rate")
+    fun rate(@PathVariable rentId: Long, @RequestBody rentReviewDTO: RentReviewDTO) {
+        rentService.rate(rentId, rentReviewDTO)
     }
 }

@@ -44,8 +44,7 @@ class PlaceService(
     private val rentSlotMapper: RentSlotMapper,
     private val rentSlotRepository: RentSlotRepository,
     private val filesystemService: FilesystemService,
-    private val favoritePlaceRepository: FavoritePlaceRepository,
-    private val placeReviewService: PlaceReviewService
+    private val favoritePlaceRepository: FavoritePlaceRepository
 ) {
 
     @Transactional
@@ -67,7 +66,7 @@ class PlaceService(
             }
             .let {
                 val placeImages = placeImageService.getPlaceImages(it.id)
-                placeMapper.domainToDto(it, placeImages, null)
+                placeMapper.domainToDto(it, placeImages)
             }
     }
 
@@ -91,7 +90,7 @@ class PlaceService(
             }
             .let {
                 val placeImages = placeImageService.getPlaceImages(it.id)
-                placeMapper.domainToDto(it, placeImages, null)
+                placeMapper.domainToDto(it, placeImages)
             }
     }
 
@@ -175,7 +174,7 @@ class PlaceService(
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .map { placeMapper.domainToDto(it, placeImageMap[it.id], null) }
+            .map { placeMapper.domainToDto(it, placeImageMap[it.id]) }
 
         return PlaceListDTO(places, total)
     }
@@ -213,7 +212,7 @@ class PlaceService(
             throw ImageNotSavedException(place.id, e)
         }
 
-        return place.let { placeMapper.domainToDto(it, placeImages, null) }
+        return place.let { placeMapper.domainToDto(it, placeImages) }
     }
 
     @Transactional
@@ -237,7 +236,7 @@ class PlaceService(
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, placeImageService.getPlaceImages(it.id), null) }
+            .let { placeMapper.domainToDto(it, placeImageService.getPlaceImages(it.id)) }
     }
 
     fun findById(id: Long): PlaceEntity {
@@ -247,9 +246,8 @@ class PlaceService(
 
     fun get(id: Long): PlaceDTO {
         val placeImages = placeImageService.getPlaceImages(id)
-        val reviews = placeReviewService.findByPlaceId(id)
         return getDomain(id)
-            .let { placeMapper.domainToDto(it, placeImages, reviews) }
+            .let { placeMapper.domainToDto(it, placeImages) }
     }
 
     fun getDomain(id: Long): Place {
@@ -280,7 +278,7 @@ class PlaceService(
                     }
                     .map {
                         val placeImages = placeImageService.getPlaceImages(it.id!!)
-                        placeMapper.domainToDto(it, placeImages, null)
+                        placeMapper.domainToDto(it, placeImages)
                     }
 
                 return PlaceListDTO(places, total)
@@ -297,7 +295,7 @@ class PlaceService(
                     }
                     .map {
                         val placeImages = placeImageService.getPlaceImages(it.id!!)
-                        placeMapper.domainToDto(it, placeImages, null)
+                        placeMapper.domainToDto(it, placeImages)
                     }
 
                 return PlaceListDTO(places, total)
@@ -314,7 +312,7 @@ class PlaceService(
                     }
                     .map {
                         val placeImages = placeImageService.getPlaceImages(it.id!!)
-                        placeMapper.domainToDto(it, placeImages, null)
+                        placeMapper.domainToDto(it, placeImages)
                     }
 
                 return PlaceListDTO(places, total)

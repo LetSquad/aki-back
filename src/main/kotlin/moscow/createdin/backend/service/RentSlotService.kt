@@ -32,7 +32,7 @@ class RentSlotService(
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, listOf(), null) }
+            .let { placeMapper.domainToDto(it, listOf()) }
     }
 
     fun validate(list: List<CreateRentSlotRequestDTO>) {
@@ -80,7 +80,7 @@ class RentSlotService(
                 val rentSlots = getByPlaceId(it.id!!)
                 placeMapper.entityToDomain(it, rentSlots)
             }
-            .let { placeMapper.domainToDto(it, listOf(), null) }
+            .let { placeMapper.domainToDto(it, listOf()) }
     }
 
     fun updateStatus(

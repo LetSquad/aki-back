@@ -3,16 +3,13 @@ package moscow.createdin.backend.controller
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Schema
 import moscow.createdin.backend.model.dto.BanDataRequestDTO
-import moscow.createdin.backend.model.dto.RentReviewDTO
 import moscow.createdin.backend.model.dto.place.NewPlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.dto.place.PlaceListDTO
-import moscow.createdin.backend.model.dto.place.PlaceReviewDTO
 import moscow.createdin.backend.model.dto.place.UpdatePlaceDTO
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.PlaceSortType
 import moscow.createdin.backend.model.enums.SpecializationType
-import moscow.createdin.backend.service.PlaceReviewService
 import moscow.createdin.backend.service.PlaceService
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
@@ -36,8 +33,7 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @RequestMapping("/api/places")
 class PlaceController(
-    private val placeService: PlaceService,
-    private val placeReviewService: PlaceReviewService
+    private val placeService: PlaceService
 ) {
 
     @GetMapping
@@ -166,13 +162,5 @@ class PlaceController(
     @DeleteMapping("{id}/favorite")
     fun deleteFavorite(@Parameter(description = "ID площадки") @PathVariable id: Long): PlaceDTO {
         return placeService.deleteFavorite(id)
-    }
-
-    @PostMapping("{id}/review")
-    fun review(
-        @Parameter(description = "ID площадки") @PathVariable id: Long,
-        @RequestBody rentReviewDTO: RentReviewDTO
-    ): List<PlaceReviewDTO> {
-        return placeReviewService.review(id, rentReviewDTO)
     }
 }

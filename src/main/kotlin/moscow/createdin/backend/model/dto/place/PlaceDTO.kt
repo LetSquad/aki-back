@@ -36,6 +36,5 @@ data class PlaceDTO(
     val rating: RatingDTO,
     val admin: Long?,
 
-    val favorite: Boolean,
-    val reviews: List<PlaceReviewDTO>?
+    val favorite: Boolean
 )

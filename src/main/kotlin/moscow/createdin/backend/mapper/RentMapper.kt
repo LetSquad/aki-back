@@ -29,7 +29,7 @@ class RentMapper(
 
     fun domainToDto(rent: Rent) = RentDTO(
         id = rent.id!!,
-        place = placeMapper.domainToDto(rent.place, listOf(), null),
+        place = placeMapper.domainToDto(rent.place, listOf()),
         renter = userMapper.domainToDto(rent.renter),
 
         rentSlots = rent.rentSlots.map { rentSlotMapper.domainToDto(it) },
