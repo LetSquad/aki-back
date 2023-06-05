@@ -8,11 +8,12 @@ interface RentRepository {
 
     fun update(rent: RentEntity)
 
-    fun findByRenterId(id: Long): List<RentEntity>
+    fun findByRenterIdAndId(id: Long, renterId: Long?): RentEntity
 
     fun create(
         placeId: Long,
-        renterId: Long
+        renterId: Long,
+        agreement: String
     ): Long
 
     fun findByRenterId(

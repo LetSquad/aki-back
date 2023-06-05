@@ -35,7 +35,7 @@ class PlaceImageJdbc(
         )
     }
 
-    override fun deleteByPlaceId(placeId: Long, images: List<String>?) {
+    override fun deleteByPlaceId(placeId: Long, images: List<String>) {
         val namedParameters = MapSqlParameterSource()
             .addValue("placeId", placeId)
             .addValue("images", images)

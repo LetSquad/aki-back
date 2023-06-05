@@ -1,11 +1,11 @@
 package moscow.createdin.backend.model.dto.place
 
+import moscow.createdin.backend.model.domain.place.PlaceReview
 import moscow.createdin.backend.model.dto.RatingDTO
-import moscow.createdin.backend.model.dto.RentSlotDTO
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.SpecializationType
 
-data class PlaceDTO(
+data class PlaceWithReviewsDTO(
     val id: Long,
 
     val name: String,
@@ -22,7 +22,6 @@ data class PlaceDTO(
     val levelNumber: Int?,
     val parking: Boolean?,
 
-    val rentSlots: List<RentSlotDTO>?,
 
     val price: PlacePriceDTO,
     val status: PlaceConfirmationStatus,
@@ -36,5 +35,6 @@ data class PlaceDTO(
     val rating: RatingDTO,
     val admin: Long?,
 
-    val favorite: Boolean
+    val favorite: Boolean,
+    val reviews: List<PlaceReview>
 )

@@ -81,7 +81,8 @@ class SecurityConfig(
         val corsConfiguration = CorsConfiguration()
         corsConfiguration.applyPermitDefaultValues()
         corsConfiguration.allowedMethods = listOf("*")
-        corsConfiguration.allowedOrigins = listOf("*")
+        corsConfiguration.allowedOrigins = listOf("https://localhost:8888")
+        corsConfiguration.allowCredentials = true
         val ccs = UrlBasedCorsConfigurationSource()
         ccs.registerCorsConfiguration("/**", corsConfiguration)
         return ccs

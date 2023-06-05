@@ -11,6 +11,7 @@ data class RentDTO(
     val rentSlots: List<RentSlotDTO>,
 
     val status: RentConfirmationStatus,
+    val agreement: String?,
     val banReason: String?,
     val adminId: Long?
 )

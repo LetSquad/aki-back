@@ -11,7 +11,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.jdbc.support.KeyHolder
 import org.springframework.stereotype.Repository
 import java.sql.Array
-import java.sql.SQLException
 import java.sql.Timestamp
 
 
@@ -20,8 +19,9 @@ class PlaceJdbc(
     private val jdbcTemplate: NamedParameterJdbcTemplate,
     private val rowMapper: PlaceRowMapper
 ) : PlaceRepository {
+
     override fun countByFilter(
-        specialization: String?,
+        specialization: List<SpecializationType>,
         rating: Int?,
         priceMin: Int?,
         priceMax: Int?,
@@ -33,12 +33,13 @@ class PlaceJdbc(
         levelNumberMax: Int?,
         withParking: Boolean?,
         dateFrom: Timestamp?,
-        dateTo: Timestamp?
+        dateTo: Timestamp?,
+        userId: Long?
     ): Int {
         val namedParameters =
             getNamedParameters(
                 specialization, rating, priceMin, priceMax, capacityMin, capacityMax, squareMin,
-                squareMax, levelNumberMin, levelNumberMax, withParking, dateFrom, dateTo
+                squareMax, levelNumberMin, levelNumberMax, withParking, dateFrom, dateTo, userId
             )
         return jdbcTemplate.queryForObject(
             """
@@ -46,11 +47,11 @@ class PlaceJdbc(
                 FROM place p
                 INNER JOIN rent_slot rs on p.id = rs.place_id
                 LEFT JOIN (
-                    SELECT
-        count(distinct r.id) as popular,
-        avg(pr.rating) as rating,
+    SELECT
         min(rs.price) as min_price,
         max(rs.price) as max_price,
+        count(distinct r.id) as popular,
+        avg(pr.rating) as rating,
         min(rs.time_start) as time_start,
         min(rs.time_end) as time_end,
         rs.place_id as place_id
@@ -59,8 +60,8 @@ class PlaceJdbc(
              LEFT JOIN place_review pr on r.id = pr.rent_id
     WHERE rs.rent_slot_status = 'OPEN'
     GROUP BY rs.place_id
-                ) as st on p.id = st.place_id
-                WHERE (:withSpecializationFilter = false OR :specialization::SPECIALIZATION_ENUM = ANY (specialization))
+) as st on p.id = st.place_id
+                WHERE (:withSpecializationFilter = false OR :specialization && specialization)
                 AND (:withRatingFilter = false OR :rating >= (rating))
                 AND (:withPriceMinFilter = false OR :priceMin <= min_price)
                 AND (:withPriceMaxFilter = false OR :priceMax >= min_price)
@@ -80,7 +81,7 @@ class PlaceJdbc(
     }
 
     override fun findAll(
-        specialization: String?,
+        specialization: List<SpecializationType>,
         rating: Int?,
         priceMin: Int?,
         priceMax: Int?,
@@ -96,13 +97,14 @@ class PlaceJdbc(
 
         pageNumber: Long,
         limit: Int,
+        userId: Long?,
         sortType: PlaceSortType,
         sortDirection: PlaceSortDirection
     ): List<PlaceEntity> {
         val sortTypeColumnName = sortType.columnName
         val query = """
             $SQL_SELECT_FILTER_ENTITY
-                WHERE (:withSpecializationFilter = false OR :specialization::SPECIALIZATION_ENUM = ANY (specialization))
+                WHERE (:withSpecializationFilter = false OR :specialization && specialization)
                 AND (:withRatingFilter = false OR :rating >= (rating))
                 AND (:withPriceMinFilter = false OR :priceMin <= min_price)
                 AND (:withPriceMaxFilter = false OR :priceMax >= min_price)
@@ -116,14 +118,15 @@ class PlaceJdbc(
                 AND (:withDateFromFilter = false OR rs.time_start >= :dateFrom)
                 AND (:withDateToFilter = false OR rs.time_end <= :dateTo)
                 AND p.place_status = 'VERIFIED' 
-                ORDER BY $sortTypeColumnName $sortDirection
+                AND rs.rent_slot_status = 'OPEN'
+                ORDER BY $sortTypeColumnName $sortDirection NULLS LAST
                 LIMIT :limit OFFSET :offset
         """
         val namedParameters =
             getNamedParameters(
                 specialization, rating, priceMin, priceMax, capacityMin, capacityMax,
                 squareMin, squareMax, levelNumberMin, levelNumberMax, withParking,
-                dateFrom, dateTo
+                dateFrom, dateTo, userId
             )
         namedParameters.addValue("limit", limit)
         namedParameters.addValue("offset", (pageNumber - 1) * limit)
@@ -176,16 +179,13 @@ class PlaceJdbc(
         return keyHolder.key?.toLong() ?: -1
     }
 
-    private fun createSqlArray(list: List<SpecializationType>): Array? {
-        var intArray: Array? = null
-        try {
-            intArray = jdbcTemplate.jdbcTemplate.dataSource.connection.createArrayOf(
+    private fun createSqlArray(list: List<SpecializationType>): Array {
+        return jdbcTemplate.jdbcTemplate.dataSource!!.connection.use {
+            it.createArrayOf(
                 "SPECIALIZATION_ENUM",
                 list.toTypedArray()
             )
-        } catch (ignore: SQLException) {
         }
-        return intArray
     }
 
     override fun update(place: PlaceEntity) {
@@ -242,13 +242,14 @@ class PlaceJdbc(
         )
     }
 
-    override fun findById(id: Long): PlaceEntity {
+    override fun findById(id: Long, userId: Long?): PlaceEntity {
         val query = """
             $SQL_SELECT_ENTITY
                 WHERE p.id = :id
         """
         val namedParameters = MapSqlParameterSource()
             .addValue("id", id)
+            .addValue("userId", userId)
         return jdbcTemplate.queryForObject(
             query, namedParameters, rowMapper
         )!!
@@ -284,6 +285,22 @@ class PlaceJdbc(
         )
     }
 
+    override fun findFavorite(pageNumber: Long, limit: Int, userId: Long?): List<PlaceEntity> {
+        val parameters = MapSqlParameterSource()
+            .addValue("limit", limit)
+            .addValue("offset", (pageNumber - 1) * limit)
+            .addValue("userId", userId)
+
+        return jdbcTemplate.query(
+            """
+                $SQL_SELECT_ENTITY
+                WHERE EXISTS(SELECT id FROM favorite_place
+             WHERE place_id = p.id AND user_id = :userId) 
+                LIMIT :limit OFFSET :offset
+            """, parameters, rowMapper
+        )
+    }
+
     override fun countUnverified(): Int {
         val parameters = MapSqlParameterSource()
 
@@ -292,6 +309,20 @@ class PlaceJdbc(
                 SELECT COUNT(distinct p.id) as count
                 FROM place p
                 WHERE p.place_status = 'UNVERIFIED'
+            """, parameters
+        ) { rs, _ -> rs.getInt("count") }!!
+    }
+
+    override fun countFavorite(userId: Long?): Int {
+        val parameters = MapSqlParameterSource()
+            .addValue("userId", userId)
+
+        return jdbcTemplate.queryForObject(
+            """
+                SELECT COUNT(distinct p.id) as count
+                FROM place p
+                LEFT JOIN favorite_place fp on p.id = fp.place_id
+                WHERE fp.user_id = :userId
             """, parameters
         ) { rs, _ -> rs.getInt("count") }!!
     }
@@ -316,7 +347,7 @@ class PlaceJdbc(
     }
 
     private fun getNamedParameters(
-        specialization: String?,
+        specialization: List<SpecializationType>,
         rating: Int?,
         priceMin: Int?,
         priceMax: Int?,
@@ -328,12 +359,13 @@ class PlaceJdbc(
         levelNumberMax: Int?,
         withParking: Boolean?,
         dateFrom: Timestamp?,
-        dateTo: Timestamp?
+        dateTo: Timestamp?,
+        userId: Long?
     ): MapSqlParameterSource {
         val mapSqlParameterSource = MapSqlParameterSource()
         return mapSqlParameterSource
-            .addValue("withSpecializationFilter", !specialization.isNullOrBlank())
-            .addValue("specialization", specialization)
+            .addValue("withSpecializationFilter", specialization.isNotEmpty())
+            .addValue("specialization", createSqlArray(specialization))
             .addValue("rating", rating)
             .addValue("withRatingFilter", rating != null)
             .addValue("withPriceMinFilter", priceMin != null)
@@ -358,13 +390,14 @@ class PlaceJdbc(
             .addValue("withDateToFilter", dateTo != null)
             .addValue("dateFrom", dateFrom)
             .addValue("dateTo", dateTo)
+            .addValue("userId", userId)
     }
 
     companion object {
         private const val SQL_SELECT_FILTER_ENTITY =
             """
                 SELECT distinct
-                    p.id,
+                    p.id place_id,
                     p.user_id,
                     p.area_id,
                     p.place_type,
@@ -426,22 +459,29 @@ class PlaceJdbc(
                     a.area_admin_id,
                 
                     st.popular,
+                    st.rate_count,
                     st.rating,
                     st.min_price,
                     st.max_price,
                     st.time_start,
-                    st.time_end
+                    st.time_end,
+    CASE WHEN EXISTS (SELECT id FROM favorite_place
+                      WHERE place_id = p.id AND user_id = :userId)
+             THEN 'TRUE'
+         ELSE 'FALSE'
+        END AS favorite
                     /**/
                 FROM place p
                 INNER JOIN aki_user u on p.user_id = u.id
                 LEFT JOIN area a on p.area_id = a.id
                 INNER JOIN rent_slot rs on p.id = rs.place_id
                 LEFT JOIN (
-                    SELECT
-        count(distinct r.id) as popular,
-        avg(pr.rating) as rating,
+    SELECT
         min(rs.price) as min_price,
         max(rs.price) as max_price,
+        count(distinct r.id) as popular,
+        count(distinct pr.id) as rate_count,
+        avg(pr.rating) as rating,
         min(rs.time_start) as time_start,
         min(rs.time_end) as time_end,
         rs.place_id as place_id
@@ -450,13 +490,13 @@ class PlaceJdbc(
              LEFT JOIN place_review pr on r.id = pr.rent_id
     WHERE rs.rent_slot_status = 'OPEN'
     GROUP BY rs.place_id
-                ) as st on p.id = st.place_id
+) as st on p.id = st.place_id
                     """
 
         private const val SQL_SELECT_ENTITY =
             """
                 SELECT distinct 
-                    p.id, 
+                    p.id place_id, 
                     p.user_id,
                     p.area_id, 
                     p.place_type, 
@@ -517,11 +557,36 @@ class PlaceJdbc(
                     a.area_ban_reason, 
                     a.area_admin_id,
                     
-                    0 as min_price, null as time_start, null as time_end 
+                    st.min_price, 
+                    st.time_start, 
+                    st.time_end,
+                    st.rate_count,
+                    st.rating,
+    CASE WHEN EXISTS (SELECT id FROM favorite_place
+                      WHERE place_id = p.id AND user_id = :userId)
+             THEN 'TRUE'
+         ELSE 'FALSE'
+        END AS favorite
                 FROM place p
                 
                 INNER JOIN aki_user u on p.user_id = u.id
                 LEFT JOIN area a on p.area_id = a.id 
+                LEFT JOIN (
+    SELECT
+        min(rs.price) as min_price,
+        max(rs.price) as max_price,
+        count(distinct r.id) as popular,
+        count(distinct pr.id) as rate_count,
+        avg(pr.rating) as rating,
+        min(rs.time_start) as time_start,
+        min(rs.time_end) as time_end,
+        rs.place_id as place_id
+    FROM rent_slot rs
+             LEFT JOIN rent r on rs.place_id = r.place_id
+             LEFT JOIN place_review pr on r.id = pr.rent_id
+    WHERE rs.rent_slot_status = 'OPEN'
+    GROUP BY rs.place_id
+) as st on p.id = st.place_id
             """
     }
 }

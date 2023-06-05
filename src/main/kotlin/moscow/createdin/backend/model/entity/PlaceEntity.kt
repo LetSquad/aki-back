@@ -35,5 +35,8 @@ data class PlaceEntity(
     val banReason: String?,
     val admin: Long?,
     val minPrice: Double?,
-    val priceType: String?
+    val priceType: String?,
+    val rating: Double?,
+    val rateCount: Int?,
+    val favorite: Boolean
 )

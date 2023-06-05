@@ -1,8 +1,6 @@
 package moscow.createdin.backend.repository
 
-import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.entity.RentEntity
-import moscow.createdin.backend.model.enums.AdminStatusType
 import moscow.createdin.backend.model.enums.RentConfirmationStatus
 import moscow.createdin.backend.repository.mapper.RentRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
@@ -46,17 +44,18 @@ class RentJdbc(
         )
     }
 
-    override fun findByRenterId(id: Long): List<RentEntity> {
+    override fun findByRenterIdAndId(id: Long, renterId: Long?): RentEntity {
         val parameters = MapSqlParameterSource()
-            .addValue("renterId", id)
-        return jdbcTemplate.query(
+            .addValue("rentId", id)
+            .addValue("userId", renterId)
+        return jdbcTemplate.queryForObject(
             """
                 $SQL_SELECT_ENTITY
                 WHERE
-                   r.user_id = :renterId AND r.rent_status != 'DELETED'
+                   r.user_id = :userId AND r.rent_status != 'DELETED' AND r.id = :rentId
                 GROUP BY r.id, p.id, u.id, up.id
             """, parameters, rowMapper
-        )
+        )!!
     }
 
     override fun findByRenterId(
@@ -82,18 +81,20 @@ class RentJdbc(
 
     override fun create(
         placeId: Long,
-        renterId: Long
+        renterId: Long,
+        agreement: String
     ): Long {
         val keyHolder: KeyHolder = GeneratedKeyHolder()
         val parameters = MapSqlParameterSource()
         parameters.addValue("placeId", placeId)
         parameters.addValue("userId", renterId)
         parameters.addValue("status", RentConfirmationStatus.OPEN.name)
+        parameters.addValue("agreement", agreement)
 
         jdbcTemplate.update(
             """
-                INSERT INTO rent (place_id, user_id, rent_status) 
-                VALUES (:placeId, :userId, :status)
+                INSERT INTO rent (place_id, user_id, rent_status, agreement) 
+                VALUES (:placeId, :userId, :status, :agreement)
             """,
             parameters, keyHolder, arrayOf("id")
         )
@@ -125,6 +126,7 @@ class RentJdbc(
                     r.place_id,
                     r.user_id,
                     r.rent_status,
+                    r.agreement,
                     r.rent_admin_id,
                     r.rent_ban_reason,
             
@@ -148,7 +150,7 @@ class RentJdbc(
                     u.user_ban_reason,
                     u.user_type,
                     
-                    p.id,
+                    p.id place_id,
                     p.place_type,
                     p.place_name,
                     p.specialization,
@@ -174,6 +176,7 @@ class RentJdbc(
                     p.area_id,
                     p.place_coordinates_id,
                     0 as min_price, null as time_start, null as time_end,
+                    0 as rating, 0 as rate_count,
                     
                     up.id,
                     up.user_email,
@@ -194,7 +197,12 @@ class RentJdbc(
                     up.user_admin_id,
                     up.user_ban_reason,
                     up.user_type,
-                    array_agg(rs.id)
+                    array_agg(rs.id),
+    CASE WHEN EXISTS (SELECT id FROM favorite_place
+                      WHERE place_id = p.id AND user_id = :userId)
+             THEN 'TRUE'
+         ELSE 'FALSE'
+        END AS favorite
                     
                     FROM rent r
                          JOIN rent_slot__rent rs_r on rs_r.rent_id = r.id

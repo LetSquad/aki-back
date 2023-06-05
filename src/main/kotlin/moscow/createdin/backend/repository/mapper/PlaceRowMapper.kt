@@ -20,7 +20,7 @@ class PlaceRowMapper(
 ) : RowMapper<PlaceEntity> {
 
     override fun mapRow(rs: ResultSet, rowNum: Int): PlaceEntity = PlaceEntity(
-        id = rs.getLong("id"),
+        id = rs.getLong("place_id"),
         user = akiUserRowMapper.mapRow(rs, rowNum),
         area = if (rs.getLongOrNull("area_id") == null) {
             null
@@ -40,11 +40,11 @@ class PlaceRowMapper(
         phone = rs.getString("place_phone"),
         email = rs.getString("place_email"),
         website = rs.getString("place_website"),
-        levelNumber = rs.getInt("level_number"),
+        levelNumber = rs.getIntOrNull("level_number"),
         fullArea = rs.getInt("full_area"),
         rentableArea = rs.getInt("rentable_area"),
-        minCapacity = rs.getInt("capacity_min"),
-        maxCapacity = rs.getInt("capacity_max"),
+        minCapacity = rs.getIntOrNull("capacity_min"),
+        maxCapacity = rs.getIntOrNull("capacity_max"),
         parking = rs.getBoolean("parking"),
         services = stringToPGObject(rs.getString("services")),
         rules = rs.getString("rules"),
@@ -53,9 +53,12 @@ class PlaceRowMapper(
         equipments = stringToPGObject(rs.getString("equipments")),
         status = rs.getString("place_status"),
         banReason = rs.getString("place_ban_reason"),
-        admin = rs.getLong("place_admin_id"),
+        admin = rs.getLongOrNull("place_admin_id"),
         minPrice = rs.getDouble("min_price"),
-        priceType = findPriceType(rs.getDate("time_start"), rs.getDate("time_end"))
+        priceType = findPriceType(rs.getDate("time_start"), rs.getDate("time_end")),
+        rating = rs.getDouble("rating"),
+        rateCount = rs.getInt("rate_count"),
+        favorite = rs.getBoolean("favorite")
     )
 
     private fun getArrayEnum(arrayStr: String): List<SpecializationType> {
@@ -80,7 +83,7 @@ class PlaceRowMapper(
     }
 
     fun stringToPGObject(value: String?): PGobject {
-        val pGobject: PGobject = PGobject()
+        val pGobject = PGobject()
         pGobject.type = "jsonb"
         pGobject.value = value
         return pGobject

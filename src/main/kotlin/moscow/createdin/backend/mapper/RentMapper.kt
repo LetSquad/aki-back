@@ -13,6 +13,7 @@ class RentMapper(
     private val userMapper: UserMapper,
     private val placeMapper: PlaceMapper
 ) {
+
     fun domainToEntity(rent: Rent) = RentEntity(
         id = rent.id,
 
@@ -21,6 +22,7 @@ class RentMapper(
 
         rentSlotIds = rent.rentSlots.map { it.id!! },
         status = rent.status.name,
+        agreement = rent.agreement,
         banReason = rent.banReason,
         admin = rent.admin
     )
@@ -32,6 +34,7 @@ class RentMapper(
 
         rentSlots = rent.rentSlots.map { rentSlotMapper.domainToDto(it) },
         status = rent.status,
+        agreement = rent.agreement,
         banReason = rent.banReason,
         adminId = rent.admin
     )
@@ -43,6 +46,7 @@ class RentMapper(
         rentSlots = rentSlots,
 
         status = RentConfirmationStatus.valueOf(rent.status),
+        agreement = rent.agreement,
         banReason = rent.banReason,
         admin = rent.admin,
     )

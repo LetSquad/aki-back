@@ -41,5 +41,9 @@ data class Place(
     val banReason: String?,
     val admin: Long?,
     val price: Price?,
-    val rentSlots: List<RentSlot>?
+    val rentSlots: List<RentSlot>?,
+    val rating: Double?,
+    val rateCount: Int?,
+
+    val favorite: Boolean
 )

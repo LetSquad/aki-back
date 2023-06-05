@@ -8,12 +8,16 @@ import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.CreateRentRequestDTO
 import moscow.createdin.backend.model.dto.RentDTO
 import moscow.createdin.backend.model.dto.RentListDTO
+import moscow.createdin.backend.model.dto.RentReviewDTO
 import moscow.createdin.backend.model.enums.AdminStatusType
 import moscow.createdin.backend.model.enums.RentConfirmationStatus
 import moscow.createdin.backend.model.enums.RentSlotStatusType
+import moscow.createdin.backend.repository.PlaceReviewRepository
 import moscow.createdin.backend.repository.RentRepository
 import moscow.createdin.backend.repository.RentSlotToRentRepository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import kotlin.math.ceil
 
 @Service
 class RentService(
@@ -26,13 +30,15 @@ class RentService(
     private val rentSlotMapper: RentSlotMapper,
 
     private val rentRepository: RentRepository,
-    private val rentSlotToRentRepository: RentSlotToRentRepository
+    private val rentSlotToRentRepository: RentSlotToRentRepository,
+    private val placeReviewRepository: PlaceReviewRepository
 ) {
 
+    @Transactional
     fun create(req: CreateRentRequestDTO): RentDTO {
         val renter = userService.getCurrentUser()
 
-        val newRentId = rentRepository.create(req.placeId, renter.id)
+        val newRentId = rentRepository.create(req.placeId, renter.id, req.agreement)
         rentSlotService.updateStatus(req.rentSlotIds, RentSlotStatusType.BOOKED)
         rentSlotToRentRepository.create(newRentId, req.rentSlotIds)
 
@@ -43,13 +49,16 @@ class RentService(
         return get(newRentId)
     }
 
+    @Transactional
     fun getAll(
         pageNumber: Long,
         limit: Int
     ): RentListDTO {
         val renter = userService.getCurrentUser()
 
-        val total = rentRepository.countByRenterId(renter.id)
+        val count = rentRepository.countByRenterId(renter.id)
+        val total = ceil(count / limit.toDouble()).toInt()
+
         val rents = rentRepository.findByRenterId(pageNumber, limit, renter.id)
             .map { rent ->
                 val slots = rentSlotToRentRepository.findSlotsByRentId(rent.id!!)
@@ -75,6 +84,7 @@ class RentService(
             }
     }
 
+    @Transactional
     fun delete(id: Long) {
         val rent = rentRepository.findById(id)
         val deleteRent = rent.copy(status = AdminStatusType.DELETED.name)
@@ -85,6 +95,7 @@ class RentService(
         rentSlotToRentRepository.delete(id)
     }
 
+    @Transactional
     fun ban(banRequestDTO: BanRequestDTO): RentDTO {
         val adminUser = userService.getCurrentUserDomain()
         val editable = getDomain(banRequestDTO.id)
@@ -99,6 +110,13 @@ class RentService(
             .also { rentRepository.update(it) }
             .let { getDomain(it.id!!) }
             .let { rentMapper.domainToDto(it) }
+    }
+
+    @Transactional
+    fun rate(rentId: Long, rentReviewDTO: RentReviewDTO) {
+        val user = userService.getCurrentUserDomain()
+        rentRepository.findByRenterIdAndId(rentId, user.id)
+        placeReviewRepository.save(rentId, rentReviewDTO.rating)
     }
 
     companion object {

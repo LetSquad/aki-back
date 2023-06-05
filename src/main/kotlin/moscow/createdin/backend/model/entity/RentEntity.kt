@@ -8,6 +8,7 @@ data class RentEntity(
     val rentSlotIds: List<Long>,
 
     val status: String,
+    val agreement: String?,
     val banReason: String?,
     val admin: Long?
 )
