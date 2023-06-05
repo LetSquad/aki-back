@@ -1,38 +1,26 @@
 package moscow.createdin.backend.service
 
 import moscow.createdin.backend.exception.UnprocessableCreateRentSlotRequestException
-import moscow.createdin.backend.getLogger
-import moscow.createdin.backend.mapper.PlaceMapper
 import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.domain.RentSlotTime
 import moscow.createdin.backend.model.dto.CreateRentSlotRequestDTO
-import moscow.createdin.backend.model.dto.place.PlaceDTO
 import moscow.createdin.backend.model.enums.RentSlotStatusType
 import moscow.createdin.backend.repository.RentSlotRepository
 import org.springframework.stereotype.Service
 
 @Service
 class RentSlotService(
-    private val placeService: PlaceService,
-    private val placeMapper: PlaceMapper,
     private val rentSlotMapper: RentSlotMapper,
     private val rentSlotRepository: RentSlotRepository
 ) {
 
-    fun create(list: List<CreateRentSlotRequestDTO>): PlaceDTO {
+    fun create(list: List<CreateRentSlotRequestDTO>) {
         validate(list)
 
         list.map { rentSlotMapper.createDtoToDomain(it) }
             .map { rentSlotMapper.domainToEntity(it) }
             .also { rentSlotRepository.save(it) }
-
-        return placeService.findById(list[0].placeId)
-            .let {
-                val rentSlots = getByPlaceId(it.id!!)
-                placeMapper.entityToDomain(it, rentSlots)
-            }
-            .let { placeMapper.domainToDto(it, listOf()) }
     }
 
     fun validate(list: List<CreateRentSlotRequestDTO>) {
@@ -66,21 +54,13 @@ class RentSlotService(
             .let { rentSlotMapper.entityToDomain(it) }
     }
 
-    private fun getByPlaceId(placeId: Long): List<RentSlot> {
+    fun getByPlaceId(placeId: Long): List<RentSlot> {
         return rentSlotRepository.findByPlaceId(placeId)
             .map { rentSlotMapper.entityToDomain(it) }
     }
 
-    fun delete(ids: List<Long>): PlaceDTO {
+    fun delete(ids: List<Long>) {
         updateStatus(ids, RentSlotStatusType.DELETED)
-
-        val placeId = getById(ids[0]).placeId!!
-        return placeService.findById(placeId)
-            .let {
-                val rentSlots = getByPlaceId(it.id!!)
-                placeMapper.entityToDomain(it, rentSlots)
-            }
-            .let { placeMapper.domainToDto(it, listOf()) }
     }
 
     fun updateStatus(
@@ -92,9 +72,5 @@ class RentSlotService(
             .map { it.copy(status = statusType) }
             .map { rentSlotMapper.domainToEntity(it) }
             .let { rentSlotRepository.update(it) }
-    }
-
-    companion object {
-        private val log = getLogger<RentSlotService>()
     }
 }
