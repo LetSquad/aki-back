@@ -149,7 +149,7 @@ class RentJdbc(
                     u.user_ban_reason,
                     u.user_type,
                     
-                    p.id,
+                    p.id place_id,
                     p.place_type,
                     p.place_name,
                     p.specialization,

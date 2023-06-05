@@ -20,7 +20,7 @@ class PlaceRowMapper(
 ) : RowMapper<PlaceEntity> {
 
     override fun mapRow(rs: ResultSet, rowNum: Int): PlaceEntity = PlaceEntity(
-        id = rs.getLong("id"),
+        id = rs.getLong("place_id"),
         user = akiUserRowMapper.mapRow(rs, rowNum),
         area = if (rs.getLongOrNull("area_id") == null) {
             null

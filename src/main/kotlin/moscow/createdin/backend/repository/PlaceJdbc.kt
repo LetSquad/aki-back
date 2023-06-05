@@ -362,7 +362,7 @@ class PlaceJdbc(
         private const val SQL_SELECT_FILTER_ENTITY =
             """
                 SELECT distinct
-                    p.id,
+                    p.id place_id,
                     p.user_id,
                     p.area_id,
                     p.place_type,
@@ -456,7 +456,7 @@ class PlaceJdbc(
         private const val SQL_SELECT_ENTITY =
             """
                 SELECT distinct 
-                    p.id, 
+                    p.id place_id, 
                     p.user_id,
                     p.area_id, 
                     p.place_type, 
