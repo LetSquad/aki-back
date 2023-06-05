@@ -35,6 +35,7 @@ data class Place(
     val accessibility: String?,
     val facilities: List<PlaceFacility>?,
     val equipments: List<PlaceEquipment>?,
+    val metroStations: List<String>?,
 
 
     val status: PlaceConfirmationStatus,

@@ -22,6 +22,7 @@ data class NewPlaceDTO(
     val services: List<PlaceServiceDTO>?,
     val equipments: List<PlaceEquipmentDTO>?,
     val facilities: List<PlaceFacilitiesDTO>?,
+    val metroStations: List<String>?,
     val rules: String?,
     val accessibility: String?,
 

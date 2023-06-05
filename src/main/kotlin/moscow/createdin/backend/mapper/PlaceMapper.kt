@@ -68,7 +68,8 @@ class PlaceMapper(
         status = PlaceConfirmationStatus.UNVERIFIED,
         banReason = null,
         admin = place.admin,
-        price = null
+        price = null,
+        metroStations = place.metroStations
     )
 
     fun updatedDtoToDomain(place: UpdatePlaceDTO, akiUser: AkiUser, area: Long?) = SimplePlace(
@@ -101,7 +102,8 @@ class PlaceMapper(
         status = PlaceConfirmationStatus.UNVERIFIED,
         banReason = null,
         admin = place.admin,
-        price = null
+        price = null,
+        metroStations = null
     )
 
     fun simpleDomainToEntity(
@@ -141,7 +143,8 @@ class PlaceMapper(
         priceType = null,
         rating = null,
         rateCount = null,
-        favorite = false
+        favorite = false,
+        metroStations = stringToPGObject(gson.toJson(place.metroStations))
     )
 
     fun domainToEntity(place: Place) = PlaceEntity(
@@ -178,7 +181,8 @@ class PlaceMapper(
         priceType = null,
         rating = null,
         rateCount = null,
-        favorite = false
+        favorite = false,
+        metroStations = stringToPGObject(gson.toJson(place.metroStations))
     )
 
     fun entityToDomain(place: PlaceEntity, rentSlots: List<RentSlot>?) = Place(
@@ -224,7 +228,11 @@ class PlaceMapper(
         rentSlots = rentSlots,
         rating = place.rating,
         rateCount = place.rateCount,
-        favorite = place.favorite
+        favorite = place.favorite,
+        metroStations = gson.fromJson(
+            place.metroStations?.value ?: "[]",
+            object : TypeToken<Collection<String?>?>() {}.type
+        )
     )
 
     fun domainToDto(place: Place, placeImages: List<String>?) = PlaceDTO(
@@ -254,7 +262,8 @@ class PlaceMapper(
         admin = place.admin,
         rentSlots = place.rentSlots?.map { rentSlotMapper.domainToDto(it) },
         rating = placeRatingToDTO(place.rating, place.rateCount),
-        favorite = place.favorite
+        favorite = place.favorite,
+        metroStations = place.metroStations
     )
 
     private fun stringToPGObject(value: String?): PGobject {

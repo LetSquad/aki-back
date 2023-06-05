@@ -17,3 +17,5 @@ databaseChangeLog:
       file: db/changelog/sql/8_rent_agreement.sql
   - include:
       file: db/changelog/sql/9_drop_review_constraint.sql
+  - include:
+      file: db/changelog/sql/10_add_metro_column.sql

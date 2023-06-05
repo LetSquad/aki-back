@@ -31,6 +31,7 @@ data class PlaceDTO(
     val equipments: List<PlaceEquipmentDTO>?,
     val facilities: List<PlaceFacilitiesDTO>?,
     val placeImages: List<String>?,
+    val metroStations: List<String>?,
 
     val user: PlaceUserDTO,
     val rating: RatingDTO,

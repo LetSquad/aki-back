@@ -38,5 +38,6 @@ data class PlaceEntity(
     val priceType: String?,
     val rating: Double?,
     val rateCount: Int?,
-    val favorite: Boolean
+    val favorite: Boolean,
+    val metroStations: PGobject?
 )
