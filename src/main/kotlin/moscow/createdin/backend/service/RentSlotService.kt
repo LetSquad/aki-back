@@ -66,7 +66,7 @@ class RentSlotService(
             .let { rentSlotMapper.entityToDomain(it) }
     }
 
-    private fun getByPlaceId(placeId: Long): List<RentSlot> {
+    fun getByPlaceId(placeId: Long): List<RentSlot> {
         return rentSlotRepository.findByPlaceId(placeId)
             .map { rentSlotMapper.entityToDomain(it) }
     }

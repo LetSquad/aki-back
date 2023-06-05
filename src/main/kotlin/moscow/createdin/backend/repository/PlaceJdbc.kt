@@ -140,6 +140,51 @@ class PlaceJdbc(
         )
     }
 
+    override fun findAll(
+        specialization: List<SpecializationType>,
+        rating: Int?,
+        priceMin: Int?,
+        priceMax: Int?,
+        capacityMin: Int?,
+        capacityMax: Int?,
+        squareMin: Int?,
+        squareMax: Int?,
+        levelNumberMin: Int?,
+        levelNumberMax: Int?,
+        withParking: Boolean?,
+        dateFrom: Timestamp?,
+        dateTo: Timestamp?,
+        userId: Long?
+    ): List<PlaceEntity> {
+        val query = """
+            $SQL_SELECT_FILTER_ENTITY
+                WHERE (:withSpecializationFilter = false OR :specialization && specialization)
+                AND (:withRatingFilter = false OR :rating >= (rating))
+                AND (:withPriceMinFilter = false OR :priceMin <= min_price)
+                AND (:withPriceMaxFilter = false OR :priceMax >= min_price)
+                AND (:withCapacityMinFilter = false OR :capacityMin <= capacity_min)
+                AND (:withCapacityMaxFilter = false OR :capacityMax >= capacity_max)
+                AND (:withSquareMinFilter = false OR :squareMin <= full_area)
+                AND (:withSquareMaxFilter = false OR :squareMax >= full_area)
+                AND (:withLevelMinFilter = false OR :levelNumberMin <= level_number)
+                AND (:withLevelMaxFilter = false OR :levelNumberMax >= level_number)
+                AND (:withParkingFilter = false OR p.parking = :withParking)
+                AND (:withDateFromFilter = false OR rs.time_start >= :dateFrom)
+                AND (:withDateToFilter = false OR rs.time_end <= :dateTo)
+                AND p.place_status = 'VERIFIED' 
+                AND rs.rent_slot_status = 'OPEN'
+        """
+        val namedParameters =
+            getNamedParameters(
+                specialization, rating, priceMin, priceMax, capacityMin, capacityMax,
+                squareMin, squareMax, levelNumberMin, levelNumberMax, withParking,
+                dateFrom, dateTo, userId
+            )
+        return jdbcTemplate.query(
+            query, namedParameters, rowMapper
+        )
+    }
+
     override fun save(place: PlaceEntity): Long {
         val keyHolder: KeyHolder = GeneratedKeyHolder()
         val parameters = MapSqlParameterSource()

@@ -49,6 +49,23 @@ interface PlaceRepository {
         sortDirection: PlaceSortDirection
     ): List<PlaceEntity>
 
+    fun findAll(
+        specialization: List<SpecializationType>,
+        rating: Int?,
+        priceMin: Int?,
+        priceMax: Int?,
+        capacityMin: Int?,
+        capacityMax: Int?,
+        squareMin: Int?,
+        squareMax: Int?,
+        levelNumberMin: Int?,
+        levelNumberMax: Int?,
+        withParking: Boolean?,
+        dateFrom: Timestamp?,
+        dateTo: Timestamp?,
+        userId: Long?
+    ): List<PlaceEntity>
+
     fun save(place: PlaceEntity): Long
 
     fun findById(id: Long, userId: Long?): PlaceEntity
