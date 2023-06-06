@@ -58,7 +58,8 @@ class PlaceRowMapper(
         priceType = findPriceType(rs.getDate("time_start"), rs.getDate("time_end")),
         rating = rs.getDouble("rating"),
         rateCount = rs.getInt("rate_count"),
-        favorite = rs.getBoolean("favorite")
+        favorite = rs.getBoolean("favorite"),
+        metroStations = stringToPGObject(rs.getString("metro_stations"))
     )
 
     private fun getArrayEnum(arrayStr: String): List<SpecializationType> {

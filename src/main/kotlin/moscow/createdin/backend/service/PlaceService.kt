@@ -109,6 +109,7 @@ class PlaceService(
         withParking: Boolean?,
         dateFrom: LocalDate?,
         dateTo: LocalDate?,
+        metroStations: List<String>?,
 
         pageNumber: Long,
         limit: Int,
@@ -136,7 +137,8 @@ class PlaceService(
             withParking,
             dateFrom?.let { Timestamp.from(dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC)) },
             dateTo?.let { Timestamp.from(dateTo.atStartOfDay().toInstant(ZoneOffset.UTC)) },
-            userId
+            userId,
+            metroStations
         )
 
         val total = ceil(count / limit.toDouble()).toInt()
@@ -155,6 +157,7 @@ class PlaceService(
             withParking,
             dateFrom?.let { Timestamp.from(dateFrom.atStartOfDay().toInstant(ZoneOffset.UTC)) },
             dateTo?.let { Timestamp.from(dateTo.atStartOfDay().toInstant(ZoneOffset.UTC)) },
+            metroStations,
 
             pageNumber,
             limit,

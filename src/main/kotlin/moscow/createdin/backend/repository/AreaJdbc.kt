@@ -113,7 +113,7 @@ class AreaJdbc(
                        area.area_admin_id,
                        area.area_coordinates_id,
                 
-                       aki_user.id as user_id,,
+                       aki_user.id as user_id,
                        aki_user.user_email,
                        aki_user.password,
                        aki_user.role,
@@ -154,7 +154,7 @@ class AreaJdbc(
                        area_admin.user_type
                 FROM area
                          INNER JOIN aki_user on area.user_id = aki_user.id
-                         FULL JOIN aki_user area_admin on area.admin_id = area_admin.id
+                         FULL JOIN aki_user area_admin on area.area_admin_id = area_admin.id
             """
     }
 }

@@ -1,5 +1,7 @@
 package moscow.createdin.backend.controller
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import moscow.createdin.backend.getLogger
 import moscow.createdin.backend.model.dto.CreateRentSlotRequestDTOList
 import moscow.createdin.backend.model.dto.DeleteRentSlotRequestDTOList
@@ -14,12 +16,16 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+@Tag(name = "Методы работы со слотами")
 @RestController
 @RequestMapping("/api/rentSlots")
 class RentSlotController(
     private val rentSlotService: RentSlotService
 ) {
 
+    @Operation(
+        summary = "Создание слотов для возможных аренд"
+    )
     @PreAuthorize("hasRole('LANDLORD')")
     @PostMapping
     fun create(@RequestBody req: CreateRentSlotRequestDTOList): ResponseEntity<PlaceDTO> {
@@ -32,6 +38,9 @@ class RentSlotController(
         }
     }
 
+    @Operation(
+        summary = "Удаление слотов для аренды"
+    )
     @PreAuthorize("hasRole('LANDLORD')")
     @DeleteMapping
     fun delete(@RequestBody req: DeleteRentSlotRequestDTOList): PlaceDTO {

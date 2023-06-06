@@ -34,12 +34,14 @@ class PlaceJdbc(
         withParking: Boolean?,
         dateFrom: Timestamp?,
         dateTo: Timestamp?,
-        userId: Long?
+        userId: Long?,
+        metroStations: List<String>?
     ): Int {
         val namedParameters =
             getNamedParameters(
                 specialization, rating, priceMin, priceMax, capacityMin, capacityMax, squareMin,
-                squareMax, levelNumberMin, levelNumberMax, withParking, dateFrom, dateTo, userId
+                squareMax, levelNumberMin, levelNumberMax, withParking, dateFrom, dateTo, userId,
+                metroStations
             )
         return jdbcTemplate.queryForObject(
             """
@@ -74,6 +76,7 @@ class PlaceJdbc(
                 AND (:withParkingFilter = false OR p.parking = :withParking)
                 AND (:withDateFromFilter = false OR rs.time_start >= :dateFrom)
                 AND (:withDateToFilter = false OR rs.time_end <= :dateTo)
+                AND (:withMetroFilter = false OR p.metro_stations ??| string_to_array(:metroStations, ','))
                 AND p.place_status = 'VERIFIED' 
                 AND rs.rent_slot_status = 'OPEN' 
             """, namedParameters
@@ -94,6 +97,7 @@ class PlaceJdbc(
         withParking: Boolean?,
         dateFrom: Timestamp?,
         dateTo: Timestamp?,
+        metroStations: List<String>?,
 
         pageNumber: Long,
         limit: Int,
@@ -117,6 +121,7 @@ class PlaceJdbc(
                 AND (:withParkingFilter = false OR p.parking = :withParking)
                 AND (:withDateFromFilter = false OR rs.time_start >= :dateFrom)
                 AND (:withDateToFilter = false OR rs.time_end <= :dateTo)
+                AND (:withMetroFilter = false OR p.metro_stations ??| string_to_array(:metroStations, ','))
                 AND p.place_status = 'VERIFIED' 
                 AND rs.rent_slot_status = 'OPEN'
                 ORDER BY $sortTypeColumnName $sortDirection NULLS LAST
@@ -126,7 +131,7 @@ class PlaceJdbc(
             getNamedParameters(
                 specialization, rating, priceMin, priceMax, capacityMin, capacityMax,
                 squareMin, squareMax, levelNumberMin, levelNumberMax, withParking,
-                dateFrom, dateTo, userId
+                dateFrom, dateTo, userId, metroStations
             )
         namedParameters.addValue("limit", limit)
         namedParameters.addValue("offset", (pageNumber - 1) * limit)
@@ -163,15 +168,16 @@ class PlaceJdbc(
         parameters.addValue("ban_reason", place.banReason)
         parameters.addValue("admin_id", place.admin)
         parameters.addValue("status", place.status)
+        parameters.addValue("metro_stations", place.metroStations)
 
         jdbcTemplate.update(
             """
                 INSERT INTO place (user_id, area_id, place_type, place_name, specialization, place_description, place_address, place_coordinates_id, place_phone, place_email, 
                 place_website, level_number, services, rules, accessibility, full_area, rentable_area, facilities, equipments, capacity_min, 
-                capacity_max, place_status, place_ban_reason, place_admin_id, parking) 
+                capacity_max, place_status, place_ban_reason, place_admin_id, parking, metro_stations) 
                 VALUES (:user_id, :area_id, :type, :name, :specialization, :description, :address, :coordinates_id, :phone, :email, 
                 :website, :level_number, :services, :rules, :accessibility, :full_area, :rentable_area, :facilities, :equipments, :capacity_min, 
-                :capacity_max, :status, :ban_reason, :admin_id, :parking)
+                :capacity_max, :status, :ban_reason, :admin_id, :parking, :metro_stations)
             """,
             parameters, keyHolder, arrayOf("id")
         )
@@ -360,7 +366,8 @@ class PlaceJdbc(
         withParking: Boolean?,
         dateFrom: Timestamp?,
         dateTo: Timestamp?,
-        userId: Long?
+        userId: Long?,
+        metroStations: List<String>?
     ): MapSqlParameterSource {
         val mapSqlParameterSource = MapSqlParameterSource()
         return mapSqlParameterSource
@@ -391,6 +398,8 @@ class PlaceJdbc(
             .addValue("dateFrom", dateFrom)
             .addValue("dateTo", dateTo)
             .addValue("userId", userId)
+            .addValue("withMetroFilter", !metroStations.isNullOrEmpty())
+            .addValue("metroStations", metroStations?.joinToString())
     }
 
     companion object {
@@ -423,6 +432,7 @@ class PlaceJdbc(
                     p.place_status,
                     p.place_admin_id,
                     p.place_ban_reason,
+                    p.metro_stations,
                 
                     u.id,
                     u.user_email,
@@ -522,6 +532,7 @@ class PlaceJdbc(
                     p.place_ban_reason, 
                     p.place_status, 
                     p.place_admin_id, 
+                    p.metro_stations,
                     
                     u.id, 
                     u.user_email, 

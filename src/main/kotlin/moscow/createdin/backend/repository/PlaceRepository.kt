@@ -22,7 +22,8 @@ interface PlaceRepository {
         withParking: Boolean?,
         dateFrom: Timestamp?,
         dateTo: Timestamp?,
-        userId: Long?
+        userId: Long?,
+        metroStations: List<String>?
     ): Int
 
     fun findAll(
@@ -39,6 +40,7 @@ interface PlaceRepository {
         withParking: Boolean?,
         dateFrom: Timestamp?,
         dateTo: Timestamp?,
+        metroStations: List<String>?,
 
         pageNumber: Long,
         limit: Int,

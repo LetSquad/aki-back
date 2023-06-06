@@ -64,7 +64,7 @@ class RentJdbc(
         userId: Long
     ): List<RentEntity> {
         val parameters = MapSqlParameterSource()
-            .addValue("renterId", userId)
+            .addValue("userId", userId)
             .addValue("limit", limit)
             .addValue("offset", (pageNumber - 1) * limit)
 
@@ -72,7 +72,7 @@ class RentJdbc(
             """
                 $SQL_SELECT_ENTITY
                 WHERE
-                   r.user_id = :renterId AND r.rent_status != 'DELETED'
+                   r.user_id = :userId AND r.rent_status != 'DELETED'
                 GROUP BY r.id, p.id, u.id, up.id
                 LIMIT :limit OFFSET :offset
             """, parameters, rowMapper
@@ -175,6 +175,7 @@ class RentJdbc(
                     p.place_admin_id,
                     p.area_id,
                     p.place_coordinates_id,
+                    p.metro_stations,
                     0 as min_price, null as time_start, null as time_end,
                     0 as rating, 0 as rate_count,
                     
