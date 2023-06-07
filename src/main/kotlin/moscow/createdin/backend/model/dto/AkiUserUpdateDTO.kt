@@ -10,6 +10,7 @@ data class AkiUserUpdateDTO(
     val phone: String?,
 
     val userImage: String?,
+    val organizationLogo: String?,
     val inn: String?,
     val organization: String?,
     val jobTitle: String?

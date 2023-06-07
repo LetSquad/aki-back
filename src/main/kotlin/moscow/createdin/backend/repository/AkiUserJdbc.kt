@@ -132,13 +132,14 @@ class AkiUserJdbc(
             .addValue("userImage", user.userImage)
             .addValue("inn", user.inn)
             .addValue("organization", user.organization)
+            .addValue("logoImage", user.logoImage)
             .addValue("jobTitle", user.jobTitle)
         jdbcTemplate.update(
             """
                 UPDATE aki_user 
                 SET user_email = :email, first_name = :firstName, last_name = :lastName, middle_name = :middleName, 
                     user_phone = :phone, user_image = :userImage, inn = :inn, organization = :organization,
-                    job_title = :jobTitle
+                    logo_image = :logoImage, job_title = :jobTitle
                 WHERE id = :id
             """,
             parameters

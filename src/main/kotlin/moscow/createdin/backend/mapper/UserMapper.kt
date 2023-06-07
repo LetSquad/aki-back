@@ -2,7 +2,6 @@ package moscow.createdin.backend.mapper
 
 import moscow.createdin.backend.config.properties.AkiProperties
 import moscow.createdin.backend.model.domain.AkiUser
-import moscow.createdin.backend.model.domain.SimpleUser
 import moscow.createdin.backend.model.dto.AkiUserDTO
 import moscow.createdin.backend.model.dto.RegistrationRequestDTO
 import moscow.createdin.backend.model.dto.UserRoleDTO
@@ -15,11 +14,11 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
-import java.util.*
+import java.util.UUID
 
 @Component
 class UserMapper(
-    private val akiProperties: AkiProperties,
+    private val properties: AkiProperties,
     private val passwordEncoder: PasswordEncoder,
 ) {
 
@@ -45,26 +44,6 @@ class UserMapper(
         type = null // TODO добавить на фронте выбор типа юзера для системы рекомендаций
     )
 
-    fun dtoToDomain(akiUserDTO: AkiUserDTO) = SimpleUser(
-        id = null,
-        email = akiUserDTO.email.lowercase(),
-        firstName = akiUserDTO.firstName,
-        lastName = akiUserDTO.lastName,
-        middleName = akiUserDTO.middleName,
-        phone = akiUserDTO.phone,
-        userImage = null,
-        inn = akiUserDTO.inn,
-        organization = akiUserDTO.organization,
-        logoImage = null,
-        jobTitle = akiUserDTO.jobTitle,
-        isActivated = true,
-        activationCode = UUID.randomUUID().toString(),
-        isBanned = false,
-        admin = null,
-        banReason = null,
-        type = null
-    )
-
     fun domainToDto(user: AkiUser) = AkiUserDTO(
         id = user.id!!,
         email = user.email,
@@ -73,11 +52,18 @@ class UserMapper(
         lastName = user.lastName,
         middleName = user.middleName,
         phone = user.phone,
-        userImage =
-        if (!user.userImage.isNullOrEmpty())
-            "${akiProperties.url}/${akiProperties.imageUrlPrefix}/${user.userImage}" else null,
+        userImage = if (!user.userImage.isNullOrBlank()) {
+            "${properties.url}/${properties.imageUrlPrefix}/${user.userImage}"
+        } else {
+            null
+        },
         inn = user.inn,
         organization = user.organization,
+        organizationLogo = if (!user.logoImage.isNullOrBlank()) {
+            "${properties.url}/${properties.imageUrlPrefix}/${user.logoImage}"
+        } else {
+            null
+        },
         jobTitle = user.jobTitle
     )
 

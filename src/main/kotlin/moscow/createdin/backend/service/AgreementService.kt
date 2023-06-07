@@ -35,7 +35,7 @@ class AgreementService(
 
         return AgreementDTO(
             placeId = createAgreementRequest.placeId,
-            agreement = "${properties.dataPath}/$agreementPath"
+            agreement = "${properties.url}/${properties.imageUrlPrefix}/$agreementPath"
         )
     }
 

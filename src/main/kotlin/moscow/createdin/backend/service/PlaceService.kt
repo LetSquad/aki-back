@@ -247,7 +247,7 @@ class PlaceService(
         placeImageService.clearPlaceImages(
             placeId = updatePlace.id,
             images = updatePlace.placeImages
-                ?.map { it.removePrefix("${properties.url}/${properties.dataPath}/") }
+                ?.map { it.removePrefix("${properties.url}/${properties.imageUrlPrefix}/") }
         )
         saveImages(updatePlace.id, images)
 
@@ -383,6 +383,7 @@ class PlaceService(
             .onEach { (image, priority) -> placeImageService.savePlaceImage(placeId, image, priority) }
             .map { (image, _) -> image }
     } catch (e: Exception) {
+        log.error("Exception while saving images for place with id = $placeId")
         throw ImageNotSavedException(placeId, e)
     }
 

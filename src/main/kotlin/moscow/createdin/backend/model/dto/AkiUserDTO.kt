@@ -16,5 +16,6 @@ data class AkiUserDTO(
     val userImage: String?,
     val inn: String?,
     val organization: String?,
+    val organizationLogo: String?,
     val jobTitle: String?
 )

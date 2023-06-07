@@ -1,5 +1,6 @@
 package moscow.createdin.backend.mapper
 
+import moscow.createdin.backend.config.properties.AkiProperties
 import moscow.createdin.backend.model.domain.Rent
 import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.dto.RentDTO
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class RentMapper(
+    private val properties: AkiProperties,
     private val rentSlotMapper: RentSlotMapper,
     private val userMapper: UserMapper,
     private val placeMapper: PlaceMapper
@@ -34,7 +36,7 @@ class RentMapper(
 
         rentSlots = rent.rentSlots.map { rentSlotMapper.domainToDto(it) },
         status = rent.status,
-        agreement = rent.agreement,
+        agreement = "${properties.url}/${properties.imageUrlPrefix}/${rent.agreement}",
         banReason = rent.banReason,
         adminId = rent.admin
     )
