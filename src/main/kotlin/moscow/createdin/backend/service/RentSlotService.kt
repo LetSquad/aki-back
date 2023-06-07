@@ -1,6 +1,7 @@
 package moscow.createdin.backend.service
 
 import moscow.createdin.backend.exception.UnprocessableCreateRentSlotRequestException
+import moscow.createdin.backend.getLogger
 import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.domain.RentSlotTime
@@ -72,5 +73,14 @@ class RentSlotService(
             .map { it.copy(status = statusType) }
             .map { rentSlotMapper.domainToEntity(it) }
             .let { rentSlotRepository.update(it) }
+    }
+
+    fun getByPlaceIdFutureSlots(placeId: Long): List<RentSlot> {
+        return rentSlotRepository.findByPlaceIdFuture(placeId)
+            .map { rentSlotMapper.entityToDomain(it) }
+    }
+
+    companion object {
+        private val log = getLogger<RentSlotService>()
     }
 }

@@ -19,6 +19,7 @@ class RentJdbc(
     override fun findById(id: Long): RentEntity {
         val parameters = MapSqlParameterSource()
             .addValue("id", id)
+            .addValue("userId", null)
         return jdbcTemplate.queryForObject(
             """
                 $SQL_SELECT_ENTITY

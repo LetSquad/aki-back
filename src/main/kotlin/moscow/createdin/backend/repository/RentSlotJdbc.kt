@@ -5,6 +5,8 @@ import moscow.createdin.backend.repository.mapper.RentSlotRowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
+import java.sql.Timestamp
+import java.time.Instant
 
 
 @Repository
@@ -72,6 +74,20 @@ class RentSlotJdbc(
                 WHERE rent_slot.id = :id
             """,
             parameters.toTypedArray()
+        )
+    }
+
+    override fun findByPlaceIdFuture(placeId: Long): List<RentSlotEntity> {
+        val parameters = MapSqlParameterSource()
+            .addValue("placeId", placeId)
+            .addValue("currentTime", Timestamp.from(Instant.now()))
+
+        return jdbcTemplate.query(
+            """
+                $SQL_SELECT_ENTITY
+                WHERE rent_slot.place_id = :placeId AND rent_slot.rent_slot_status in ('OPEN', 'BOOKED') AND rent_slot.time_start > :currentTime
+            """,
+            parameters, rowMapper
         )
     }
 
