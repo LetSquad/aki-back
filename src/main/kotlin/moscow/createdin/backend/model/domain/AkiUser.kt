@@ -1,7 +1,7 @@
 package moscow.createdin.backend.model.domain
 
 import moscow.createdin.backend.model.enums.UserRole
-import moscow.createdin.backend.model.enums.UserType
+import moscow.createdin.backend.model.enums.UserSpecialization
 
 data class AkiUser(
     val id: Long?,
@@ -10,7 +10,7 @@ data class AkiUser(
     val password: String,
     val role: UserRole,
 
-    val type: UserType?,
+    val specializations: List<UserSpecialization>,
 
     val firstName: String,
     val lastName: String,

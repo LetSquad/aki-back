@@ -18,8 +18,8 @@ class WebConfig(
 ) : WebMvcConfigurer {
 
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {
-        registry.addResourceHandler("/static/**")
-            .addResourceLocations("classpath:static/")
+        registry.addResourceHandler("/img/**")
+            .addResourceLocations("classpath:img/")
 
         registry.addResourceHandler("/${properties.imageUrlPrefix}/**")
             .addResourceLocations("file:${filesystemService.dataPath}/")

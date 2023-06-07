@@ -4,7 +4,7 @@ import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.dto.CreateRentSlotRequestDTO
 import moscow.createdin.backend.model.dto.RentSlotDTO
 import moscow.createdin.backend.model.entity.RentSlotEntity
-import moscow.createdin.backend.model.enums.RentSlotStatusType
+import moscow.createdin.backend.model.enums.RentSlotStatus
 import org.springframework.stereotype.Component
 import java.sql.Timestamp
 
@@ -24,7 +24,7 @@ class RentSlotMapper {
         placeId = rentSlot.placeId,
         timeStart = rentSlot.timeStart.toInstant(),
         timeEnd = rentSlot.timeEnd.toInstant(),
-        status = RentSlotStatusType.OPEN,
+        status = RentSlotStatus.OPEN,
         price = rentSlot.price
     )
 
@@ -33,7 +33,7 @@ class RentSlotMapper {
         placeId = rentSlot.placeId,
         timeStart = rentSlot.timeStart.toInstant(),
         timeEnd = rentSlot.timeEnd.toInstant(),
-        status = RentSlotStatusType.valueOf(rentSlot.status),
+        status = RentSlotStatus.valueOf(rentSlot.status),
         price = rentSlot.price
     )
 

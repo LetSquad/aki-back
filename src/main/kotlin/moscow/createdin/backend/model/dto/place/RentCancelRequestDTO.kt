@@ -1,5 +1,5 @@
 package moscow.createdin.backend.model.dto.place
 
-data class RentDeleteDTO(
+data class RentCancelRequestDTO(
     val rentId: Long
 )

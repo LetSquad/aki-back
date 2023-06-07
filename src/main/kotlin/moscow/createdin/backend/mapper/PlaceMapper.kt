@@ -24,9 +24,8 @@ import moscow.createdin.backend.model.entity.AreaEntity
 import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.PriceType
-import org.postgresql.util.PGobject
+import moscow.createdin.backend.repository.mapper.toPGObject
 import org.springframework.stereotype.Component
-
 
 @Component
 class PlaceMapper(
@@ -130,11 +129,11 @@ class PlaceMapper(
         maxCapacity = place.maxCapacity,
         parking = place.parking,
 
-        services = stringToPGObject(gson.toJson(place.services)),
+        services = gson.toJson(place.services).toPGObject(),
         rules = place.rules,
         accessibility = place.accessibility,
-        facilities = stringToPGObject(gson.toJson(place.facilities)),
-        equipments = stringToPGObject(gson.toJson(place.equipments)),
+        facilities = gson.toJson(place.facilities).toPGObject(),
+        equipments = gson.toJson(place.equipments).toPGObject(),
 
         status = place.status.name,
         banReason = place.banReason,
@@ -144,7 +143,7 @@ class PlaceMapper(
         rating = null,
         rateCount = null,
         favorite = false,
-        metroStations = stringToPGObject(gson.toJson(place.metroStations))
+        metroStations = gson.toJson(place.metroStations).toPGObject()
     )
 
     fun domainToEntity(place: Place) = PlaceEntity(
@@ -168,11 +167,11 @@ class PlaceMapper(
         maxCapacity = place.maxCapacity,
         parking = place.parking,
 
-        services = stringToPGObject(gson.toJson(place.services)),
+        services = gson.toJson(place.services).toPGObject(),
         rules = place.rules,
         accessibility = place.accessibility,
-        facilities = stringToPGObject(gson.toJson(place.facilities)),
-        equipments = stringToPGObject(gson.toJson(place.equipments)),
+        facilities = gson.toJson(place.facilities).toPGObject(),
+        equipments = gson.toJson(place.equipments).toPGObject(),
 
         status = place.status.name,
         banReason = place.banReason,
@@ -182,7 +181,7 @@ class PlaceMapper(
         rating = null,
         rateCount = null,
         favorite = false,
-        metroStations = stringToPGObject(gson.toJson(place.metroStations))
+        metroStations = gson.toJson(place.metroStations).toPGObject()
     )
 
     fun entityToDomain(place: PlaceEntity, rentSlots: List<RentSlot>?) = Place(
@@ -265,13 +264,6 @@ class PlaceMapper(
         favorite = place.favorite,
         metroStations = place.metroStations
     )
-
-    private fun stringToPGObject(value: String?): PGobject {
-        val pGobject: PGobject = PGobject()
-        pGobject.type = "jsonb"
-        pGobject.value = value
-        return pGobject
-    }
 
     private fun placeServiceToDTO(placeService: PlaceService): PlaceServiceDTO {
         return PlaceServiceDTO(placeService.name, placePriceToDTO(placeService.price))

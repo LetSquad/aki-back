@@ -10,9 +10,9 @@ import moscow.createdin.backend.model.dto.CreateRentRequestDTO
 import moscow.createdin.backend.model.dto.RentDTO
 import moscow.createdin.backend.model.dto.RentListDTO
 import moscow.createdin.backend.model.dto.RentReviewDTO
-import moscow.createdin.backend.model.enums.AdminStatusType
+import moscow.createdin.backend.model.dto.place.RentCancelRequestDTO
 import moscow.createdin.backend.model.enums.RentConfirmationStatus
-import moscow.createdin.backend.model.enums.RentSlotStatusType
+import moscow.createdin.backend.model.enums.RentSlotStatus
 import moscow.createdin.backend.repository.PlaceReviewRepository
 import moscow.createdin.backend.repository.RentRepository
 import moscow.createdin.backend.repository.RentSlotToRentRepository
@@ -44,7 +44,7 @@ class RentService(
 
         val agreementUrl: String = req.agreement.removePrefix("${properties.url}/${properties.imageUrlPrefix}/")
         val newRentId = rentRepository.create(req.placeId, renter.id, agreementUrl)
-        rentSlotService.updateStatus(req.rentSlotIds, RentSlotStatusType.BOOKED)
+        rentSlotService.updateStatus(req.rentSlotIds, RentSlotStatus.BOOKED)
         rentSlotToRentRepository.create(newRentId, req.rentSlotIds)
         val rentSlots = mutableListOf<RentSlot>()
         for (slotId in req.rentSlotIds) {
@@ -117,31 +117,32 @@ class RentService(
     }
 
     @Transactional
-    fun delete(id: Long) {
-        val rent = rentRepository.findById(id)
-        val deleteRent = rent.copy(status = AdminStatusType.DELETED.name)
-        rentRepository.update(deleteRent)
+    fun cancelRent(req: RentCancelRequestDTO): RentDTO {
+        val rent = rentRepository.findById(req.rentId)
+        val canceledRent = rent.copy(
+            status = RentConfirmationStatus.CANCELED.name,
+            banReason = "Отменено пользователем"
+        )
+        rentRepository.update(canceledRent)
+        freeRentSlots(req.rentId)
 
-        val rentSlotIds = rentSlotToRentRepository.findSlotsByRentId(id).map { it.id!! }
-        rentSlotService.updateStatus(rentSlotIds, RentSlotStatusType.OPEN)
-        rentSlotToRentRepository.delete(id)
+        return get(req.rentId)
     }
 
     @Transactional
-    fun ban(banRequestDTO: BanRequestDTO): RentDTO {
+    fun ban(req: BanRequestDTO): RentDTO {
         val adminUser = userService.getCurrentUserDomain()
-        val editable = getDomain(banRequestDTO.id)
 
-        val result = editable.copy(
-            status = RentConfirmationStatus.BANNED,
-            banReason = banRequestDTO.banReason,
+        val rent = rentRepository.findById(req.id)
+        val bannedRent = rent.copy(
+            status = RentConfirmationStatus.BANNED.name,
+            banReason = req.banReason,
             admin = adminUser.id
         )
+        rentRepository.update(bannedRent)
+        freeRentSlots(req.id)
 
-        return rentMapper.domainToEntity(result)
-            .also { rentRepository.update(it) }
-            .let { getDomain(it.id!!) }
-            .let { rentMapper.domainToDto(it) }
+        return get(req.id)
     }
 
     @Transactional
@@ -151,7 +152,13 @@ class RentService(
         placeReviewRepository.save(rentId, rentReviewDTO.rating)
     }
 
+    private fun freeRentSlots(rentId: Long) {
+        val rentSlotIds = rentSlotToRentRepository.findSlotsByRentId(rentId)
+            .map { it.id!! }
+        rentSlotService.updateStatus(rentSlotIds, RentSlotStatus.OPEN)
+    }
+
     companion object {
-        private const val LOGO_PATH = "static/darkLogo.png"
+        private const val LOGO_PATH = "img/darkLogo.png"
     }
 }

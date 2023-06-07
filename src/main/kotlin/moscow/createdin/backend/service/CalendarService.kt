@@ -2,7 +2,7 @@ package moscow.createdin.backend.service
 
 import moscow.createdin.backend.getLogger
 import moscow.createdin.backend.model.dto.CalendarFileDTO
-import moscow.createdin.backend.model.enums.RentSlotStatusType
+import moscow.createdin.backend.model.enums.RentSlotStatus
 import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.ComponentList
 import net.fortuna.ical4j.model.Property
@@ -55,7 +55,7 @@ class CalendarService(
         timeStart: Instant,
         timeEnd: Instant,
         price: BigDecimal,
-        status: RentSlotStatusType?,
+        status: RentSlotStatus?,
         name: String
     ): VEvent {
         val vEvent = VEvent()
@@ -90,10 +90,10 @@ class CalendarService(
         return vEvent
     }
 
-    private fun russianStatus(status: RentSlotStatusType?): String {
+    private fun russianStatus(status: RentSlotStatus?): String {
         return when (status) {
-            RentSlotStatusType.BOOKED -> "Забронирован"
-            RentSlotStatusType.OPEN -> "Открыт"
+            RentSlotStatus.BOOKED -> "Забронирован"
+            RentSlotStatus.OPEN -> "Открыт"
             else -> {
                 "Неизвестный статус"
             }

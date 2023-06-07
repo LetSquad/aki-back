@@ -1,12 +1,15 @@
 package moscow.createdin.backend.model.dto
 
 import moscow.createdin.backend.model.enums.UserRole
+import moscow.createdin.backend.model.enums.UserSpecialization
 
 data class AkiUserDTO(
     val id: Long,
 
     val email: String,
     val userRole: UserRole,
+
+    val specializations: List<UserSpecialization>,
 
     val firstName: String,
     val lastName: String,

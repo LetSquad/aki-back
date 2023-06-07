@@ -149,7 +149,7 @@ class RentJdbc(
                     u.is_banned,
                     u.user_admin_id,
                     u.user_ban_reason,
-                    u.user_type,
+                    u.specializations,
                     
                     p.id place_id,
                     p.place_type,
@@ -198,7 +198,7 @@ class RentJdbc(
                     up.is_banned,
                     up.user_admin_id,
                     up.user_ban_reason,
-                    up.user_type,
+                    up.specializations,
                     array_agg(rs.id),
     CASE WHEN EXISTS (SELECT id FROM favorite_place
                       WHERE place_id = p.id AND user_id = :userId)

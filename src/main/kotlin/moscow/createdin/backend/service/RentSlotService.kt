@@ -1,12 +1,12 @@
 package moscow.createdin.backend.service
 
+import moscow.createdin.backend.exception.RentSlotBookingException
 import moscow.createdin.backend.exception.UnprocessableCreateRentSlotRequestException
-import moscow.createdin.backend.getLogger
 import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.domain.RentSlotTime
 import moscow.createdin.backend.model.dto.CreateRentSlotRequestDTO
-import moscow.createdin.backend.model.enums.RentSlotStatusType
+import moscow.createdin.backend.model.enums.RentSlotStatus
 import moscow.createdin.backend.repository.RentSlotRepository
 import org.springframework.stereotype.Service
 
@@ -61,16 +61,20 @@ class RentSlotService(
     }
 
     fun delete(ids: List<Long>) {
-        updateStatus(ids, RentSlotStatusType.DELETED)
+        updateStatus(ids, RentSlotStatus.DELETED)
     }
 
-    fun updateStatus(
-        ids: List<Long>,
-        statusType: RentSlotStatusType
-    ) {
-        ids
-            .map { getById(it) }
-            .map { it.copy(status = statusType) }
+    fun updateStatus(ids: List<Long>, status: RentSlotStatus) {
+        val rentSlots = ids.map { getById(it) }
+        if (status == RentSlotStatus.BOOKED) {
+            for (rentSlot in rentSlots) {
+                if (rentSlot.status != RentSlotStatus.OPEN) {
+                    throw RentSlotBookingException(rentSlot.id, rentSlot.status)
+                }
+            }
+        }
+
+        rentSlots.map { it.copy(status = status) }
             .map { rentSlotMapper.domainToEntity(it) }
             .let { rentSlotRepository.update(it) }
     }
@@ -78,9 +82,5 @@ class RentSlotService(
     fun getByPlaceIdFutureSlots(placeId: Long): List<RentSlot> {
         return rentSlotRepository.findByPlaceIdFuture(placeId)
             .map { rentSlotMapper.entityToDomain(it) }
-    }
-
-    companion object {
-        private val log = getLogger<RentSlotService>()
     }
 }

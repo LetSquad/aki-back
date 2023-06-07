@@ -28,6 +28,6 @@ class AkiUserAdminRowMapper : RowMapper<AkiUserEntity> {
         isBanned = rs.getBoolean("is_banned"),
         admin = null,
         banReason = rs.getString("ban_reason"),
-        type = rs.getString("user_type"),
+        specializations = rs.getString("specializations").toPGObject(),
     )
 }

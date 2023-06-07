@@ -44,7 +44,7 @@ class AkiUserJdbc(
             .addValue("id", id)
         return jdbcTemplate.queryForObject(
             """
-                SELECT id as user_id, user_type, user_email, password, role, first_name, last_name, middle_name, 
+                SELECT id as user_id, specializations, user_email, password, role, first_name, last_name, middle_name, 
                     user_phone, user_image, logo_image, inn, organization, job_title, is_activated, 
                     activation_code, is_banned, user_admin_id, user_ban_reason
                 FROM aki_user 
@@ -61,7 +61,7 @@ class AkiUserJdbc(
             """
                 SELECT 
                     id as user_id, 
-                    user_type, 
+                    specializations, 
                     user_email, 
                     password, 
                     role, 
@@ -107,13 +107,13 @@ class AkiUserJdbc(
         parameters.addValue("activationCode", user.activationCode)
         parameters.addValue("isBanned", user.isBanned)
         parameters.addValue("banReason", user.banReason)
-        parameters.addValue("type", user.type)
+        parameters.addValue("specializations", user.specializations)
         parameters.addValue("adminId", user.admin)
         jdbcTemplate.update(
             """
-                INSERT INTO aki_user (user_email, user_type, password, role, first_name, last_name, middle_name, 
+                INSERT INTO aki_user (user_email, specializations, password, role, first_name, last_name, middle_name, 
                     user_phone, user_image, logo_image, inn, organization, job_title, is_activated, activation_code, is_banned, user_admin_id, user_ban_reason) 
-                VALUES (:email, :type, :password, :role, :firstName, :lastName, :middleName, :phone, :userImage,  :logoImage, :inn, :organization, :jobTitle, :isActivated, :activationCode, :isBanned, :adminId, :banReason)
+                VALUES (:email, :specializations, :password, :role, :firstName, :lastName, :middleName, :phone, :userImage,  :logoImage, :inn, :organization, :jobTitle, :isActivated, :activationCode, :isBanned, :adminId, :banReason)
             """,
             parameters, keyHolder
         )
@@ -124,7 +124,7 @@ class AkiUserJdbc(
     override fun update(user: AkiUserEntity) {
         val parameters = MapSqlParameterSource()
             .addValue("id", user.id)
-            .addValue("email", user.email)
+            .addValue("specializations", user.specializations)
             .addValue("firstName", user.firstName)
             .addValue("lastName", user.lastName)
             .addValue("middleName", user.middleName)
@@ -137,7 +137,7 @@ class AkiUserJdbc(
         jdbcTemplate.update(
             """
                 UPDATE aki_user 
-                SET user_email = :email, first_name = :firstName, last_name = :lastName, middle_name = :middleName, 
+                SET specializations = :specializations, first_name = :firstName, last_name = :lastName, middle_name = :middleName, 
                     user_phone = :phone, user_image = :userImage, inn = :inn, organization = :organization,
                     logo_image = :logoImage, job_title = :jobTitle
                 WHERE id = :id
@@ -233,7 +233,7 @@ class AkiUserJdbc(
     }
 
     companion object {
-        private const val SQL_SELECT_ENTITY = "SELECT id as user_id, user_type, user_email, password, role, first_name, last_name, middle_name, " +
+        private const val SQL_SELECT_ENTITY = "SELECT id as user_id, specializations, user_email, password, role, first_name, last_name, middle_name, " +
                 "user_phone, user_image, logo_image, inn, organization, job_title, is_activated, activation_code, is_banned, user_admin_id, user_ban_reason " +
                 "FROM aki_user"
     }
