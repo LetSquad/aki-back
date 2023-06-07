@@ -10,8 +10,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.nio.charset.StandardCharsets
@@ -25,7 +25,7 @@ class CalendarController(private val calendarService: CalendarService) {
         summary = "Экспорт календаря в формате ics для его импорта в другие системы"
     )
     @PreAuthorize("hasRole('LANDLORD')")
-    @PostMapping("{placeId}/export")
+    @GetMapping("{placeId}/export")
     fun export(
         @PathVariable placeId: Long
     ): ResponseEntity<ByteArray> {

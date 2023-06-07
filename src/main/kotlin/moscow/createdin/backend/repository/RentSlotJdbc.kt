@@ -85,7 +85,7 @@ class RentSlotJdbc(
         return jdbcTemplate.query(
             """
                 $SQL_SELECT_ENTITY
-                WHERE rent_slot.place_id = :placeId AND rent_slot.rent_slot_status = 'OPEN' AND rent_slot.time_start > :currentTime
+                WHERE rent_slot.place_id = :placeId AND rent_slot.rent_slot_status in ('OPEN', 'BOOKED') AND rent_slot.time_start > :currentTime
             """,
             parameters, rowMapper
         )
