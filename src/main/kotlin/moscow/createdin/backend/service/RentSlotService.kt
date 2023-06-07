@@ -73,4 +73,13 @@ class RentSlotService(
             .map { rentSlotMapper.domainToEntity(it) }
             .let { rentSlotRepository.update(it) }
     }
+
+    fun getByPlaceIdFutureSlots(placeId: Long): List<RentSlot> {
+        return rentSlotRepository.findByPlaceIdFuture(placeId)
+            .map { rentSlotMapper.entityToDomain(it) }
+    }
+
+    companion object {
+        private val log = getLogger<RentSlotService>()
+    }
 }

@@ -12,4 +12,6 @@ interface RentSlotRepository {
 
     fun update(rentSlots: List<RentSlotEntity>)
 
+    fun findByPlaceIdFuture(placeId: Long): List<RentSlotEntity>
+
 }

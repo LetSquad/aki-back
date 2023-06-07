@@ -17,6 +17,8 @@ import moscow.createdin.backend.repository.RentRepository
 import moscow.createdin.backend.repository.RentSlotToRentRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlin.math.ceil
 
 @Service
@@ -37,13 +39,18 @@ class RentService(
     @Transactional
     fun create(req: CreateRentRequestDTO): RentDTO {
         val renter = userService.getCurrentUser()
+        val place = placeService.findById(req.placeId)
 
         val newRentId = rentRepository.create(req.placeId, renter.id, req.agreement)
         rentSlotService.updateStatus(req.rentSlotIds, RentSlotStatusType.BOOKED)
         rentSlotToRentRepository.create(newRentId, req.rentSlotIds)
 
-        mailService.sendRentEmailToRenter(renter.email)
-        val landlordEmail = placeService.findById(req.placeId).user.email
+        //TODO получать время из БД
+        mailService.sendRentEmailToRenter(
+            renter.email, Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS),
+            "${renter.firstName} ${renter.lastName}", place.name
+        )
+        val landlordEmail = place.user.email
         mailService.sendRentEmailToLandlord(landlordEmail)
 
         return get(newRentId)
