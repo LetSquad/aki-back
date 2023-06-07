@@ -82,11 +82,22 @@ class CalendarService(
 
         //Add title and description
         property.add(Summary("Слот для площадки $name"))
-        property.add(Description(" Цена = $price | Статус брони = $status"))
+        val russianStatus = russianStatus(status)
+        property.add(Description(" Цена = $price | Статус брони = $russianStatus"))
 
         val propertyList = PropertyList(property)
         vEvent.propertyList = propertyList
         return vEvent
+    }
+
+    private fun russianStatus(status: RentSlotStatusType?): String {
+        return when (status) {
+            RentSlotStatusType.BOOKED -> "Забронирован"
+            RentSlotStatusType.OPEN -> "Открыт"
+            else -> {
+                "Неизвестный статус"
+            }
+        }
     }
 
     companion object {

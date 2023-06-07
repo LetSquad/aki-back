@@ -4,6 +4,7 @@ import moscow.createdin.backend.config.properties.AkiProperties
 import moscow.createdin.backend.mapper.RentMapper
 import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.Rent
+import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.CreateRentRequestDTO
 import moscow.createdin.backend.model.dto.RentDTO
@@ -18,7 +19,6 @@ import moscow.createdin.backend.repository.RentSlotToRentRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 import kotlin.math.ceil
 
 @Service
@@ -46,14 +46,30 @@ class RentService(
         val newRentId = rentRepository.create(req.placeId, renter.id, agreementUrl)
         rentSlotService.updateStatus(req.rentSlotIds, RentSlotStatusType.BOOKED)
         rentSlotToRentRepository.create(newRentId, req.rentSlotIds)
+        val rentSlots = mutableListOf<RentSlot>()
+        for (slotId in req.rentSlotIds) {
+            val rentSlot = rentSlotService.getById(slotId)
+            rentSlots.add(rentSlot)
+        }
+        val minTimeStart: Instant = rentSlots.minOf { it.timeStart }
+        val maxTimeEnd: Instant = rentSlots.maxOf { it.timeEnd }
+        val agreement = "${properties.url}/${properties.imageUrlPrefix}/$agreementUrl"
 
-        //TODO получать время из БД
         mailService.sendRentEmailToRenter(
-            renter.email, Instant.now(), Instant.now().plus(1, ChronoUnit.HOURS),
-            "${renter.firstName} ${renter.lastName}", place.name
+            renter.email,
+            minTimeStart,
+            maxTimeEnd,
+            "${renter.firstName} ${renter.lastName}",
+            place.name,
+            "${renter.firstName} ${renter.lastName}",
+            agreement,
+            properties.url
         )
         val landlordEmail = place.user.email
-        mailService.sendRentEmailToLandlord(landlordEmail)
+        mailService.sendRentEmailToLandlord(
+            landlordEmail, minTimeStart, maxTimeEnd, "${renter.firstName} ${renter.lastName}",
+            place.name, "${place.user.firstName} ${place.user.lastName}", agreement, renter.email
+        )
 
         return get(newRentId)
     }
