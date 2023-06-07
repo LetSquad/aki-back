@@ -12,7 +12,14 @@ import moscow.createdin.backend.model.dto.ResetUserPasswordTO
 import moscow.createdin.backend.service.ResetPasswordService
 import moscow.createdin.backend.service.UserService
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import javax.servlet.http.HttpServletResponse
 
@@ -46,15 +53,15 @@ class UserController(
     )
     @PutMapping
     fun edit(
-        @Parameter(
-            ref = "Модель данных юзера",
-            schema = Schema(type = "string", format = "binary")
-        ) @RequestPart user: AkiUserUpdateDTO,
-        @Parameter(ref = "Фотография юзера") image: MultipartFile?
-    ): AkiUserDTO {
-        return userService.update(user, image)
-    }
+        @Parameter(ref = "Модель данных пользователя", schema = Schema(type = "string", format = "binary"))
+        @RequestPart user: AkiUserUpdateDTO,
 
+        @Parameter(ref = "Фотография пользователя") image: MultipartFile?,
+
+        @Parameter(ref = "Логотип организации") organizationLogo: MultipartFile?
+    ): AkiUserDTO {
+        return userService.update(user, image, organizationLogo)
+    }
 
     @Operation(
         summary = "Подтверждение зарегистрированного пользователя",
@@ -78,7 +85,6 @@ class UserController(
         resetPasswordService.resetPassword(req.userEmail)
     }
 
-
     @Operation(summary = "Валидация токена восстановления пароля пользователя")
     @GetMapping("validate-reset-password-token/{token}")
     fun validateUserResetPasswordToken(
@@ -86,7 +92,6 @@ class UserController(
     ): Boolean {
         return resetPasswordService.isTokenValid(token)
     }
-
 
     @Operation(summary = "Изменение пароля пользователя (через процедуру восстановления пароля)")
     @PostMapping("change-password")

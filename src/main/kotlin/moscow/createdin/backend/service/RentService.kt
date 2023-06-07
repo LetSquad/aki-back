@@ -1,6 +1,6 @@
 package moscow.createdin.backend.service
 
-import moscow.createdin.backend.getLogger
+import moscow.createdin.backend.config.properties.AkiProperties
 import moscow.createdin.backend.mapper.RentMapper
 import moscow.createdin.backend.mapper.RentSlotMapper
 import moscow.createdin.backend.model.domain.Rent
@@ -21,6 +21,7 @@ import kotlin.math.ceil
 
 @Service
 class RentService(
+    private val properties: AkiProperties,
     private val userService: UserService,
     private val rentSlotService: RentSlotService,
     private val mailService: MailService,
@@ -38,7 +39,8 @@ class RentService(
     fun create(req: CreateRentRequestDTO): RentDTO {
         val renter = userService.getCurrentUser()
 
-        val newRentId = rentRepository.create(req.placeId, renter.id, req.agreement)
+        val agreementUrl: String = req.agreement.removePrefix("${properties.url}/${properties.imageUrlPrefix}/")
+        val newRentId = rentRepository.create(req.placeId, renter.id, agreementUrl)
         rentSlotService.updateStatus(req.rentSlotIds, RentSlotStatusType.BOOKED)
         rentSlotToRentRepository.create(newRentId, req.rentSlotIds)
 
@@ -117,9 +119,5 @@ class RentService(
         val user = userService.getCurrentUserDomain()
         rentRepository.findByRenterIdAndId(rentId, user.id)
         placeReviewRepository.save(rentId, rentReviewDTO.rating)
-    }
-
-    companion object {
-        private val log = getLogger<RentService>()
     }
 }

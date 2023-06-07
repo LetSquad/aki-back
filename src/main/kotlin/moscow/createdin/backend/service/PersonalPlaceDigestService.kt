@@ -13,6 +13,7 @@ import java.sql.Timestamp
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.stream.Collectors
+import kotlin.math.roundToInt
 
 @Service
 class PersonalPlaceDigestService(
@@ -90,7 +91,9 @@ class PersonalPlaceDigestService(
             0
         }
 
-        return favoriteWeight + specializationWeight
+        val ratingWeight: Int = place.rating?.roundToInt() ?: 0
+
+        return favoriteWeight + specializationWeight + ratingWeight
     }
 
     private fun getSpecializationsForUser(userType: UserType?): Set<SpecializationType> = when (userType) {

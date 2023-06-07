@@ -54,23 +54,17 @@ class UserService(
 
     fun update(
         req: AkiUserUpdateDTO,
-        image: MultipartFile?
+        image: MultipartFile?,
+        organizationLogo: MultipartFile?
     ): AkiUserDTO {
         val userWithOldFields = userRepository.findById(req.id)
             .let { userMapper.entityToDomain(it) }
-        var imageName: String? = null
 
-        if (image != null) {
-            try {
-                imageName = filesystemService.saveImage(image)
-            } catch (e: Exception) {
-                log.error("Exception while saving image for user with id = " + req.id, e)
-                throw ImageNotSavedException(req.id, e)
-            }
-        }
+        val imageName: String? = image?.let { saveImage(req.id, image) }
+        val logoName: String? = organizationLogo?.let { saveImage(req.id, organizationLogo) }
 
         val userWithNewFields = userWithOldFields.copy(
-//            email = req.email ?: updatable.email, // TODO нужно обновлять также ключ в таблице рефреш токена
+            //email = req.email ?: updatable.email, // TODO нужно обновлять также ключ в таблице рефреш токена
             firstName = req.firstName ?: userWithOldFields.firstName,
             lastName = req.lastName ?: userWithOldFields.lastName,
             middleName = req.middleName ?: userWithOldFields.middleName,
@@ -78,6 +72,7 @@ class UserService(
             userImage = imageName ?: userWithOldFields.userImage,
             inn = req.inn ?: userWithOldFields.inn,
             organization = req.organization ?: userWithOldFields.organization,
+            logoImage = logoName ?: userWithOldFields.logoImage,
             jobTitle = req.jobTitle ?: userWithOldFields.jobTitle,
         )
 
@@ -147,6 +142,13 @@ class UserService(
         )
 
         userRepository.save(result)
+    }
+
+    private fun saveImage(userId: Long, image: MultipartFile): String = try {
+        filesystemService.saveImage(image)
+    } catch (e: Exception) {
+        log.error("Exception while saving image for user with id = $userId", e)
+        throw ImageNotSavedException(userId, e)
     }
 
     companion object {
