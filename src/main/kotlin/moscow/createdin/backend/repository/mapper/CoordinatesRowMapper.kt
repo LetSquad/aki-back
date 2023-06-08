@@ -9,7 +9,7 @@ import java.sql.ResultSet
 class CoordinatesRowMapper : RowMapper<CoordinatesEntity> {
 
     override fun mapRow(rs: ResultSet, rowNum: Int): CoordinatesEntity = CoordinatesEntity(
-        id = rs.getLong("id"),
+        id = rs.getLong("coordinates_id"),
         longitude = rs.getBigDecimal("longitude"),
         latitude = rs.getBigDecimal("latitude")
     )

@@ -26,7 +26,7 @@ class PlaceRowMapper(
         } else {
             areaRowMapper.mapRow(rs, rowNum)
         },
-        coordinates = if (rs.getLongOrNull("place_coordinates_id") == null) {
+        coordinates = if (rs.getLongOrNull("coordinates_id") == null) {
             null
         } else {
             coordinatesRowMapper.mapRow(rs, rowNum)

@@ -247,6 +247,7 @@ class PlaceJdbc(
         parameters.addValue("email", place.email)
         parameters.addValue("website", place.website)
         parameters.addValue("specialization", createSqlArray(place.specialization))
+        parameters.addValue("coordinates_id", place.coordinates?.id)
         parameters.addValue("phone", place.phone)
         parameters.addValue("description", place.description)
         parameters.addValue("rentableArea", place.rentableArea)
@@ -266,6 +267,7 @@ class PlaceJdbc(
                     place_email = :email, 
                     place_website = :website, 
                     specialization = :specialization, 
+                    place_coordinates_id = :coordinates_id,
                     place_phone = :phone, 
                     place_description = :description, 
                     rentable_area = :rentableArea, 
@@ -457,7 +459,7 @@ class PlaceJdbc(
                     p.user_id,
                     p.area_id,
                     p.place_type,
-                    p.place_coordinates_id,
+                    p.place_coordinates_id coordinates_id,
                     p.place_description,
                     p.place_name,
                     p.specialization,
@@ -514,6 +516,9 @@ class PlaceJdbc(
                     a.area_coordinates_id,
                     a.area_ban_reason,
                     a.area_admin_id,
+                    
+                    c.longitude,
+                    c.latitude,
                 
                     st.popular,
                     st.rate_count,
@@ -531,6 +536,7 @@ class PlaceJdbc(
                 FROM place p
                 INNER JOIN aki_user u on p.user_id = u.id
                 LEFT JOIN area a on p.area_id = a.id
+                LEFT JOIN coordinates c on p.place_coordinates_id = c.id
                 INNER JOIN rent_slot rs on p.id = rs.place_id
                 LEFT JOIN (
     SELECT
@@ -572,7 +578,7 @@ class PlaceJdbc(
                     p.rentable_area, 
                     p.facilities, 
                     p.equipments, 
-                    p.place_coordinates_id, 
+                    p.place_coordinates_id coordinates_id, 
                     p.capacity_min, 
                     p.capacity_max, 
                     p.parking, 
@@ -615,6 +621,9 @@ class PlaceJdbc(
                     a.area_ban_reason, 
                     a.area_admin_id,
                     
+                    c.longitude,
+                    c.latitude,
+                    
                     st.min_price, 
                     st.time_start, 
                     st.time_end,
@@ -629,6 +638,7 @@ class PlaceJdbc(
                 
                 INNER JOIN aki_user u on p.user_id = u.id
                 LEFT JOIN area a on p.area_id = a.id 
+                LEFT JOIN coordinates c on p.place_coordinates_id = c.id
                 LEFT JOIN (
     SELECT
         min(rs.price) as min_price,

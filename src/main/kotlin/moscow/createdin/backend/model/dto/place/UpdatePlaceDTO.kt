@@ -1,5 +1,6 @@
 package moscow.createdin.backend.model.dto.place
 
+import moscow.createdin.backend.model.dto.CoordinatesDTO
 import moscow.createdin.backend.model.enums.SpecializationType
 
 data class UpdatePlaceDTO(
@@ -14,8 +15,10 @@ data class UpdatePlaceDTO(
     val minCapacity: Int?,
     val maxCapacity: Int?,
     val parking: Boolean?,
-    val placeImages: List<String>?,
 
+    val coordinates: CoordinatesDTO?,
+
+    val placeImages: List<String>?,
     val services: List<PlaceServiceDTO>?,
     val equipments: List<PlaceEquipmentDTO>?,
     val facilities: List<PlaceFacilitiesDTO>?,

@@ -21,7 +21,7 @@ class AreaRowMapper(
         website = rs.getString("area_website"),
         email = rs.getString("area_email"),
         phone = rs.getString("area_phone"),
-        coordinates = if (rs.getLongOrNull("area_coordinates_id") == null) {
+        coordinates = if (rs.getLongOrNull("coordinates_id") == null) {
             null
         } else {
             coordinatesRowMapper.mapRow(rs, rowNum)

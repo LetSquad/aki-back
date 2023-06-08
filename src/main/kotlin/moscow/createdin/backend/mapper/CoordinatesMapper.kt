@@ -7,30 +7,26 @@ import org.springframework.stereotype.Component
 
 @Component
 class CoordinatesMapper {
+
     fun domainToEntity(coordinates: Coordinates) = CoordinatesEntity(
         id = coordinates.id,
-
         longitude = coordinates.longitude,
         latitude = coordinates.latitude,
     )
 
     fun entityToDomain(coordinates: CoordinatesEntity) = Coordinates(
         id = coordinates.id,
-
         longitude = coordinates.longitude,
         latitude = coordinates.latitude,
     )
 
     fun dtoToDomain(coordinates: CoordinatesDTO) = Coordinates(
-        id = coordinates.id,
-
+        id = null,
         longitude = coordinates.longitude,
         latitude = coordinates.latitude,
     )
 
     fun domainToDto(coordinates: Coordinates) = CoordinatesDTO(
-        id = coordinates.id,
-
         longitude = coordinates.longitude,
         latitude = coordinates.latitude,
     )

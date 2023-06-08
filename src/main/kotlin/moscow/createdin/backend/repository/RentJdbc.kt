@@ -175,7 +175,7 @@ class RentJdbc(
                     p.place_ban_reason,
                     p.place_admin_id,
                     p.area_id,
-                    p.place_coordinates_id,
+                    p.place_coordinates_id coordinates_id,
                     p.metro_stations,
                     0 as min_price, null as time_start, null as time_end,
                     0 as rating, 0 as rate_count,
