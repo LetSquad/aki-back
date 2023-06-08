@@ -55,7 +55,6 @@ class RentService(
         val maxTimeEnd: Instant = rentSlots.maxOf { it.timeEnd }
         val agreement = "${properties.url}/${properties.imageUrlPrefix}/$agreementUrl"
 
-        //TODO добавить imageHost
         mailService.sendRentEmailToRenter(
             renter.email,
             minTimeStart,
@@ -64,13 +63,19 @@ class RentService(
             place.name,
             "${renter.firstName} ${renter.lastName}",
             agreement,
-            properties.url, "imageHost"
+            properties.url,
+            "${properties.url}/$LOGO_PATH"
         )
         val landlordEmail = place.user.email
         mailService.sendRentEmailToLandlord(
-            landlordEmail, minTimeStart, maxTimeEnd, "${renter.firstName} ${renter.lastName}",
-            place.name, "${place.user.firstName} ${place.user.lastName}", agreement, renter.email,
-            properties.url, "imageHost"
+            landlordEmail,
+            minTimeStart,
+            maxTimeEnd,
+            "${renter.firstName} ${renter.lastName}",
+            place.name,
+            "${place.user.firstName} ${place.user.lastName}", agreement, renter.email,
+            properties.url,
+            "${properties.url}/$LOGO_PATH"
         )
 
         return get(newRentId)
@@ -144,5 +149,9 @@ class RentService(
         val user = userService.getCurrentUserDomain()
         rentRepository.findByRenterIdAndId(rentId, user.id)
         placeReviewRepository.save(rentId, rentReviewDTO.rating)
+    }
+
+    companion object {
+        private const val LOGO_PATH = "static/darkLogo.png"
     }
 }
