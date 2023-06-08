@@ -1,6 +1,7 @@
 package moscow.createdin.backend.model.domain.place
 
 import moscow.createdin.backend.model.domain.AkiUser
+import moscow.createdin.backend.model.domain.Coordinates
 import moscow.createdin.backend.model.domain.Price
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
 import moscow.createdin.backend.model.enums.SpecializationType
@@ -10,7 +11,7 @@ data class SimplePlace(
 
     val user: AkiUser,
     val area: Long?,
-    val coordinates: Long?,
+    val coordinates: Coordinates?,
 
     val type: String?,
     val name: String,

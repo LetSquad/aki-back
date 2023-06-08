@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import moscow.createdin.backend.config.properties.AkiProperties
 import moscow.createdin.backend.model.domain.AkiUser
+import moscow.createdin.backend.model.domain.Coordinates
 import moscow.createdin.backend.model.domain.Price
 import moscow.createdin.backend.model.domain.RentSlot
 import moscow.createdin.backend.model.domain.place.Place
@@ -37,11 +38,11 @@ class PlaceMapper(
     private val gson: Gson
 ) {
 
-    fun dtoToDomain(place: NewPlaceDTO, akiUser: AkiUser) = SimplePlace(
+    fun dtoToDomain(place: NewPlaceDTO, akiUser: AkiUser, coordinates: Coordinates?) = SimplePlace(
         id = null,
         user = akiUser,
         area = place.area,
-        coordinates = place.coordinates,
+        coordinates = coordinates,
 
         type = place.type,
         name = place.name,
@@ -71,80 +72,91 @@ class PlaceMapper(
         metroStations = place.metroStations
     )
 
-    fun updatedDtoToDomain(place: UpdatePlaceDTO, akiUser: AkiUser, area: Long?) = SimplePlace(
-        id = place.id,
-        user = akiUser,
-        area = area,
-        coordinates = null,
+    fun updatedDtoToDomain(
+        place: UpdatePlaceDTO,
+        akiUser: AkiUser,
+        area: Long?,
+        coordinates: Coordinates?
+    ): SimplePlace {
+        return SimplePlace(
+            id = place.id,
+            user = akiUser,
+            area = area,
+            coordinates = coordinates,
 
-        type = "",
-        name = place.name,
-        specialization = place.specialization,
-        description = place.description,
-        address = "",
-        phone = place.phone,
-        email = place.email,
-        website = place.site,
-        levelNumber = -1,
-        fullArea = -1,
-        rentableArea = place.freeSquare,
-        minCapacity = place.minCapacity,
-        maxCapacity = place.maxCapacity,
-        parking = place.parking,
+            type = "",
+            name = place.name,
+            specialization = place.specialization,
+            description = place.description,
+            address = "",
+            phone = place.phone,
+            email = place.email,
+            website = place.site,
+            levelNumber = -1,
+            fullArea = -1,
+            rentableArea = place.freeSquare,
+            minCapacity = place.minCapacity,
+            maxCapacity = place.maxCapacity,
+            parking = place.parking,
 
-        services = place.services?.map { dtoToPlaceService(it) },
-        rules = place.rules,
-        accessibility = place.accessibility,
-        facilities = place.facilities?.map { dtoToPlaceFacilities(it) },
-        equipments = place.equipments?.map { dtoToPlaceEquipments(it) },
+            services = place.services?.map { dtoToPlaceService(it) },
+            rules = place.rules,
+            accessibility = place.accessibility,
+            facilities = place.facilities?.map { dtoToPlaceFacilities(it) },
+            equipments = place.equipments?.map { dtoToPlaceEquipments(it) },
 
-        status = PlaceConfirmationStatus.UNVERIFIED,
-        banReason = null,
-        admin = place.admin,
-        price = null,
-        metroStations = null
-    )
+            status = PlaceConfirmationStatus.UNVERIFIED,
+            banReason = null,
+            admin = place.admin,
+            price = null,
+            metroStations = null
+        )
+    }
 
     fun simpleDomainToEntity(
-        place: SimplePlace, akiUser: AkiUser,
+        place: SimplePlace,
+        akiUser: AkiUser,
         area: AreaEntity?
-    ) = PlaceEntity(
-        id = place.id,
-        user = userMapper.domainToEntity(akiUser),
-        area = area,
-        coordinates = area?.coordinates,
+    ): PlaceEntity {
+        return PlaceEntity(
+            id = place.id,
+            user = userMapper.domainToEntity(akiUser),
+            area = area,
+            coordinates = area?.coordinates
+                ?: place.coordinates?.let { coordinatesMapper.domainToEntity(it) },
 
-        type = place.type,
-        name = place.name,
-        specialization = place.specialization,
-        description = place.description,
-        address = place.address,
-        phone = place.phone,
-        email = place.email,
-        website = place.website,
-        levelNumber = place.levelNumber,
-        fullArea = place.fullArea,
-        rentableArea = place.rentableArea,
-        minCapacity = place.minCapacity,
-        maxCapacity = place.maxCapacity,
-        parking = place.parking,
+            type = place.type,
+            name = place.name,
+            specialization = place.specialization,
+            description = place.description,
+            address = place.address,
+            phone = place.phone,
+            email = place.email,
+            website = place.website,
+            levelNumber = place.levelNumber,
+            fullArea = place.fullArea,
+            rentableArea = place.rentableArea,
+            minCapacity = place.minCapacity,
+            maxCapacity = place.maxCapacity,
+            parking = place.parking,
 
-        services = gson.toJson(place.services).toPGObject(),
-        rules = place.rules,
-        accessibility = place.accessibility,
-        facilities = gson.toJson(place.facilities).toPGObject(),
-        equipments = gson.toJson(place.equipments).toPGObject(),
+            services = gson.toJson(place.services).toPGObject(),
+            rules = place.rules,
+            accessibility = place.accessibility,
+            facilities = gson.toJson(place.facilities).toPGObject(),
+            equipments = gson.toJson(place.equipments).toPGObject(),
 
-        status = place.status.name,
-        banReason = place.banReason,
-        admin = place.admin,
-        minPrice = null,
-        priceType = null,
-        rating = null,
-        rateCount = null,
-        favorite = false,
-        metroStations = gson.toJson(place.metroStations).toPGObject()
-    )
+            status = place.status.name,
+            banReason = place.banReason,
+            admin = place.admin,
+            minPrice = null,
+            priceType = null,
+            rating = null,
+            rateCount = null,
+            favorite = false,
+            metroStations = gson.toJson(place.metroStations).toPGObject()
+        )
+    }
 
     fun domainToEntity(place: Place) = PlaceEntity(
         id = place.id,
@@ -246,6 +258,8 @@ class PlaceMapper(
         phone = place.phone,
         site = place.website,
         levelNumber = place.levelNumber,
+
+        coordinates = place.coordinates?.let { coordinatesMapper.domainToDto(it) },
 
         status = place.status,
         freeSquare = place.rentableArea,

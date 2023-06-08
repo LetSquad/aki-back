@@ -6,8 +6,10 @@ import moscow.createdin.backend.exception.ImageNotSavedException
 import moscow.createdin.backend.exception.WrongUserException
 import moscow.createdin.backend.getLogger
 import moscow.createdin.backend.mapper.AreaMapper
+import moscow.createdin.backend.mapper.CoordinatesMapper
 import moscow.createdin.backend.mapper.PlaceMapper
 import moscow.createdin.backend.model.domain.AkiUser
+import moscow.createdin.backend.model.domain.Coordinates
 import moscow.createdin.backend.model.domain.place.Place
 import moscow.createdin.backend.model.dto.BanRequestDTO
 import moscow.createdin.backend.model.dto.CreateRentSlotRequestDTO
@@ -39,6 +41,8 @@ class PlaceService(
     private val personalDigestService: PersonalPlaceDigestService,
     private val placeRepository: PlaceRepository,
     private val placeImageService: PlaceImageService,
+    private val coordinatesMapper: CoordinatesMapper,
+    private val coordinatesService: CoordinatesService,
     private val areaService: AreaService,
     private val userService: UserService,
     private val rentSlotService: RentSlotService,
@@ -212,15 +216,21 @@ class PlaceService(
     }
 
     @Transactional
-    fun create(newPlaceDTO: NewPlaceDTO, images: Collection<MultipartFile>): PlaceDTO {
+    fun create(newPlace: NewPlaceDTO, images: Collection<MultipartFile>): PlaceDTO {
         val user = userService.getCurrentUserDomain()
-        val area = newPlaceDTO.area?.let {
-            areaService.get(newPlaceDTO.area)
+        val area = newPlace.area?.let {
+            areaService.get(newPlace.area)
                 .let { areaMapper.dtoToDomain(it, user) }
                 .let { areaMapper.domainToEntity(it) }
         }
 
-        val place: Place = placeMapper.dtoToDomain(newPlaceDTO, user)
+        val coordinates: Coordinates? = if (newPlace.coordinates != null) {
+            coordinatesService.saveCoordinates(newPlace.coordinates)
+        } else {
+            null
+        }
+
+        val place: Place = placeMapper.dtoToDomain(newPlace, user, coordinates)
             .let { placeMapper.simpleDomainToEntity(it, user, area) }
             .let { placeRepository.save(it) }
             .let { placeRepository.findById(it, user.id) }
@@ -242,7 +252,15 @@ class PlaceService(
     fun edit(updatePlace: UpdatePlaceDTO, images: Collection<MultipartFile>): PlaceDTO {
         val user = userService.getCurrentUserDomain()
         val oldPlace = findById(updatePlace.id)
-        if (user.id != oldPlace.user.id) throw WrongUserException("wrong user with id = ${user.id} was id = ${oldPlace.user.id}")
+        if (user.id != oldPlace.user.id) {
+            throw WrongUserException("wrong user with id = ${user.id} was id = ${oldPlace.user.id}")
+        }
+
+        val coordinates: Coordinates? = if (updatePlace.coordinates != null) {
+            coordinatesService.saveCoordinates(updatePlace.coordinates)
+        } else {
+            null
+        }
 
         placeImageService.clearPlaceImages(
             placeId = updatePlace.id,
@@ -251,7 +269,7 @@ class PlaceService(
         )
         saveImages(updatePlace.id, images)
 
-        return placeMapper.updatedDtoToDomain(updatePlace, user, oldPlace.area?.id)
+        val result = placeMapper.updatedDtoToDomain(updatePlace, user, oldPlace.area?.id, coordinates)
             .let { placeMapper.simpleDomainToEntity(it, user, oldPlace.area) }
             .let { placeRepository.update(it) }
             .let { placeRepository.findById(updatePlace.id, user.id) }
@@ -260,6 +278,12 @@ class PlaceService(
                 placeMapper.entityToDomain(it, rentSlots)
             }
             .let { placeMapper.domainToDto(it, placeImageService.getPlaceImages(it.id)) }
+
+        if (oldPlace.coordinates?.id != null) {
+            coordinatesService.deleteCoordinates(oldPlace.coordinates.id)
+        }
+
+        return result
     }
 
     fun findById(id: Long): PlaceEntity {

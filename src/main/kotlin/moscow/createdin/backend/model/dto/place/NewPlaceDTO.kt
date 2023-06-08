@@ -1,5 +1,6 @@
 package moscow.createdin.backend.model.dto.place
 
+import moscow.createdin.backend.model.dto.CoordinatesDTO
 import moscow.createdin.backend.model.enums.SpecializationType
 
 data class NewPlaceDTO(
@@ -19,6 +20,8 @@ data class NewPlaceDTO(
     val levelNumber: Int?,
     val parking: Boolean?,
 
+    val coordinates: CoordinatesDTO?,
+
     val services: List<PlaceServiceDTO>?,
     val equipments: List<PlaceEquipmentDTO>?,
     val facilities: List<PlaceFacilitiesDTO>?,
@@ -27,6 +30,5 @@ data class NewPlaceDTO(
     val accessibility: String?,
 
     val admin: Long?,
-    val coordinates: Long?,
     val area: Long?
 )

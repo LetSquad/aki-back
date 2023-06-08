@@ -1,5 +1,6 @@
 package moscow.createdin.backend.model.dto.place
 
+import moscow.createdin.backend.model.dto.CoordinatesDTO
 import moscow.createdin.backend.model.dto.RatingDTO
 import moscow.createdin.backend.model.dto.RentSlotDTO
 import moscow.createdin.backend.model.enums.PlaceConfirmationStatus
@@ -21,6 +22,8 @@ data class PlaceDTO(
     val maxCapacity: Int?,
     val levelNumber: Int?,
     val parking: Boolean?,
+
+    val coordinates: CoordinatesDTO?,
 
     val rentSlots: List<RentSlotDTO>?,
 
