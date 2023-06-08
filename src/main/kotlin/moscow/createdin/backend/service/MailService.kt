@@ -54,53 +54,55 @@ class MailService(
 
     // TODO придумать нормальный текст
     fun sendRentEmailToRenter(
-        email: String, timeStart: Instant,
-        timeEnd: Instant, renter: String, placeName: String, user: String, agreement: String, host: String
+        email: String, timeStart: Instant, timeEnd: Instant, renter: String,
+        placeName: String, user: String, agreement: String, host: String,
+        imageHost: String
     ) {
         val message =
             """
                <html lang="ru">
-                <head>
-                    <meta charset="utf-8">
-                </head>
-                <body style="background-color:#fff">
-                <p>Здравствуйте, $user!</p>
-                <p style="margin-bottom: 0">Бронь площадки "$placeName" успешно создана на сервисе АКИ "Агрегатор креативных пространств Москвы"!</p>
-                <p style="margin-top: 5px; margin-bottom: 0">Договор аренды можно скачать по <a href='$agreement' style="color: #e74362">ссылке</a></p>
-                <p style="margin-top: 5px">Зайдите в <a href='$host/rents' style="color: #e74362">личный кабинет</a> для просмотра более подробной информации</p>
-                <p style="margin-bottom: 0">С уважением,</p>
-                <p style="margin-top: 5px">Агентство креативных индустрий</p>
-                <a href='https://svgshare.com/i/tz2.svg' >
-                    <img src='https://svgshare.com/i/tz2.svg' title='AKI'  alt="AKI"/>
-                </a>
-                </body>
+                    <head>
+                        <meta charset="utf-8">
+                    </head>
+                    <body style="background-color:#fff">
+                        <p>Здравствуйте, $user!</p>
+                        <p style="margin-bottom: 0">Бронь площадки "$placeName" успешно создана на сервисе АКИ "Агрегатор креативных пространств Москвы"!</p>
+                        <p style="margin-top: 5px; margin-bottom: 0">Договор аренды можно скачать по <a href='$agreement' style="color: #e74362">ссылке</a></p>
+                        <p style="margin-top: 5px">Зайдите в <a href='$host/rents' style="color: #e74362">личный кабинет</a> для просмотра более подробной информации</p>
+                        <p style="margin-bottom: 0">С уважением,</p>
+                        <p style="margin-top: 5px">Агентство креативных индустрий</p>
+                        <a href='$host' >
+                            <img src="$imageHost" alt="AKI"/>
+                        </a>
+                    </body>
                 </html>
             """
 
         sendMimeMessage(email, "Уведомление о брони площадки", message, timeStart, timeEnd, renter, placeName, email)
     }
 
-    // TODO придумать нормальный текст
     fun sendRentEmailToLandlord(
         email: String, timeStart: Instant,
-        timeEnd: Instant, renter: String, placeName: String, user: String, agreement: String, organizer: String
+        timeEnd: Instant, renter: String, placeName: String,
+        user: String, agreement: String, organizer: String, host: String,
+        imageHost: String
     ) {
         val message =
             """
                <html lang="ru">
-                <head>
-                <meta charset="utf-8">
-                </head>
-                <body style="background-color:#fff">
-                <p>Здравствуйте, $user!</p>
-                <p style="margin-bottom: 0px">Уведомляем вас о брони по вашей площадке "$placeName" на сервисе "Агрегатор креативных индустрий Москвы"!</p>
-                <p style="margin-top: 5px">Договор аренды можно скачать по <a href='$agreement' style="color: #e74362">ссылке</a></p>
-                <p style="margin-bottom: 0px">С уважением,</p>
-                <p style="margin-top: 5px">Агентство креативных индустрий</p>
-                <a href='https://svgshare.com/i/tz2.svg' >
-                    <img src='https://svgshare.com/i/tz2.svg' title='AKI'  alt="AKI"/>
-                </a>
-                </body>
+                    <head>
+                        <meta charset="utf-8">
+                    </head>
+                    <body style="background-color:#fff">
+                        <p>Здравствуйте, $user!</p>
+                        <p style="margin-bottom: 0">Уведомляем вас о брони по вашей площадке "$placeName" на сервисе "Агрегатор креативных индустрий Москвы"!</p>
+                        <p style="margin-top: 5px">Договор аренды можно скачать по <a href='$agreement' style="color: #e74362">ссылке</a></p>
+                        <p style="margin-bottom: 0">С уважением,</p>
+                        <p style="margin-top: 5px">Агентство креативных индустрий</p>
+                        <a href='$host' >
+                            <img src="$imageHost" alt="AKI"/>
+                        </a>
+                    </body>
                 </html>
             """
 

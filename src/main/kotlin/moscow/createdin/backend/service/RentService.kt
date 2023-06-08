@@ -55,6 +55,7 @@ class RentService(
         val maxTimeEnd: Instant = rentSlots.maxOf { it.timeEnd }
         val agreement = "${properties.url}/${properties.imageUrlPrefix}/$agreementUrl"
 
+        //TODO добавить imageHost
         mailService.sendRentEmailToRenter(
             renter.email,
             minTimeStart,
@@ -63,12 +64,13 @@ class RentService(
             place.name,
             "${renter.firstName} ${renter.lastName}",
             agreement,
-            properties.url
+            properties.url, "imageHost"
         )
         val landlordEmail = place.user.email
         mailService.sendRentEmailToLandlord(
             landlordEmail, minTimeStart, maxTimeEnd, "${renter.firstName} ${renter.lastName}",
-            place.name, "${place.user.firstName} ${place.user.lastName}", agreement, renter.email
+            place.name, "${place.user.firstName} ${place.user.lastName}", agreement, renter.email,
+            properties.url, "imageHost"
         )
 
         return get(newRentId)
