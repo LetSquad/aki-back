@@ -1,13 +1,13 @@
 package moscow.createdin.backend.model.domain
 
-import moscow.createdin.backend.model.enums.UserType
+import moscow.createdin.backend.model.enums.UserSpecialization
 
 data class SimpleUser(
     val id: Long?,
 
     val email: String,
 
-    val type: UserType?,
+    val type: UserSpecialization?,
 
     val firstName: String,
     val lastName: String,

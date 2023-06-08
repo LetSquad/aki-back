@@ -1,9 +1,8 @@
 package moscow.createdin.backend.model.enums
 
-enum class RentSlotStatusType {
+enum class RentSlotStatus {
     OPEN,
     BOOKED,
     CLOSED,
-    CANCELLED,
     DELETED
 }

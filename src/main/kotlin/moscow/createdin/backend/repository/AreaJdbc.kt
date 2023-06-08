@@ -131,7 +131,7 @@ class AreaJdbc(
                        aki_user.is_banned,
                        aki_user.user_admin_id,
                        aki_user.user_ban_reason,
-                       aki_user.user_type,
+                       aki_user.specializations,
                 
                        area_admin.id,
                        area_admin.user_email,
@@ -151,7 +151,7 @@ class AreaJdbc(
                        area_admin.is_banned,
                        area_admin.user_admin_id,
                        area_admin.user_ban_reason,
-                       area_admin.user_type
+                       area_admin.specializations
                 FROM area
                          INNER JOIN aki_user on area.user_id = aki_user.id
                          FULL JOIN aki_user area_admin on area.area_admin_id = area_admin.id

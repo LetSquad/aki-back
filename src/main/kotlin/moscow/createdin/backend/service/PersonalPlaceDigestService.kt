@@ -6,7 +6,7 @@ import moscow.createdin.backend.model.domain.place.Place
 import moscow.createdin.backend.model.entity.PlaceEntity
 import moscow.createdin.backend.model.enums.PlaceSortDirection
 import moscow.createdin.backend.model.enums.SpecializationType
-import moscow.createdin.backend.model.enums.UserType
+import moscow.createdin.backend.model.enums.UserSpecialization
 import moscow.createdin.backend.repository.PlaceRepository
 import org.springframework.stereotype.Service
 import java.sql.Timestamp
@@ -62,7 +62,10 @@ class PersonalPlaceDigestService(
             user?.id
         )
 
-        val placeSpecializations: Set<SpecializationType> = getSpecializationsForUser(user?.type)
+        val placeSpecializations: Set<SpecializationType> = user?.specializations
+            ?.map { getPlaceSpecializations(it) }
+            ?.fold(emptySet()) { acc, placeSpecs -> acc + placeSpecs }
+            ?: emptySet()
         val sortedPlaces = when (sortDirection) {
             PlaceSortDirection.ASC -> placeEntityList.sortedBy {
                 calculateWeightForPlace(it, placeSpecializations)
@@ -96,37 +99,65 @@ class PersonalPlaceDigestService(
         return favoriteWeight + specializationWeight + ratingWeight
     }
 
-    private fun getSpecializationsForUser(userType: UserType?): Set<SpecializationType> = when (userType) {
-        UserType.MUSICIAN -> setOf(
+    private fun getPlaceSpecializations(userSpec: UserSpecialization): Set<SpecializationType> = when (userSpec) {
+        UserSpecialization.ART -> setOf(
+            SpecializationType.CREATIVE_SPACE,
+            SpecializationType.GALLERY,
+            SpecializationType.SHOWROOM,
+            SpecializationType.ART_WORKSHOP,
+            SpecializationType.SHOW_SPACE
+        )
+        UserSpecialization.ARCHITECTURE -> setOf(
+            SpecializationType.PROTOTYPING_CENTER,
+            SpecializationType.LAYOUT_WORKSHOP,
+            SpecializationType.RENDERING_STUDIO
+        )
+        UserSpecialization.VIDEO_GAMES_AND_SOFTWARE -> setOf(
+            SpecializationType.AR_VR_STUDIOS,
+            SpecializationType.SOUND_RECORDING_STUDIO,
+            SpecializationType.RENDERING_STUDIO,
+            SpecializationType.MOKAP_STUDIO
+        )
+        UserSpecialization.DESIGN -> setOf(
+            SpecializationType.DESIGN_STUDIO,
+            SpecializationType.RENDERING_STUDIO
+        )
+        UserSpecialization.PUBLISHING_AND_NEW_MEDIA -> setOf(
+            SpecializationType.BOOKSTORE,
+            SpecializationType.FILM_STUDIO,
+            SpecializationType.PUBLISHING_HOUSE,
+            SpecializationType.RENDERING_STUDIO,
+            SpecializationType.PHOTO_VIDEO_STUDIO
+        )
+        UserSpecialization.PERFORMING_ARTS -> setOf(
+            SpecializationType.CREATIVE_SPACE,
+            SpecializationType.DANCE_HALL,
+            SpecializationType.REHEARSAL_ROOM,
+            SpecializationType.MOKAP_STUDIO
+        )
+        UserSpecialization.FILM_AND_ANIMATION -> setOf(
+            SpecializationType.CINEMA,
+            SpecializationType.FILM_STUDIO,
+            SpecializationType.VIDEO_EDITING_STUDIO,
+            SpecializationType.MOKAP_STUDIO
+        )
+        UserSpecialization.FASHION -> setOf(
+            SpecializationType.SEWING_SHOP,
+            SpecializationType.SHOWROOM
+        )
+        UserSpecialization.MUSIC -> setOf(
             SpecializationType.SOUND_RECORDING_STUDIO,
             SpecializationType.REHEARSAL_ROOM,
             SpecializationType.DANCE_HALL,
             SpecializationType.MUSIC_REHEARSAL_STUDIO,
             SpecializationType.CONCERT_HALL
         )
-        UserType.SINGER -> setOf(
-            SpecializationType.SOUND_RECORDING_STUDIO,
-            SpecializationType.REHEARSAL_ROOM,
-            SpecializationType.STAGE_SPACE,
-            SpecializationType.MUSIC_REHEARSAL_STUDIO,
-            SpecializationType.CONCERT_HALL
-        )
-        UserType.BUSINESSMAN -> setOf(
-            SpecializationType.AR_VR_STUDIOS,
+        UserSpecialization.ADVERTISING -> setOf(
             SpecializationType.CREATIVE_SPACE,
-            SpecializationType.GALLERY,
             SpecializationType.PUBLISHING_HOUSE,
-            SpecializationType.SHOW_SPACE
+            SpecializationType.SOUND_RECORDING_STUDIO,
+            SpecializationType.FILM_STUDIO,
+            SpecializationType.VIDEO_EDITING_STUDIO,
         )
-        UserType.TEACHER -> setOf(
-            SpecializationType.BOOKSTORE,
-            SpecializationType.ART_WORKSHOP,
-            SpecializationType.PROTOTYPING_CENTER,
-            SpecializationType.LAYOUT_WORKSHOP,
-            SpecializationType.RENDERING_STUDIO,
-            SpecializationType.REHEARSAL_ROOM,
-            SpecializationType.SEWING_SHOP
-        )
-        null -> emptySet()
     }
 }

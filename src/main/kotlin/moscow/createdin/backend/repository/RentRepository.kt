@@ -21,6 +21,6 @@ interface RentRepository {
         limit: Int,
         userId: Long
     ): List<RentEntity>
-    fun countByRenterId(userId: Long): Int
 
+    fun countByRenterId(userId: Long): Int
 }

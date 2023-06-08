@@ -1,5 +1,7 @@
 package moscow.createdin.backend.mapper
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import moscow.createdin.backend.config.properties.AkiProperties
 import moscow.createdin.backend.model.domain.AkiUser
 import moscow.createdin.backend.model.dto.AkiUserDTO
@@ -8,7 +10,8 @@ import moscow.createdin.backend.model.dto.UserRoleDTO
 import moscow.createdin.backend.model.dto.place.PlaceUserDTO
 import moscow.createdin.backend.model.entity.AkiUserEntity
 import moscow.createdin.backend.model.enums.UserRole
-import moscow.createdin.backend.model.enums.UserType
+import moscow.createdin.backend.model.enums.UserSpecialization
+import moscow.createdin.backend.repository.mapper.toPGObject
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
@@ -19,6 +22,7 @@ import java.util.UUID
 @Component
 class UserMapper(
     private val properties: AkiProperties,
+    private val gson: Gson,
     private val passwordEncoder: PasswordEncoder,
 ) {
 
@@ -41,13 +45,14 @@ class UserMapper(
         isBanned = false,
         admin = null,
         banReason = null,
-        type = null // TODO добавить на фронте выбор типа юзера для системы рекомендаций
+        specializations = registrationRequest.specializations.orEmpty()
     )
 
     fun domainToDto(user: AkiUser) = AkiUserDTO(
         id = user.id!!,
         email = user.email,
         userRole = user.role,
+        specializations = user.specializations,
         firstName = user.firstName,
         lastName = user.lastName,
         middleName = user.middleName,
@@ -111,7 +116,7 @@ class UserMapper(
         isActivated = user.isActivated,
         activationCode = user.activationCode,
         isBanned = user.isBanned,
-        type = user.type?.name,
+        specializations = gson.toJson(user.specializations).toPGObject(),
         banReason = user.banReason,
         admin = user.admin
     )
@@ -133,7 +138,10 @@ class UserMapper(
         isActivated = user.isActivated,
         activationCode = user.activationCode,
         isBanned = user.isBanned,
-        type = user.type?.let { UserType.valueOf(user.type) },
+        specializations = gson.fromJson<List<String>>(
+            user.specializations.value,
+            object : TypeToken<Collection<String>>() {}.type
+        ).map { UserSpecialization.valueOf(it) },
         admin = user.admin,
         banReason = user.banReason
     )

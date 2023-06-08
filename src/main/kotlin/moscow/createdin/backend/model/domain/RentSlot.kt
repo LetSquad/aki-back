@@ -1,6 +1,6 @@
 package moscow.createdin.backend.model.domain
 
-import moscow.createdin.backend.model.enums.RentSlotStatusType
+import moscow.createdin.backend.model.enums.RentSlotStatus
 import java.math.BigDecimal
 import java.time.Instant
 
@@ -11,6 +11,6 @@ data class RentSlot(
     val timeStart: Instant,
     val timeEnd: Instant,
 
-    val status: RentSlotStatusType,
+    val status: RentSlotStatus,
     val price: BigDecimal
 )

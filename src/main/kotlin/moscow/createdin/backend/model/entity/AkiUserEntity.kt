@@ -1,5 +1,7 @@
 package moscow.createdin.backend.model.entity
 
+import org.postgresql.util.PGobject
+
 data class AkiUserEntity(
     val id: Long?,
 
@@ -7,7 +9,7 @@ data class AkiUserEntity(
     val password: String,
     val role: String,
 
-    val type: String?,
+    val specializations: PGobject,
 
     val firstName: String,
     val lastName: String,

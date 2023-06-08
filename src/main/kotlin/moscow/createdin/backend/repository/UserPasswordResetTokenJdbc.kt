@@ -43,7 +43,7 @@ class UserPasswordResetTokenJdbc(
                     u.user_email,
                     u.password,
                     u.role,
-                    u.user_type,
+                    u.specializations,
                     u.first_name,
                     u.last_name,
                     u.middle_name,

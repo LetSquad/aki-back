@@ -64,16 +64,16 @@ class UserService(
         val logoName: String? = organizationLogo?.let { saveImage(req.id, organizationLogo) }
 
         val userWithNewFields = userWithOldFields.copy(
-            //email = req.email ?: updatable.email, // TODO нужно обновлять также ключ в таблице рефреш токена
-            firstName = req.firstName ?: userWithOldFields.firstName,
-            lastName = req.lastName ?: userWithOldFields.lastName,
-            middleName = req.middleName ?: userWithOldFields.middleName,
-            phone = req.phone ?: userWithOldFields.phone,
+            specializations = req.specializations.orEmpty(),
+            firstName = req.firstName,
+            lastName = req.lastName,
+            middleName = req.middleName,
+            phone = req.phone,
             userImage = imageName ?: userWithOldFields.userImage,
-            inn = req.inn ?: userWithOldFields.inn,
-            organization = req.organization ?: userWithOldFields.organization,
+            inn = req.inn,
+            organization = req.organization,
             logoImage = logoName ?: userWithOldFields.logoImage,
-            jobTitle = req.jobTitle ?: userWithOldFields.jobTitle,
+            jobTitle = req.jobTitle,
         )
 
         userMapper.domainToEntity(userWithNewFields)

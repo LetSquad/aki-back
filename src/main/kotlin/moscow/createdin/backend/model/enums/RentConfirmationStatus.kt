@@ -4,6 +4,6 @@ enum class RentConfirmationStatus {
     UNSIGNED,
     OPEN,
     CLOSED,
-    CANCELLED,
+    CANCELED,
     BANNED
 }
