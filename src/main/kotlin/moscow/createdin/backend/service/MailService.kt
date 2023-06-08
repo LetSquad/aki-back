@@ -10,6 +10,7 @@ import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.property.CalScale
 import net.fortuna.ical4j.model.property.Description
 import net.fortuna.ical4j.model.property.DtStart
+import net.fortuna.ical4j.model.property.Organizer
 import net.fortuna.ical4j.model.property.ProdId
 import net.fortuna.ical4j.model.property.Summary
 import net.fortuna.ical4j.model.property.Uid
@@ -53,31 +54,68 @@ class MailService(
 
     // TODO придумать нормальный текст
     fun sendRentEmailToRenter(
-        email: String, timeStart: Instant,
-        timeEnd: Instant, renter: String, placeName: String
+        email: String, timeStart: Instant, timeEnd: Instant, renter: String,
+        placeName: String, user: String, agreement: String, host: String,
+        imageHost: String
     ) {
         val message =
             """
-               Привет, $email!
-               Бронь по площадке успешно создана на сервисе АКИ "Агрегатор креативных пространств Москвы"!
-               
-               Зайдите в личный кабинет для просмотра деталей
+               <html lang="ru">
+                    <head>
+                        <meta charset="utf-8">
+                    </head>
+                    <body style="background-color:#fff">
+                        <p>Здравствуйте, $user!</p>
+                        <p style="margin-bottom: 0">Бронь площадки "$placeName" успешно создана на сервисе АКИ "Агрегатор креативных пространств Москвы"!</p>
+                        <p style="margin-top: 5px; margin-bottom: 0">Договор аренды можно скачать по <a href='$agreement' style="color: #e74362">ссылке</a></p>
+                        <p style="margin-top: 5px">Зайдите в <a href='$host/rents' style="color: #e74362">личный кабинет</a> для просмотра более подробной информации</p>
+                        <p style="margin-bottom: 0">С уважением,</p>
+                        <p style="margin-top: 5px">Агентство креативных индустрий</p>
+                        <a href='$host' >
+                            <img src="$imageHost" alt="AKI"/>
+                        </a>
+                    </body>
+                </html>
             """
 
-        sendMimeMessage(email, "Уведомление о брони площадки", message, timeStart, timeEnd, renter, placeName)
+        sendMimeMessage(email, "Уведомление о брони площадки", message, timeStart, timeEnd, renter, placeName, email)
     }
 
-    // TODO придумать нормальный текст
-    fun sendRentEmailToLandlord(email: String) {
+    fun sendRentEmailToLandlord(
+        email: String, timeStart: Instant,
+        timeEnd: Instant, renter: String, placeName: String,
+        user: String, agreement: String, organizer: String, host: String,
+        imageHost: String
+    ) {
         val message =
             """
-               Привет, $email!
-               Уведомляем вас о брони по вашей площадке на сервисе АКИ "Агрегатор креативных пространств Москвы"!
-               
-               Зайдите в личный кабинет для просмотра деталей
+               <html lang="ru">
+                    <head>
+                        <meta charset="utf-8">
+                    </head>
+                    <body style="background-color:#fff">
+                        <p>Здравствуйте, $user!</p>
+                        <p style="margin-bottom: 0">Уведомляем вас о брони по вашей площадке "$placeName" на сервисе "Агрегатор креативных индустрий Москвы"!</p>
+                        <p style="margin-top: 5px">Договор аренды можно скачать по <a href='$agreement' style="color: #e74362">ссылке</a></p>
+                        <p style="margin-bottom: 0">С уважением,</p>
+                        <p style="margin-top: 5px">Агентство креативных индустрий</p>
+                        <a href='$host' >
+                            <img src="$imageHost" alt="AKI"/>
+                        </a>
+                    </body>
+                </html>
             """
 
-        sendMail(email, "Уведомление о брони площадки", message)
+        sendMimeMessage(
+            email,
+            "Уведомление о брони площадки",
+            message,
+            timeStart,
+            timeEnd,
+            renter,
+            placeName,
+            organizer
+        )
     }
 
     fun sendResetEmail(email: String, token: String?) {
@@ -111,7 +149,7 @@ class MailService(
 
     private fun sendMimeMessage(
         emailTo: String, subject: String, message: String, timeStart: Instant,
-        timeEnd: Instant, renter: String, placeName: String
+        timeEnd: Instant, renter: String, placeName: String, organizer: String
     ) {
         try {
             val mimeMessage: MimeMessage = mailSender.createMimeMessage()
@@ -123,21 +161,24 @@ class MailService(
             mimeMessage.setFrom(mailProperties.username)
             mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailTo))
             mimeMessage.subject = subject
-            mimeMessage.setText(message)
             mimeMessage.setHeader("Content-class", "urn:content-classes:calendarmessage")
 
-            val content: String = generateCalendar(timeStart, timeEnd, renter, placeName)
+            val htmlBodyPart = MimeBodyPart()
+            htmlBodyPart.setContent(message, "text/html; charset=\"utf-8\"")
+
             // Create the message part
-            val messageBodyPart: BodyPart = MimeBodyPart()
+            val content: String = generateCalendar(timeStart, timeEnd, renter, placeName, organizer)
+            val calendarBodyPart: BodyPart = MimeBodyPart()
 
             // Fill the message
-            messageBodyPart.setHeader("Content-Class", "urn:content-  classes:calendarmessage")
-            messageBodyPart.setHeader("Content-ID", "calendar_message")
-            messageBodyPart.dataHandler =
+            calendarBodyPart.setHeader("Content-Class", "urn:content-  classes:calendarmessage")
+            calendarBodyPart.setHeader("Content-ID", "calendar_message")
+            calendarBodyPart.dataHandler =
                 DataHandler(ByteArrayDataSource(content, "text/calendar;method=REQUEST")) // very important
 
             val multipart: Multipart = MimeMultipart()
-            multipart.addBodyPart(messageBodyPart)
+            multipart.addBodyPart(calendarBodyPart)
+            multipart.addBodyPart(htmlBodyPart)
             mimeMessage.setContent(multipart)
 
             mailSender.send(mimeMessage)
@@ -146,7 +187,13 @@ class MailService(
         }
     }
 
-    private fun generateCalendar(timeStart: Instant, timeEnd: Instant, renter: String, placeName: String): String {
+    private fun generateCalendar(
+        timeStart: Instant,
+        timeEnd: Instant,
+        renter: String,
+        placeName: String,
+        organizer: String
+    ): String {
         val icsCalendar = Calendar()
         val property = mutableListOf<Property>()
         property.add(ProdId(placeName))
@@ -158,13 +205,19 @@ class MailService(
         icsCalendar.propertyList = propertyList
 
         val eventList = mutableListOf<VEvent>()
-        eventList.add(generateEvent(timeStart, timeEnd, renter, placeName))
+        eventList.add(generateEvent(timeStart, timeEnd, renter, placeName, organizer))
 
         icsCalendar.componentList = ComponentList(eventList)
         return icsCalendar.toString()
     }
 
-    private fun generateEvent(timeStart: Instant, timeEnd: Instant, renter: String, placeName: String): VEvent {
+    private fun generateEvent(
+        timeStart: Instant,
+        timeEnd: Instant,
+        renter: String,
+        placeName: String,
+        organizer: String
+    ): VEvent {
         val vEvent = VEvent()
         val property = mutableListOf<Property>()
         val dateStart = Date.from(timeStart)
@@ -189,6 +242,7 @@ class MailService(
 
         //Add title and description
         property.add(Summary("Бронь для площадки $placeName"))
+        property.add(Organizer(organizer))
         property.add(Description(" Арендатор - $renter"))
 
         val propertyList = PropertyList(property)
